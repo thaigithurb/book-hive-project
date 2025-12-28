@@ -1,0 +1,118 @@
+import { useState, useEffect } from "react";
+import axios from "axios";
+import { toast } from "react-toastify";
+
+export function useBulkSelect(
+  items: any[],
+  fetchData: () => void,
+  fetchAllItems: () => Promise<any[]>,
+  resource: string,
+  setEditedItems: (items: any[]) => void,
+  editedItems: any[]
+) {
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [bulkValue, setBulkValue] = useState<string>("");
+  const [pendingDeleteIds, setPendingDeleteIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    setSelectedIds([]);
+  }, [items]);
+
+  const handleSelectAll = (checked: boolean) => {
+    setSelectedIds(checked ? items.map((item) => item._id) : []);
+  };
+
+  const handleSelect = (id: string, checked: boolean) => {
+    setSelectedIds((prev) =>
+      checked ? [...prev, id] : prev.filter((itemId) => itemId !== id)
+    );
+  };
+
+  const handleBulkChange = async () => {
+    if (!bulkValue || selectedIds.length === 0) return;
+
+    if (bulkValue === "delete") {
+      setPendingDeleteIds(selectedIds);
+      return;
+    }
+
+    let payload;
+    if (bulkValue === "position-change") {
+      payload = {
+        ids: selectedIds.map((id) => {
+          const editedItem = editedItems.find((b) => b._id === id);
+          const newPosition = editedItem?.position ?? "";
+          return `${id}-${newPosition}`;
+        }),
+        type: "position-change",
+      };
+    } else {
+      payload = {
+        ids: selectedIds,
+        type: bulkValue,
+      };
+    }
+
+    const bulkPromise = axios
+      .patch(
+        `http://localhost:3001/api/v1/admin/${resource}/change-multi`,
+        payload
+      )
+      .then(async () => {
+        const allItems = await fetchAllItems();
+        setEditedItems(allItems);
+        await fetchData();
+      });
+
+    toast.promise(bulkPromise, {
+      pending: "Đang cập nhật...",
+      success: "Cập nhật thành công!",
+      error: "Cập nhật thất bại!",
+    });
+
+    await bulkPromise;
+    setSelectedIds([]);
+    setBulkValue("");
+  };
+
+  const executeBulkDelete = async () => {
+    if (pendingDeleteIds.length === 0) return;
+
+    const bulkPromise = axios
+      .patch(`http://localhost:3001/api/v1/admin/${resource}/change-multi`, {
+        ids: pendingDeleteIds,
+        type: "delete",
+      })
+      .then(async () => {
+        const allItems = await fetchAllItems();
+        setEditedItems(allItems);
+        await fetchData();
+      });
+
+    toast.promise(bulkPromise, {
+      pending: "Đang xóa...",
+      success: `Xóa thành công ${pendingDeleteIds.length} ${
+        resource === "books" ? "sách" : "thể loại"
+      }!`,
+      error: "Xóa thất bại!",
+    });
+
+    await bulkPromise;
+    setPendingDeleteIds([]);
+    setSelectedIds([]);
+    setBulkValue("");
+  };
+
+  return {
+    selectedIds,
+    setSelectedIds,
+    bulkValue,
+    setBulkValue,
+    handleSelectAll,
+    handleSelect,
+    handleBulkChange,
+    pendingDeleteIds,
+    setPendingDeleteIds,
+    executeBulkDelete
+  };
+}

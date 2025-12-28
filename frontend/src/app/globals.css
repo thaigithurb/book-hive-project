@@ -1,0 +1,21 @@
+@import "tailwindcss";
+
+body {
+  box-sizing: border-box;
+}
+
+@theme {
+  /* Colors */
+  --color-primary: #1e293b;
+  --color-secondary1: #3b82f6;
+  --color-secondary2: #64748b;
+}
+
+.container {
+  max-width: 1024px;
+  margin: 0 auto;
+}
+
+.book-card {
+  transition: transform 0.2s, box-shadow 0.2s;
+}
