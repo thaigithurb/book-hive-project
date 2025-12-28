@@ -19,6 +19,7 @@ var __rest = (this && this.__rest) || function (s, e) {
     return t;
 };
 const Book = require("../../models/book.model");
+const Category = require("../../models/category.model");
 const slugify = require("slugify");
 module.exports.index = (req, res) => __awaiter(this, void 0, void 0, function* () {
     try {
@@ -35,7 +36,7 @@ module.exports.index = (req, res) => __awaiter(this, void 0, void 0, function* (
         }
         if (keyword) {
             const regex = new RegExp(keyword, "i");
-            find.$or = [{ title: regex }, { author: regex }, { category: regex }];
+            find.$or = [{ title: regex }, { author: regex }];
         }
         let sort = {};
         if (req.query.sortKey && req.query.sortValue) {
@@ -46,10 +47,21 @@ module.exports.index = (req, res) => __awaiter(this, void 0, void 0, function* (
         }
         const books = yield Book.find(find).skip(skip).limit(limit).sort(sort);
         const total = yield Book.countDocuments(find);
-        if (books) {
+        if (books && books.length > 0) {
+            const booksWithCategory = [];
+            for (const book of books) {
+                const bookObj = book.toObject();
+                if (book.category_id) {
+                    const category = yield Category.findOne({
+                        _id: book.category_id,
+                    }).select("title");
+                    bookObj.category_name = category.title;
+                }
+                booksWithCategory.push(bookObj);
+            }
             return res.status(200).json({
                 message: "Thành công!",
-                books: books,
+                books: booksWithCategory,
                 total: total,
                 limit: limit,
             });
@@ -88,7 +100,9 @@ module.exports.changeStatus = (req, res) => __awaiter(this, void 0, void 0, func
 module.exports.changeMulti = (req, res) => __awaiter(this, void 0, void 0, function* () {
     try {
         const type = req.body.type;
-        const ids = req.body.ids.split(", ");
+        const ids = Array.isArray(req.body.ids)
+            ? req.body.ids
+            : req.body.ids.split(", ");
         switch (type) {
             case "active":
                 yield Book.updateMany({ _id: { $in: ids } }, { status: "active" });
@@ -124,23 +138,32 @@ module.exports.changeMulti = (req, res) => __awaiter(this, void 0, void 0, funct
                         break;
                     }
                     if (oldPos < newPos) {
-                        yield Book.updateMany({ position: { $gt: oldPos, $lte: newPos } }, { $inc: { position: -1 } });
+                        yield Book.updateMany({ position: { $gt: oldPos, $lte: newPos }, deleted: false }, { $inc: { position: -1 } });
                     }
                     else {
-                        yield Book.updateMany({ position: { $gte: newPos, $lt: oldPos } }, { $inc: { position: 1 } });
+                        yield Book.updateMany({ position: { $gte: newPos, $lt: oldPos }, deleted: false }, { $inc: { position: 1 } });
                     }
                     yield Book.updateOne({ _id: id }, { position: newPos });
-                    const books = yield Book.find({}).sort({ position: 1 });
+                    const books = yield Book.find({ deleted: false }).sort({
+                        position: 1,
+                    });
                     return res.status(200).json({
                         message: `Cập nhật vị trí thành công!`,
                         books: books,
                     });
                 }
                 for (let i = 0; i < ids.length; i++) {
-                    const [id] = ids[i].split("-");
-                    yield Book.updateOne({ _id: id }, { position: i + 1 });
+                    const [id, newPosStr] = ids[i].split("-");
+                    const newPos = parseInt(newPosStr);
+                    yield Book.updateOne({ _id: id }, { position: newPos });
                 }
-                const books = yield Book.find({}).sort({ position: 1 });
+                const allBooks = yield Book.find({ deleted: false }).sort({
+                    position: 1,
+                });
+                for (let i = 0; i < allBooks.length; i++) {
+                    yield Book.updateOne({ _id: allBooks[i]._id }, { position: i + 1 });
+                }
+                const books = yield Book.find({ deleted: false }).sort({ position: 1 });
                 return res.status(200).json({
                     message: `Cập nhật vị trí thành công cho ${ids.length} sách!`,
                     books: books,
@@ -261,6 +284,13 @@ module.exports.edit = (req, res) => __awaiter(this, void 0, void 0, function* ()
         if (req.file) {
             updateData.image = req.file.path;
         }
+        if (req.body.title) {
+            updateData.slug = slugify(req.body.title, {
+                lower: true,
+                strict: true,
+                locale: "vi",
+            });
+        }
         yield Book.updateOne({ _id: book._id }, updateData);
         return res.status(200).json({
             message: "Cập nhật thông tin thành công!",
@@ -279,9 +309,16 @@ module.exports.detail = (req, res) => __awaiter(this, void 0, void 0, function* 
         if (!book) {
             return res.status(404).json({ message: "Không tìm thấy sách!" });
         }
+        const bookObj = book.toObject();
+        if (book.category_id) {
+            const category = yield Category.findOne({
+                _id: book.category_id,
+            }).select("title");
+            bookObj.category_name = category.title;
+        }
         return res.status(200).json({
             message: "Lấy thông tin sách thành công!",
-            book: book,
+            book: bookObj,
         });
     }
     catch (error) {

@@ -1,6 +1,8 @@
 // @ts-ignore
 const Book = require("../../models/book.model");
 // @ts-ignore
+const Category = require("../../models/category.model");
+// @ts-ignore
 const slugify = require("slugify");
 
 // [GET] /api/v1/admin/books
@@ -22,7 +24,7 @@ module.exports.index = async (req, res) => {
 
     if (keyword) {
       const regex = new RegExp(keyword, "i");
-      find.$or = [{ title: regex }, { author: regex }, { category: regex }];
+      find.$or = [{ title: regex }, { author: regex }];
     }
 
     // sort
@@ -36,10 +38,23 @@ module.exports.index = async (req, res) => {
     const books = await Book.find(find).skip(skip).limit(limit).sort(sort);
     const total = await Book.countDocuments(find);
 
-    if (books) {
+    if (books && books.length > 0) {
+      const booksWithCategory = [];
+
+      for (const book of books) {
+        const bookObj = book.toObject();
+        if (book.category_id) {
+          const category = await Category.findOne({
+            _id: book.category_id,
+          }).select("title");
+          bookObj.category_name = category.title;
+        }
+        booksWithCategory.push(bookObj);
+      }
+
       return res.status(200).json({
         message: "Thành công!",
-        books: books,
+        books: booksWithCategory,
         total: total,
         limit: limit,
       });
@@ -88,7 +103,9 @@ module.exports.changeStatus = async (req, res) => {
 module.exports.changeMulti = async (req, res) => {
   try {
     const type = req.body.type;
-    const ids = req.body.ids.split(", ");
+    const ids = Array.isArray(req.body.ids)
+      ? req.body.ids
+      : req.body.ids.split(", ");
 
     switch (type) {
       case "active":
@@ -97,10 +114,7 @@ module.exports.changeMulti = async (req, res) => {
           message: `Cập nhật trạng thái thành công ${ids.length} sách!`,
         });
       case "inactive":
-        await Book.updateMany(
-          { _id: { $in: ids } },
-          { status: "inactive" }
-        );
+        await Book.updateMany({ _id: { $in: ids } }, { status: "inactive" });
         return res.status(200).json({
           message: `Cập nhật trạng thái thành công ${ids.length} sách!`,
         });
@@ -115,22 +129,18 @@ module.exports.changeMulti = async (req, res) => {
           position: 1,
         });
         for (let i = 0; i < booksLeft.length; i++) {
-          await Book.updateOne(
-            { _id: booksLeft[i]._id },
-            { position: i + 1 }
-          );
+          await Book.updateOne({ _id: booksLeft[i]._id }, { position: i + 1 });
         }
 
         return res.status(200).json({
           message: `Đã xóa ${ids.length} sách!`,
         });
       case "position-change":
-        // Nếu chỉ gửi 1 item, ví dụ ["idX-6"]
+        // Nếu chỉ gửi 1 item
         if (ids.length === 1) {
           const [id, newPosStr] = ids[0].split("-");
           const newPos = parseInt(newPosStr);
 
-          // Lấy sách hiện tại
           const currentBook = await Book.findById(id);
           if (!currentBook) {
             return res.status(404).json({ message: "Không tìm thấy sách!" });
@@ -138,28 +148,26 @@ module.exports.changeMulti = async (req, res) => {
           const oldPos = currentBook.position;
 
           if (oldPos === newPos) {
-            // Không đổi gì
             break;
           }
 
           if (oldPos < newPos) {
-            // Dời lên: giảm position của các sách nằm giữa oldPos+1 và newPos
             await Book.updateMany(
-              { position: { $gt: oldPos, $lte: newPos } },
+              { position: { $gt: oldPos, $lte: newPos }, deleted: false },
               { $inc: { position: -1 } }
             );
           } else {
-            // Dời xuống: tăng position của các sách nằm giữa newPos và oldPos-1
             await Book.updateMany(
-              { position: { $gte: newPos, $lt: oldPos } },
+              { position: { $gte: newPos, $lt: oldPos }, deleted: false },
               { $inc: { position: 1 } }
             );
           }
 
-          // Cập nhật position cho sách được đổi
           await Book.updateOne({ _id: id }, { position: newPos });
 
-          const books = await Book.find({}).sort({ position: 1 });
+          const books = await Book.find({ deleted: false }).sort({
+            position: 1,
+          });
           return res.status(200).json({
             message: `Cập nhật vị trí thành công!`,
             books: books,
@@ -167,11 +175,22 @@ module.exports.changeMulti = async (req, res) => {
         }
 
         // Nếu gửi nhiều item
+        //Cập nhật vị trí cho các sách đã chọn
         for (let i = 0; i < ids.length; i++) {
-          const [id] = ids[i].split("-");
-          await Book.updateOne({ _id: id }, { position: i + 1 });
+          const [id, newPosStr] = ids[i].split("-");
+          const newPos = parseInt(newPosStr);
+          await Book.updateOne({ _id: id }, { position: newPos });
         }
-        const books = await Book.find({}).sort({ position: 1 });
+
+        // Sắp xếp lại vị trí cho tất cả sách để tránh trùng/thiếu
+        const allBooks = await Book.find({ deleted: false }).sort({
+          position: 1,
+        });
+        for (let i = 0; i < allBooks.length; i++) {
+          await Book.updateOne({ _id: allBooks[i]._id }, { position: i + 1 });
+        }
+
+        const books = await Book.find({ deleted: false }).sort({ position: 1 });
         return res.status(200).json({
           message: `Cập nhật vị trí thành công cho ${ids.length} sách!`,
           books: books,
@@ -284,6 +303,7 @@ module.exports.getBySlug = async (req, res) => {
     if (!book) {
       return res.status(404).json({ message: "Không tìm thấy sách!" });
     }
+
     return res.status(200).json({
       message: "Lấy thông tin sách thành công!",
       book: book,
@@ -330,11 +350,16 @@ module.exports.edit = async (req, res) => {
       updateData.image = req.file.path;
     }
 
+    if (req.body.title) {
+      updateData.slug = slugify(req.body.title, {
+        lower: true,
+        strict: true,
+        locale: "vi",
+      });
+    }
+
     // Cập nhật sách
-    await Book.updateOne(
-      { _id: book._id },
-      updateData
-    );
+    await Book.updateOne({ _id: book._id }, updateData);
 
     return res.status(200).json({
       message: "Cập nhật thông tin thành công!",
@@ -354,9 +379,18 @@ module.exports.detail = async (req, res) => {
     if (!book) {
       return res.status(404).json({ message: "Không tìm thấy sách!" });
     }
+
+    const bookObj = book.toObject();
+    if (book.category_id) {
+      const category = await Category.findOne({
+        _id: book.category_id,
+      }).select("title");
+      bookObj.category_name = category.title;
+    }
+
     return res.status(200).json({
       message: "Lấy thông tin sách thành công!",
-      book: book,
+      book: bookObj,
     });
   } catch (error) {
     return res.status(400).json({

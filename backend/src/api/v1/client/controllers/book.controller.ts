@@ -1,5 +1,7 @@
 // @ts-ignore
 const Book = require("../../models/book.model");
+// @ts-ignore
+const Category = require("../../models/category.model");
 
 // [GET] /api/v1/books
 module.exports.index = async (req, res) => {
@@ -37,9 +39,18 @@ module.exports.detail = async (req, res) => {
     if (!book) {
       return res.status(404).json({ message: "Không tìm thấy sách!" });
     }
+
+    const bookObj = book.toObject();
+    if (book.category_id) {
+      const category = await Category.findOne({
+        _id: book.category_id,
+      }).select("title");
+      bookObj.category_name = category.title;
+    };
+
     return res.status(200).json({
       message: "Lấy thông tin sách thành công!",
-      book: book,
+      book: bookObj,
     });
   } catch (error) {
     return res.status(400).json({

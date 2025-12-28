@@ -8,6 +8,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 const Book = require("../../models/book.model");
+const Category = require("../../models/category.model");
 module.exports.index = (req, res) => __awaiter(this, void 0, void 0, function* () {
     try {
         const books = yield Book.find({
@@ -39,9 +40,17 @@ module.exports.detail = (req, res) => __awaiter(this, void 0, void 0, function* 
         if (!book) {
             return res.status(404).json({ message: "Không tìm thấy sách!" });
         }
+        const bookObj = book.toObject();
+        if (book.category_id) {
+            const category = yield Category.findOne({
+                _id: book.category_id,
+            }).select("title");
+            bookObj.category_name = category.title;
+        }
+        ;
         return res.status(200).json({
             message: "Lấy thông tin sách thành công!",
-            book: book,
+            book: bookObj,
         });
     }
     catch (error) {
