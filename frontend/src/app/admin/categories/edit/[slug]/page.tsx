@@ -65,8 +65,6 @@ export default function EditCategory() {
       status: form.status,
     };
 
-    console.log(data);
-
     toast
       .promise(
         axios.patch(

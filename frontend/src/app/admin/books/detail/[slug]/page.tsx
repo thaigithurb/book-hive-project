@@ -63,7 +63,7 @@ export default function BookDetail() {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.4 }}
-          className="min-h-screen flex items-center justify-center relative"
+          className="min-h-screen  flex items-center justify-center relative"
         >
           <BackButton className="absolute top-2 left-8 flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 transition cursor-pointer" />
 

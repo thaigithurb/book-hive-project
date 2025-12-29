@@ -174,6 +174,12 @@ export default function Categories() {
         className="flex justify-between items-center"
       >
         <ChangeMulti
+          options={[
+            { label: "Hoạt động", value: "active" },
+            { label: "Dừng hoạt động", value: "inactive" },
+            { label: "Đổi vị trí", value: "position-change" },
+            { label: "Xóa tất cả", value: "delete_all" },
+          ]}
           bulkValue={bulkValue}
           setBulkValue={setBulkValue}
           onBulkChange={handleBulkChange}

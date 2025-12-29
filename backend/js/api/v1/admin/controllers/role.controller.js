@@ -15,9 +15,14 @@ module.exports.index = (req, res) => __awaiter(this, void 0, void 0, function* (
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 7;
         const skip = (page - 1) * limit;
+        const keyword = req.query.keyWord;
         const find = {
             deleted: false,
         };
+        if (keyword) {
+            const regex = new RegExp(keyword, "i");
+            find.$or = [{ title: regex }];
+        }
         let sort = {};
         if (req.query.sortKey && req.query.sortValue) {
             sort[req.query.sortKey] = Number(req.query.sortValue);
@@ -40,7 +45,19 @@ module.exports.index = (req, res) => __awaiter(this, void 0, void 0, function* (
         });
     }
     catch (error) {
-        res.json("Không tìm thấy!");
+        return res.status(400).json("Không tìm thấy!");
+    }
+});
+module.exports.create = (req, res) => __awaiter(this, void 0, void 0, function* () {
+    try {
+        const newRole = new Role(req.body);
+        yield newRole.save();
+        return res.status(200).json({
+            message: "Tạo mới vai trò thành công"
+        });
+    }
+    catch (error) {
+        return res.status(400).json("Tạo mới vai trò thất bại!");
     }
 });
 module.exports.permissions = (req, res) => __awaiter(this, void 0, void 0, function* () {

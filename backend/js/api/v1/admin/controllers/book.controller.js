@@ -114,7 +114,7 @@ module.exports.changeMulti = (req, res) => __awaiter(this, void 0, void 0, funct
                 return res.status(200).json({
                     message: `Cập nhật trạng thái thành công ${ids.length} sách!`,
                 });
-            case "delete":
+            case "delete_all":
                 yield Book.updateMany({ _id: { $in: ids } }, { deleted: true, deletedAt: new Date() });
                 const booksLeft = yield Book.find({ deleted: false }).sort({
                     position: 1,

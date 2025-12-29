@@ -3,6 +3,7 @@ interface ChangeMultiProps {
   setBulkValue: (value: string) => void;
   onBulkChange: () => void;
   disabled: boolean;
+  options: any[];
 }
 
 export default function ChangeMulti({
@@ -10,6 +11,7 @@ export default function ChangeMulti({
   setBulkValue,
   onBulkChange,
   disabled,
+  options,
 }: ChangeMultiProps) {
   return (
     <div className="flex items-center gap-4 mb-6">
@@ -19,10 +21,11 @@ export default function ChangeMulti({
         onChange={(e) => setBulkValue(e.target.value)}
       >
         <option value="">Chọn thao tác</option>
-        <option value="active">Hoạt động</option>
-        <option value="inactive">Dừng hoạt động</option>
-        <option value="delete">Xóa</option>
-        <option value="position-change">Đổi vị trí</option>
+        {options.map((item, index) => (
+          <option key={index} value={item.value}>
+            {item.label}
+          </option>
+        ))}
       </select>
       <button
         className="transition-colors duration-200 px-4 py-2 bg-secondary1 text-white rounded-lg text-[15px] font-semibold disabled:opacity-50 hover:bg-blue-600 cursor-pointer"

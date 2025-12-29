@@ -10,10 +10,16 @@ module.exports.index = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 7;
     const skip = (page - 1) * limit;
+    const keyword = req.query.keyWord;
 
     const find: any = {
       deleted: false,
     };
+
+    if (keyword) {
+      const regex = new RegExp(keyword, "i");
+      find.$or = [{ title: regex }];
+    }
 
     // sort
     let sort: any = {};
@@ -40,7 +46,20 @@ module.exports.index = async (req, res) => {
       message: "Không có vai trò nào",
     });
   } catch (error) {
-    res.json("Không tìm thấy!");
+    return res.status(400).json("Không tìm thấy!");
+  }
+};
+
+// [POST] /api/v1/admin/roles/create
+module.exports.create = async (req, res) => {
+  try {
+    const newRole = new Role(req.body);
+    await newRole.save();
+    return res.status(200).json({
+      message: "Tạo mới vai trò thành công"
+    });
+  } catch (error) {
+    return res.status(400).json("Tạo mới vai trò thất bại!");
   }
 };
 
@@ -53,3 +72,14 @@ module.exports.permissions = async (req, res) => {
     res.status(500).json({ message: "Lỗi server" });
   }
 };
+
+// [PATCH] /api/v1/admin/roles/edit
+// module.exports.edit = async (req, res) => {
+//   try {
+//     const newRole = new Role(req.body);
+//     await newRole.save();
+//     return res.status(200).json("Tạo mới vai trò thành công");
+//   } catch (error) {
+//     return res.status(400).json("Tạo mới vai trò thất bại!");
+//   }
+// };
