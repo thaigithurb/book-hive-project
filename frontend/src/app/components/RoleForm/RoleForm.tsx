@@ -14,7 +14,6 @@ type RoleFormProps = {
   handleSubmit: (e: unknown) => void;
   handleChange: (e: unknown) => void;
   buttonLabel: string;
-  allPermissions: Permission[];
 };
 
 export default function RoleForm({
@@ -24,7 +23,6 @@ export default function RoleForm({
   handleSubmit,
   handleChange,
   buttonLabel,
-  allPermissions,
 }: RoleFormProps) {
 
   const editorHtmlRef = useRef(form.description || "");
@@ -88,39 +86,6 @@ export default function RoleForm({
             });
           }}
         />
-      </div>
-      <div className="mb-4">
-        <label className="mb-1 font-medium text-primary">Quyền</label>
-        <div className="grid grid-cols-2 gap-2">
-          {allPermissions.map((permission, index) => (
-            <label key={index} className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                name="permissions"
-                value={permission.key}
-                checked={form.permissions.includes(permission.key)}
-                onChange={(e) => {
-                  if (e.target.checked) {
-                    setForm &&
-                      setForm((prev: any) => ({
-                        ...prev,
-                        permissions: [...prev.permissions, permission.key],
-                      }));
-                  } else {
-                    setForm &&
-                      setForm((prev: any) => ({
-                        ...prev,
-                        permissions: prev.permissions.filter(
-                          (p: string) => p !== permission.key
-                        ),
-                      }));
-                  }
-                }}
-              />
-              {permission.label}
-            </label>
-          ))}
-        </div>
       </div>
       <button
         type="submit"

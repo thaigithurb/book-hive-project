@@ -102,7 +102,6 @@ export default function CreateRole() {
             loading={loading}
             handleSubmit={handleSubmit}
             handleChange={handleChange}
-            allPermissions={allPermissions}
             buttonLabel="Tạo mới"
           />
         </motion.div>
