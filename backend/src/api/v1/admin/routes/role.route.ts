@@ -11,6 +11,8 @@ router.post("/create", controller.create);
 
 router.get("/permissions", controller.permissions);
 
+router.patch("/permissions/edit", controller.permissionsEdit);
+
 module.exports = router;
 
 export {};

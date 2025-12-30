@@ -53,7 +53,7 @@ module.exports.create = (req, res) => __awaiter(this, void 0, void 0, function* 
         const newRole = new Role(req.body);
         yield newRole.save();
         return res.status(200).json({
-            message: "Tạo mới vai trò thành công"
+            message: "Tạo mới vai trò thành công",
         });
     }
     catch (error) {
@@ -63,7 +63,25 @@ module.exports.create = (req, res) => __awaiter(this, void 0, void 0, function* 
 module.exports.permissions = (req, res) => __awaiter(this, void 0, void 0, function* () {
     try {
         const permissions = yield Permission.find({});
-        res.status(200).json({ permissions });
+        const permissionGroups = permissions.reduce((acc, perm) => {
+            const group = perm.group;
+            acc[group] = acc[group] || [];
+            acc[group].push(perm);
+            return acc;
+        }, {});
+        res.status(200).json({ permissionGroups });
+    }
+    catch (err) {
+        res.status(500).json({ message: "Lỗi server" });
+    }
+});
+module.exports.permissionsEdit = (req, res) => __awaiter(this, void 0, void 0, function* () {
+    try {
+        const { roles } = req.body;
+        for (const role of roles) {
+            yield Role.findByIdAndUpdate(role._id, { permissions: role.permissions });
+        }
+        res.status(200).json({ message: "Cập nhật thành công" });
     }
     catch (err) {
         res.status(500).json({ message: "Lỗi server" });

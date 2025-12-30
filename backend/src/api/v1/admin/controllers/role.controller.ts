@@ -56,7 +56,7 @@ module.exports.create = async (req, res) => {
     const newRole = new Role(req.body);
     await newRole.save();
     return res.status(200).json({
-      message: "Tạo mới vai trò thành công"
+      message: "Tạo mới vai trò thành công",
     });
   } catch (error) {
     return res.status(400).json("Tạo mới vai trò thất bại!");
@@ -67,7 +67,26 @@ module.exports.create = async (req, res) => {
 module.exports.permissions = async (req, res) => {
   try {
     const permissions = await Permission.find({});
-    res.status(200).json({ permissions });
+    const permissionGroups = permissions.reduce((acc: any, perm: any) => {
+      const group = perm.group;
+      acc[group] = acc[group] || [];
+      acc[group].push(perm);
+      return acc;
+    }, {});
+    res.status(200).json({ permissionGroups });
+  } catch (err) {
+    res.status(500).json({ message: "Lỗi server" });
+  }
+};
+
+// [PATCH] /api/v1/admin/roles/permissions/edit
+module.exports.permissionsEdit = async (req, res) => {
+  try {
+    const { roles } = req.body;
+    for (const role of roles) {
+      await Role.findByIdAndUpdate(role._id, { permissions: role.permissions });
+    }
+    res.status(200).json({ message: "Cập nhật thành công" });
   } catch (err) {
     res.status(500).json({ message: "Lỗi server" });
   }
