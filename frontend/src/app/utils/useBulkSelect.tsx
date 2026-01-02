@@ -31,7 +31,7 @@ export function useBulkSelect(
   const handleBulkChange = async () => {
     if (!bulkValue || selectedIds.length === 0) return;
 
-    if (bulkValue === "delete") {
+    if (bulkValue === "delete_all") {
       setPendingDeleteIds(selectedIds);
       return;
     }
@@ -81,7 +81,7 @@ export function useBulkSelect(
     const bulkPromise = axios
       .patch(`http://localhost:3001/api/v1/admin/${resource}/change-multi`, {
         ids: pendingDeleteIds,
-        type: "delete",
+        type: "delete_all",
       })
       .then(async () => {
         const allItems = await fetchAllItems();

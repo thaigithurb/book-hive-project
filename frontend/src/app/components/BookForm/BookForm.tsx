@@ -129,6 +129,7 @@ export default function BookForm({
               forecolor backcolor
             `,
             content_style: "body { font-family: Arial; font-size: 14px; }",
+            entity_encoding: "raw"
           }}
           onEditorChange={(content) => {
             editorHtmlRef.current = content; 

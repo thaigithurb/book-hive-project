@@ -4,12 +4,11 @@ import { useRef } from "react";
 type RoleFormData = {
   title: string;
   description: string;
-  permissions: string[]; 
 };
 
 type RoleFormProps = {
   form: RoleFormData;
-  setForm?: any;
+  setForm?: unknown;
   loading: boolean;
   handleSubmit: (e: unknown) => void;
   handleChange: (e: unknown) => void;
@@ -24,7 +23,6 @@ export default function RoleForm({
   handleChange,
   buttonLabel,
 }: RoleFormProps) {
-
   const editorHtmlRef = useRef(form.description || "");
   const inputClass =
     "border bg-[#ffff] border-gray-300 rounded-lg px-4 py-2 text-[15px] outline-none focus:ring-2 focus:ring-secondary1 hover:border-secondary1 focus:border-secondary1 transition duration-200 w-full";
@@ -73,6 +71,7 @@ export default function RoleForm({
               forecolor backcolor
             `,
             content_style: "body { font-family: Arial; font-size: 14px; }",
+            entity_encoding: "raw"
           }}
           onEditorChange={(content) => {
             editorHtmlRef.current = content;

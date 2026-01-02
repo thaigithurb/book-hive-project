@@ -7,4 +7,8 @@ router.get("/", controller.index);
 router.post("/create", controller.create);
 router.get("/permissions", controller.permissions);
 router.patch("/permissions/edit", controller.permissionsEdit);
+router.get("/:slug", controller.getBySlug);
+router.patch("/edit/:slug", controller.edit);
+router.patch("/delete/:id", controller.delete);
+router.patch("/change-multi", controller.changeMulti);
 module.exports = router;

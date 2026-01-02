@@ -89,7 +89,7 @@ export default function RoleTable({
                   <button
                     className="py-1 px-3 rounded-md text-[13.6px] font-semibold bg-yellow-100 text-yellow-700 hover:bg-yellow-200 transition-colors duration-200 cursor-pointer"
                     onClick={() => {
-                      //   router.push(`/admin/categories/edit/${category.slug}`);
+                        router.push(`/admin/roles/edit/${role.slug}`);
                     }}
                   >
                     Sửa

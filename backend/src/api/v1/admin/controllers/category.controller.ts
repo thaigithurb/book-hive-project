@@ -110,7 +110,7 @@ module.exports.changeMulti = async (req, res) => {
         return res.status(200).json({
           message: `Cập nhật trạng thái thành công ${ids.length} thể loại!`,
         });
-      case "delete":
+      case "delete_all":
         await Category.updateMany(
           { _id: { $in: ids } },
           { deleted: true, deletedAt: new Date() }

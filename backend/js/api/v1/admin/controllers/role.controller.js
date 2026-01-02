@@ -7,6 +7,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
 const Role = require("../../models/role.model");
 const Permission = require("../../models/permission.model");
 const slugify = require("slugify");
@@ -50,7 +61,10 @@ module.exports.index = (req, res) => __awaiter(this, void 0, void 0, function* (
 });
 module.exports.create = (req, res) => __awaiter(this, void 0, void 0, function* () {
     try {
-        const newRole = new Role(req.body);
+        const _a = req.body, { title } = _a, newRoleData = __rest(_a, ["title"]);
+        const slug = slugify(title, { lower: true, strict: true, locale: "vi" });
+        const newRole = new Role(Object.assign(Object.assign({}, newRoleData), { slug,
+            title }));
         yield newRole.save();
         return res.status(200).json({
             message: "Tạo mới vai trò thành công",
@@ -58,6 +72,48 @@ module.exports.create = (req, res) => __awaiter(this, void 0, void 0, function* 
     }
     catch (error) {
         return res.status(400).json("Tạo mới vai trò thất bại!");
+    }
+});
+module.exports.getBySlug = (req, res) => __awaiter(this, void 0, void 0, function* () {
+    try {
+        const slug = req.params.slug;
+        const role = yield Role.findOne({ slug: slug, deleted: false });
+        if (!role) {
+            return res.status(404).json({ message: "Không tìm thấy vai trò!" });
+        }
+        return res.status(200).json({
+            message: "Lấy thông tin vai trò thành công!",
+            role: role,
+        });
+    }
+    catch (error) {
+        return res.status(400).json({
+            message: "Lỗi khi lấy thông tin vai trò!",
+        });
+    }
+});
+module.exports.edit = (req, res) => __awaiter(this, void 0, void 0, function* () {
+    try {
+        const slug = req.params.slug;
+        const role = yield Role.findOne({
+            slug: slug,
+        });
+        if (!role) {
+            res.status(400).json({
+                message: "Không tìm thấy vai trò!",
+            });
+        }
+        else {
+            yield Role.updateOne({ slug: slug }, req.body);
+            res.status(200).json({
+                message: "Cập nhật vai trò thành công!",
+            });
+        }
+    }
+    catch (error) {
+        res.status(400).json({
+            message: "Cập nhật vai trò không thành công!",
+        });
     }
 });
 module.exports.permissions = (req, res) => __awaiter(this, void 0, void 0, function* () {
@@ -85,5 +141,41 @@ module.exports.permissionsEdit = (req, res) => __awaiter(this, void 0, void 0, f
     }
     catch (err) {
         res.status(500).json({ message: "Lỗi server" });
+    }
+});
+module.exports.delete = (req, res) => __awaiter(this, void 0, void 0, function* () {
+    try {
+        const id = req.params.id;
+        const role = yield Role.findOne({ _id: id });
+        if (role) {
+            yield Role.updateOne({ _id: id }, { deleted: true });
+            res.status(200).json({ message: "Đã xóa vai trò!" });
+        }
+        else {
+            res.status(400).json({ message: "Không tìm thấy vai trò!" });
+        }
+    }
+    catch (err) {
+        res.status(500).json({ message: "Lỗi server" });
+    }
+});
+module.exports.changeMulti = (req, res) => __awaiter(this, void 0, void 0, function* () {
+    try {
+        const type = req.body.type;
+        const ids = Array.isArray(req.body.ids)
+            ? req.body.ids
+            : req.body.ids.split(", ");
+        switch (type) {
+            case "delete_all":
+                yield Role.updateMany({ _id: { $in: ids } }, { deleted: true, deletedAt: new Date() });
+                return res.status(200).json({
+                    message: `Đã xóa ${ids.length} vai trò!`,
+                });
+        }
+    }
+    catch (error) {
+        return res.status(400).json({
+            message: "Cập nhật thất bại!",
+        });
     }
 });
