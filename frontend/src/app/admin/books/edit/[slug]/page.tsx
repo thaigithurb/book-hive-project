@@ -176,7 +176,6 @@ export default function EditBook() {
           >
             <BookForm
               form={form}
-              setForm={setForm}
               loading={loading}
               preview={preview}
               setPreview={setPreview}

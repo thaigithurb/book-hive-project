@@ -8,7 +8,8 @@ export function useBulkSelect(
   fetchAllItems: () => Promise<any[]>,
   resource: string,
   setEditedItems: (items: any[]) => void,
-  editedItems: any[]
+  editedItems: any[],
+  label: string
 ) {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [bulkValue, setBulkValue] = useState<string>("");
@@ -91,9 +92,7 @@ export function useBulkSelect(
 
     toast.promise(bulkPromise, {
       pending: "Đang xóa...",
-      success: `Xóa thành công ${pendingDeleteIds.length} ${
-        resource === "books" ? "sách" : "thể loại"
-      }!`,
+      success: `Xóa thành công ${pendingDeleteIds.length} ${label}!`,
       error: "Xóa thất bại!",
     });
 
@@ -113,6 +112,6 @@ export function useBulkSelect(
     handleBulkChange,
     pendingDeleteIds,
     setPendingDeleteIds,
-    executeBulkDelete
+    executeBulkDelete,
   };
 }

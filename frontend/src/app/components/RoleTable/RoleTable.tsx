@@ -1,6 +1,7 @@
 import { Role } from "@/app/interfaces/role.interface";
 import { useRouter } from "next/navigation";
 import DOMPurify from "dompurify";
+import TableActions from "../TableActions/TableActions";
 
 interface RoleTableProps {
   roles: Role[];
@@ -82,27 +83,22 @@ export default function RoleTable({
                 dangerouslySetInnerHTML={{
                   __html: DOMPurify.sanitize(role.description),
                 }}
-              >
-              </td>
+              ></td>
               <td className="py-4 px-4">
-                <div className="flex gap-2">
-                  <button
-                    className="py-1 px-3 rounded-md text-[13.6px] font-semibold bg-yellow-100 text-yellow-700 hover:bg-yellow-200 transition-colors duration-200 cursor-pointer"
-                    onClick={() => {
-                        router.push(`/admin/roles/edit/${role.slug}`);
-                    }}
-                  >
-                    Sửa
-                  </button>
-                  <button
-                    className="py-1 px-3 rounded-md text-[13.6px] font-semibold bg-red-100 text-red-700 hover:bg-red-200 transition-colors duration-200 cursor-pointer"
-                    onClick={() => {
-                      if (role._id) setDeleteId(role._id);
-                    }}
-                  >
-                    Xóa
-                  </button>
-                </div>
+                <TableActions
+                  actions={[
+                    {
+                      label: "Sửa",
+                      title: "edit",
+                      class:
+                        "py-1 px-3 rounded-[6px] text-[13.6px] font-semibold bg-yellow-100 text-yellow-700 hover:bg-yellow-200 transition-colors duration-200 cursor-pointer",
+                    },
+                  ]}
+                  source="roles"
+                  slug={role.slug}
+                  id={role._id}
+                  onDelete={setDeleteId}
+                />
               </td>
             </tr>
           ))}

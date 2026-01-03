@@ -1,3 +1,4 @@
+"use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -18,10 +19,11 @@ var __rest = (this && this.__rest) || function (s, e) {
         }
     return t;
 };
+Object.defineProperty(exports, "__esModule", { value: true });
 const Role = require("../../models/role.model");
 const Permission = require("../../models/permission.model");
 const slugify = require("slugify");
-module.exports.index = (req, res) => __awaiter(this, void 0, void 0, function* () {
+module.exports.index = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 7;
@@ -37,9 +39,6 @@ module.exports.index = (req, res) => __awaiter(this, void 0, void 0, function* (
         let sort = {};
         if (req.query.sortKey && req.query.sortValue) {
             sort[req.query.sortKey] = Number(req.query.sortValue);
-        }
-        else {
-            sort.position = "desc";
         }
         const roles = yield Role.find(find).skip(skip).limit(limit).sort(sort);
         const total = yield Role.countDocuments(find);
@@ -59,7 +58,7 @@ module.exports.index = (req, res) => __awaiter(this, void 0, void 0, function* (
         return res.status(400).json("Không tìm thấy!");
     }
 });
-module.exports.create = (req, res) => __awaiter(this, void 0, void 0, function* () {
+module.exports.create = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const _a = req.body, { title } = _a, newRoleData = __rest(_a, ["title"]);
         const slug = slugify(title, { lower: true, strict: true, locale: "vi" });
@@ -74,10 +73,10 @@ module.exports.create = (req, res) => __awaiter(this, void 0, void 0, function* 
         return res.status(400).json("Tạo mới vai trò thất bại!");
     }
 });
-module.exports.getBySlug = (req, res) => __awaiter(this, void 0, void 0, function* () {
+module.exports.getById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const slug = req.params.slug;
-        const role = yield Role.findOne({ slug: slug, deleted: false });
+        const id = req.params.id;
+        const role = yield Role.findOne({ _id: id, deleted: false });
         if (!role) {
             return res.status(404).json({ message: "Không tìm thấy vai trò!" });
         }
@@ -92,7 +91,7 @@ module.exports.getBySlug = (req, res) => __awaiter(this, void 0, void 0, functio
         });
     }
 });
-module.exports.edit = (req, res) => __awaiter(this, void 0, void 0, function* () {
+module.exports.edit = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const slug = req.params.slug;
         const role = yield Role.findOne({
@@ -116,7 +115,7 @@ module.exports.edit = (req, res) => __awaiter(this, void 0, void 0, function* ()
         });
     }
 });
-module.exports.permissions = (req, res) => __awaiter(this, void 0, void 0, function* () {
+module.exports.permissions = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const permissions = yield Permission.find({});
         const permissionGroups = permissions.reduce((acc, perm) => {
@@ -131,7 +130,7 @@ module.exports.permissions = (req, res) => __awaiter(this, void 0, void 0, funct
         res.status(500).json({ message: "Lỗi server" });
     }
 });
-module.exports.permissionsEdit = (req, res) => __awaiter(this, void 0, void 0, function* () {
+module.exports.permissionsEdit = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { roles } = req.body;
         for (const role of roles) {
@@ -143,7 +142,7 @@ module.exports.permissionsEdit = (req, res) => __awaiter(this, void 0, void 0, f
         res.status(500).json({ message: "Lỗi server" });
     }
 });
-module.exports.delete = (req, res) => __awaiter(this, void 0, void 0, function* () {
+module.exports.delete = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const id = req.params.id;
         const role = yield Role.findOne({ _id: id });
@@ -159,7 +158,7 @@ module.exports.delete = (req, res) => __awaiter(this, void 0, void 0, function* 
         res.status(500).json({ message: "Lỗi server" });
     }
 });
-module.exports.changeMulti = (req, res) => __awaiter(this, void 0, void 0, function* () {
+module.exports.changeMulti = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const type = req.body.type;
         const ids = Array.isArray(req.body.ids)
@@ -171,11 +170,38 @@ module.exports.changeMulti = (req, res) => __awaiter(this, void 0, void 0, funct
                 return res.status(200).json({
                     message: `Đã xóa ${ids.length} vai trò!`,
                 });
+            default:
+                return res.status(400).json({
+                    message: "Loại thao tác không hợp lệ!",
+                });
         }
     }
     catch (error) {
         return res.status(400).json({
             message: "Cập nhật thất bại!",
         });
+    }
+});
+module.exports.createPerm = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const _a = req.body, { key, label } = _a, permissionData = __rest(_a, ["key", "label"]);
+        const checkKey = yield Permission.findOne({
+            key: { $regex: key, $options: "i" },
+        });
+        const checkLabel = yield Permission.findOne({
+            label: { $regex: label, $options: "i" },
+        });
+        if (checkKey) {
+            return res.status(400).json({ message: "Key đã tồn tại!" });
+        }
+        if (checkLabel) {
+            return res.status(400).json({ message: "Quyền đã tồn tại!" });
+        }
+        const newPerm = new Permission(Object.assign({ key, label }, permissionData));
+        yield newPerm.save();
+        return res.status(200).json({ message: "Tạo quyền mới thành công!" });
+    }
+    catch (err) {
+        return res.status(500).json({ message: "Lỗi server" });
     }
 });

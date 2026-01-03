@@ -11,13 +11,15 @@ router.get("/permissions", controller.permissions);
 
 router.patch("/permissions/edit", controller.permissionsEdit);
 
-router.get("/:slug", controller.getBySlug);
+router.get("/:id", controller.getById);
 
 router.patch("/edit/:slug", controller.edit);
 
 router.patch("/delete/:id", controller.delete);
 
 router.patch("/change-multi", controller.changeMulti);
+
+router.post("/permissions/create", controller.createPerm);
 
 module.exports = router;
 

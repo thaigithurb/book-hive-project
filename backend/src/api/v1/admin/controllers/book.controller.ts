@@ -1,8 +1,5 @@
-// @ts-ignore
 const Book = require("../../models/book.model");
-// @ts-ignore
 const Category = require("../../models/category.model");
-// @ts-ignore
 const slugify = require("slugify");
 
 // [GET] /api/v1/admin/books
@@ -398,3 +395,5 @@ module.exports.detail = async (req, res) => {
     });
   }
 };
+
+export {};

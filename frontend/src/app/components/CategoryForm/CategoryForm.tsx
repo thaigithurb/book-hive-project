@@ -10,7 +10,6 @@ type CategoryFormData = {
 
 type CategoryFormProps = {
   form: CategoryFormData;
-  setForm?: unknown;
   loading: boolean;
   handleSubmit: (e: unknown) => void;
   handleChange: (e: unknown) => void;

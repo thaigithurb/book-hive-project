@@ -125,7 +125,6 @@ export default function EditRole() {
             >
               <RoleForm
                 form={form}
-                setForm={setForm}
                 loading={loading}
                 handleSubmit={handleSubmit}
                 handleChange={handleChange}

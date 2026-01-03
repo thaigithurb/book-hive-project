@@ -6,23 +6,57 @@ import { ToastContainer, toast } from "react-toastify";
 import { useParams } from "next/navigation";
 import { BackButton } from "@/app/components/BackButton/BackButton";
 import BookForm from "@/app/components/BookForm/BookForm";
-import { motion, AnimatePresence } from "framer-motion"; 
-import CategoryForm from "@/app/components/CategoryForm/CategoryForm";
+import { motion, AnimatePresence } from "framer-motion";
+import AccountForm from "@/app/components/AccountForm/AccountForm";
+import { Role } from "@/app/interfaces/role.interface";
+import { Account } from "@/app/interfaces/account.interface";
 
 const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;
 
-export default function EditCategory() {
+export default function EditBook() {
   const params = useParams();
   const slug = params.slug;
 
   const [form, setForm] = useState({
-    title: "",
-    description: "",
-    position: "",
+    fullName: "",
+    email: "",
+    password: "",
+    phone: "",
     status: "active",
+    role_id: "",
+    avatar: ""
   });
   const [loading, setLoading] = useState(false);
-  const [isPageLoading, setIsPageLoading] = useState(true); 
+  const [isPageLoading, setIsPageLoading] = useState(true);
+  const [preview, setPreview] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [roles, setRoles] = useState<Role[]>([]);
+  const [accounts, setAccounts] = useState<Account[]>([]);
+  const fileInputRef = useRef<any>(null);
+
+  useEffect(() => {
+    axios
+      .get(`http://localhost:3001/api/v1/${ADMIN_PREFIX}/roles`)
+      .then((res) => setRoles(res.data.roles || []))
+      .catch(() => setRoles([]));
+  }, []);
+
+  const handleImageChange = (e: any) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setPreview(URL.createObjectURL(file));
+      setImageFile(file);
+    } else {
+      setPreview(null);
+      setImageFile(null);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setPreview(null);
+    setImageFile(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
 
   const handleChange = (e: any) => {
     const { name, value, type } = e.target;
@@ -33,43 +67,45 @@ export default function EditCategory() {
   };
 
   useEffect(() => {
-    const fetchCategory = async () => {
+    const fetchAccount = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:3001/api/v1/${ADMIN_PREFIX}/categories/${params.slug}`
+          `http://localhost:3001/api/v1/${ADMIN_PREFIX}/accounts/detail/${params.slug}`
         );
-        const category = res.data.category;
+        const account = res.data.account;
         setForm({
-          title: category.title,
-          description: category.description,
-          position: category.position,
-          status: category.status,
+          fullName: account.fullName,
+          email: account.email,
+          password: account.password,
+          phone: account.phone,
+          status: account.status,
+          role_id: account.role_id,
+          avatar: account.avatar
         });
+        setPreview(account.avatar || null);
       } catch (err) {
-        toast.error("Không tìm thấy thể loại!");
+        toast.error("Không tìm thấy sách!");
       } finally {
-        setIsPageLoading(false); 
+        setIsPageLoading(false);
       }
     };
-    fetchCategory();
+    fetchAccount();
   }, [params.slug]);
 
   const handleSubmit = (e: any) => {
     e.preventDefault();
     setLoading(true);
-
-    const data = {
-      title: form.title,
-      description: form.description,
-      position: form.position ? Number(form.position) : undefined,
-      status: form.status,
-    };
+    const formData = new FormData();
+    Object.entries(form).forEach(([key, value]) => formData.append(key, value));
+    if (imageFile) {
+      formData.append("image", imageFile);
+    }
 
     toast
       .promise(
         axios.patch(
-          `http://localhost:3001/api/v1/${ADMIN_PREFIX}/categories/edit/${slug}`,
-          data
+          `http://localhost:3001/api/v1/${ADMIN_PREFIX}/accounts/edit/${slug}`,
+          formData
         ),
         {
           pending: "Đang cập nhật...",
@@ -83,7 +119,7 @@ export default function EditCategory() {
               if (axios.isAxiosError(data)) {
                 return data.response?.data?.message;
               }
-              return "Cập nhật thể loại thất bại";
+              return "Cập nhật sách thất bại";
             },
           },
         }
@@ -114,14 +150,14 @@ export default function EditCategory() {
           className="max-w-2xl mx-auto mt-8 bg-white p-8 rounded-xl shadow relative"
         >
           <BackButton className="absolute -top-10 -left-80 flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 transition cursor-pointer" />
-          
+
           <motion.h1
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
             className="text-2xl font-bold mb-6 text-primary"
           >
-            Chỉnh sửa thể loại
+            Chỉnh sửa sách
           </motion.h1>
 
           <motion.div
@@ -129,12 +165,20 @@ export default function EditCategory() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
           >
-            <CategoryForm
+            <AccountForm
               form={form}
               loading={loading}
+              preview={preview}
+              setPreview={setPreview}
+              imageFile={imageFile}
+              setImageFile={setImageFile}
+              fileInputRef={fileInputRef}
               handleSubmit={handleSubmit}
               handleChange={handleChange}
+              handleImageChange={handleImageChange}
+              handleRemoveImage={handleRemoveImage}
               buttonLabel="Cập nhật"
+              roles={roles}
             />
           </motion.div>
 

@@ -14,7 +14,6 @@ type BookFormData = {
 
 type BookFormProps = {
   form: BookFormData;
-  setForm?: unknown;
   loading: boolean;
   preview: string | null;
   setPreview?: unknown;

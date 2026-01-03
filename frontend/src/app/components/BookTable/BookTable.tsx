@@ -1,7 +1,7 @@
 import { Book } from "@/app/interfaces/book.interface";
-import BookStatusBadge from "../ChangeStatusBadge/ChangeStatusBadge";
 import { useRouter } from "next/navigation";
-import BookTableActions from "../BookTableActions/BookTableActions";
+import ChangeStatusBadge from "../ChangeStatusBadge/ChangeStatusBadge";
+import TableActions from "../TableActions/TableActions";
 
 interface BookTableProps {
   books: Book[];
@@ -115,7 +115,7 @@ export default function BookTable({
               </td>
               <td className="py-4 px-4">
                 {book._id && (
-                  <BookStatusBadge
+                  <ChangeStatusBadge
                     status={book.status}
                     onClick={() => {
                       if (book._id) {
@@ -146,7 +146,22 @@ export default function BookTable({
                 />
               </td>
               <td className="py-4 px-4">
-                <BookTableActions
+                <TableActions
+                  actions={
+                    [
+                      {
+                        label: "Chi tiết",
+                        title: "detail",
+                        class: "py-1 px-3 rounded-[6px] text-[13.6px] font-semibold bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors duration-200 cursor-pointer"
+                      },
+                      {
+                        label: "Sửa",
+                        title: "edit",
+                        class: "py-1 px-3 rounded-[6px] text-[13.6px] font-semibold bg-yellow-100 text-yellow-700 hover:bg-yellow-200 transition-colors duration-200 cursor-pointer"
+                      },
+                    ]
+                  }
+                  source="books"
                   slug={book.slug}
                   id={book._id}
                   onDelete={setDeleteId}

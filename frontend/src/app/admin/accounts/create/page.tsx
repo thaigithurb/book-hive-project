@@ -4,20 +4,51 @@ import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import { BackButton } from "@/app/components/BackButton/BackButton";
-import BookForm from "@/app/components/BookForm/BookForm";
-import CategoryForm from "@/app/components/CategoryForm/CategoryForm";
 import { motion } from "framer-motion";
+import AccountForm from "@/app/components/AccountForm/AccountForm";
+import { Role } from "@/app/interfaces/role.interface";
 
 const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;
 
-export default function Create() {
+export default function CreateAccount() {
   const [form, setForm] = useState({
-    title: "",
-    description: "",
-    position: "",
+    fullName: "",
+    email: "",
+    password: "",
+    phone: "",
     status: "active",
+    role_id: "",
   });
   const [loading, setLoading] = useState(false);
+  const [preview, setPreview] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [roles, setRoles] = useState<Role[]>([]);
+
+  const fileInputRef = useRef<any>(null);
+
+  useEffect(() => {
+    axios
+      .get(`http://localhost:3001/api/v1/${ADMIN_PREFIX}/roles`)
+      .then((res) => setRoles(res.data.roles || []))
+      .catch(() => setRoles([]));
+  }, []);
+
+  const handleImageChange = (e: any) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setPreview(URL.createObjectURL(file));
+      setImageFile(file);
+    } else {
+      setPreview(null);
+      setImageFile(null);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setPreview(null);
+    setImageFile(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
 
   const handleChange = (e: any) => {
     const { name, value, type } = e.target;
@@ -30,22 +61,20 @@ export default function Create() {
   const handleSubmit = (e: any) => {
     e.preventDefault();
     setLoading(true);
-
-    const data = {
-      title: form.title,
-      description: form.description,
-      position: form.position ? Number(form.position) : undefined,
-      status: form.status,
-    };
+    const formData = new FormData();
+    Object.entries(form).forEach(([key, value]) => formData.append(key, value));
+    if (imageFile) {
+      formData.append("image", imageFile);
+    }
 
     toast
       .promise(
         axios.post(
-          `http://localhost:3001/api/v1/${ADMIN_PREFIX}/categories/create`,
-          data
+          `http://localhost:3001/api/v1/${ADMIN_PREFIX}/accounts/create`,
+          formData
         ),
         {
-          pending: "Đang tạo thể loại...",
+          pending: "Đang tạo tài khoản...",
           success: {
             render({ data }) {
               return data?.data?.message;
@@ -56,18 +85,23 @@ export default function Create() {
               if (axios.isAxiosError(data)) {
                 return data.response?.data?.message;
               }
-              return "Tạo thể loại thất bại";
+              return "Tạo tài khoản thất bại";
             },
           },
         }
       )
       .then(() => {
         setForm({
-          title: "",
-          description: "",
-          position: "",
+          fullName: "",
+          email: "",
+          password: "",
+          phone: "",
           status: "active",
+          role_id: "",
         });
+        setPreview(null);
+        setImageFile(null);
+        if (fileInputRef.current) fileInputRef.current.value = "";
       })
       .finally(() => setLoading(false));
   };
@@ -86,19 +120,27 @@ export default function Create() {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="text-2xl font-bold mb-6 text-primary"
         >
-          Tạo mới thể loại
+          Tạo mới tài khoản
         </motion.h1>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
         >
-          <CategoryForm
+          <AccountForm
             form={form}
             loading={loading}
+            preview={preview}
+            setPreview={setPreview}
+            imageFile={imageFile}
+            setImageFile={setImageFile}
+            fileInputRef={fileInputRef}
             handleSubmit={handleSubmit}
             handleChange={handleChange}
+            handleImageChange={handleImageChange}
+            handleRemoveImage={handleRemoveImage}
             buttonLabel="Tạo mới"
+            roles={roles}
           />
         </motion.div>
         <ToastContainer

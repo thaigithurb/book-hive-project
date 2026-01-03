@@ -12,9 +12,9 @@ import ChangeMulti from "@/app/components/ChangeMulti/ChangeMulti";
 import useChangeStatus from "@/app/utils/useChangeStatus";
 import { useBulkSelect } from "@/app/utils/useBulkSelect";
 import ConfirmDeleteModal from "@/app/components/ConfirmDeleteModal/ConfirmDeleteModal";
-import { useRouter } from "next/navigation";
 import { toast, ToastContainer } from "react-toastify";
 import { motion, AnimatePresence } from "framer-motion";
+import NewAddButton from "@/app/components/NewAddButton/NewAddButton";
 
 const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;
 
@@ -30,7 +30,6 @@ export default function Categories() {
   const [sort, setSort] = useState<{ key: string; value: 1 | -1 } | null>(null);
   const [isFirstLoad, setIsFirstLoad] = useState(true);
   const limit = 5;
-  const router = useRouter();
 
   const fetchData = useCallback(
     debounce(() => {
@@ -100,7 +99,8 @@ export default function Categories() {
     fetchAllCategories,
     "categories",
     setEditedCategories,
-    editedCategories
+    editedCategories,
+    "thể loại"
   );
 
   const handleDelete = async () => {
@@ -149,12 +149,7 @@ export default function Categories() {
         <h1 className="text-[32px] font-bold m-0 text-primary">
           📂 Quản lý thể loại
         </h1>
-        <button
-          className="py-3 px-6 bg-secondary1 transition-colors duration-200 text-white rounded-[8px] text-[16px] font-semibold cursor-pointer hover:bg-blue-600"
-          onClick={() => router.push(`/${ADMIN_PREFIX}/categories/create`)}
-        >
-          ➕ Thêm thể loại mới
-        </button>
+        <NewAddButton label="Thêm thể loại mới" source="categories" />
       </motion.div>
 
       <motion.div
@@ -164,7 +159,7 @@ export default function Categories() {
         className="flex items-center justify-between mb-6"
       >
         <StatusFilter value={status} onChange={setStatus} />
-        <Search value={keyword} onChange={setKeyword} />
+        <Search value={keyword} onChange={setKeyword} label="thể loại" />
       </motion.div>
 
       <motion.div

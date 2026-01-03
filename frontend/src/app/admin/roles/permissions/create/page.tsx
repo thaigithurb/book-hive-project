@@ -4,20 +4,26 @@ import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import { BackButton } from "@/app/components/BackButton/BackButton";
-import BookForm from "@/app/components/BookForm/BookForm";
-import CategoryForm from "@/app/components/CategoryForm/CategoryForm";
 import { motion } from "framer-motion";
 
 const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;
 
-export default function Create() {
+export default function CreatePermission() {
   const [form, setForm] = useState({
-    title: "",
-    description: "",
-    position: "",
-    status: "active",
+    key: "",
+    label: "",
+    group: "",
   });
   const [loading, setLoading] = useState(false);
+  const [allPermissions, setAllPermissions] = useState<Permission[]>([]);
+
+  useEffect(() => {
+    axios
+      .get(`http://localhost:3001/api/v1/${ADMIN_PREFIX}/roles/permissions`)
+      .then((res) => {
+        setAllPermissions(res.data.permissions);
+      });
+  }, []);
 
   const handleChange = (e: any) => {
     const { name, value, type } = e.target;
@@ -32,20 +38,19 @@ export default function Create() {
     setLoading(true);
 
     const data = {
-      title: form.title,
-      description: form.description,
-      position: form.position ? Number(form.position) : undefined,
-      status: form.status,
+      key: form.key,
+      label: form.label,
+      group: form.group,
     };
 
     toast
       .promise(
         axios.post(
-          `http://localhost:3001/api/v1/${ADMIN_PREFIX}/categories/create`,
+          `http://localhost:3001/api/v1/${ADMIN_PREFIX}/roles/permissions/create`,
           data
         ),
         {
-          pending: "Đang tạo thể loại...",
+          pending: "Đang tạo quyền...",
           success: {
             render({ data }) {
               return data?.data?.message;
@@ -56,17 +61,16 @@ export default function Create() {
               if (axios.isAxiosError(data)) {
                 return data.response?.data?.message;
               }
-              return "Tạo thể loại thất bại";
+              return "Tạo quyền thất bại";
             },
           },
         }
       )
       .then(() => {
         setForm({
-          title: "",
-          description: "",
-          position: "",
-          status: "active",
+          key: "",
+          label: "",
+          group: "",
         });
       })
       .finally(() => setLoading(false));
@@ -93,13 +97,13 @@ export default function Create() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
         >
-          <CategoryForm
+          {/* <RoleForm
             form={form}
             loading={loading}
             handleSubmit={handleSubmit}
             handleChange={handleChange}
             buttonLabel="Tạo mới"
-          />
+          /> */}
         </motion.div>
         <ToastContainer
           autoClose={1500}

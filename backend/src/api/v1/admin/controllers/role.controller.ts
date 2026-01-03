@@ -1,7 +1,5 @@
-// @ts-ignore
 const Role = require("../../models/role.model");
 const Permission = require("../../models/permission.model");
-// @ts-ignore
 const slugify = require("slugify");
 
 // [GET] /api/v1/admin/roles
@@ -25,8 +23,6 @@ module.exports.index = async (req, res) => {
     let sort: any = {};
     if (req.query.sortKey && req.query.sortValue) {
       sort[req.query.sortKey] = Number(req.query.sortValue);
-    } else {
-      sort.position = "desc";
     }
 
     const roles = await Role.find(find).skip(skip).limit(limit).sort(sort);
@@ -70,11 +66,11 @@ module.exports.create = async (req, res) => {
   }
 };
 
-// [GET] /api/v1/admin/roles/:slug
-module.exports.getBySlug = async (req, res) => {
+// [GET] /api/v1/admin/roles/:id
+module.exports.getById = async (req, res) => {
   try {
-    const slug = req.params.slug;
-    const role = await Role.findOne({ slug: slug, deleted: false });
+    const id = req.params.id;
+    const role = await Role.findOne({ _id: id, deleted: false });
     if (!role) {
       return res.status(404).json({ message: "Không tìm thấy vai trò!" });
     }
@@ -177,6 +173,10 @@ module.exports.changeMulti = async (req, res) => {
         return res.status(200).json({
           message: `Đã xóa ${ids.length} vai trò!`,
         });
+      default:
+        return res.status(400).json({
+          message: "Loại thao tác không hợp lệ!",
+        });
     }
   } catch (error) {
     return res.status(400).json({
@@ -184,3 +184,32 @@ module.exports.changeMulti = async (req, res) => {
     });
   }
 };
+
+// [GET] /api/v1/admin/roles/permissions/create
+module.exports.createPerm = async (req, res) => {
+  try {
+    const { key, label, ...permissionData } = req.body;
+
+    const checkKey = await Permission.findOne({
+      key: { $regex: key, $options: "i" },
+    });
+    const checkLabel = await Permission.findOne({
+      label: { $regex: label, $options: "i" },
+    });
+
+    if (checkKey) {
+      return res.status(400).json({ message: "Key đã tồn tại!" });
+    }
+    if (checkLabel) {
+      return res.status(400).json({ message: "Quyền đã tồn tại!" });
+    }
+
+    const newPerm = new Permission({ key, label, ...permissionData });
+    await newPerm.save();
+    return res.status(200).json({ message: "Tạo quyền mới thành công!" });
+  } catch (err) {
+    return res.status(500).json({ message: "Lỗi server" });
+  }
+};
+
+export {};

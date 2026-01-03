@@ -1,6 +1,4 @@
-// @ts-ignore
 const Category = require("../../models/category.model");
-// @ts-ignore
 const slugify = require("slugify");
 
 // [GET] /api/v1/admin/categories
@@ -353,3 +351,5 @@ module.exports.edit = async (req, res) => {
     });
   }
 };
+
+export {};

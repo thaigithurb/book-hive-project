@@ -8,7 +8,6 @@ type RoleFormData = {
 
 type RoleFormProps = {
   form: RoleFormData;
-  setForm?: unknown;
   loading: boolean;
   handleSubmit: (e: unknown) => void;
   handleChange: (e: unknown) => void;
@@ -17,7 +16,6 @@ type RoleFormProps = {
 
 export default function RoleForm({
   form,
-  setForm,
   loading,
   handleSubmit,
   handleChange,

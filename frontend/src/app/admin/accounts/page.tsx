@@ -2,10 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
-import BookTable from "@/app/components/BookTable/BookTable";
 import StatusFilter from "@/app/components/StatusFilter/StatusFilter";
 import Search from "@/app/components/Search/Search";
-import { Book } from "@/app/interfaces/book.interface";
 import debounce from "lodash.debounce";
 import Pagination from "@/app/components/Pagination/Pagination";
 import ChangeMulti from "@/app/components/ChangeMulti/ChangeMulti";
@@ -13,31 +11,31 @@ import useChangeStatus from "@/app/utils/useChangeStatus";
 import { useBulkSelect } from "@/app/utils/useBulkSelect";
 import ConfirmDeleteModal from "@/app/components/ConfirmDeleteModal/ConfirmDeleteModal";
 import { toast, ToastContainer } from "react-toastify";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import AccountTable from "@/app/components/AccountTable/AccountTable";
+import { Account } from "@/app/interfaces/account.interface";
 import NewAddButton from "@/app/components/NewAddButton/NewAddButton";
 
 const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;
 
-export default function Books() {
-  const [books, setBooks] = useState<Book[]>([]);
+export default function Accounts() {
+  const [accounts, setAccounts] = useState<Account[]>([]);
   const [keyword, setKeyword] = useState("");
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState("");
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [bulkDeleteIds, setBulkDeleteIds] = useState<string[]>([]);
-  const [editedBooks, setEditedBooks] = useState<Book[]>([]);
+  const [editedAccounts, setEditedAccounts] = useState<Account[]>([]);
   const [sort, setSort] = useState<{ key: string; value: 1 | -1 } | null>(null);
   const [isFirstLoad, setIsFirstLoad] = useState(true);
   const limit = 5;
 
-  // xử lí load data cùng với lọc và tìm kiếm
   const fetchData = useCallback(
     debounce(() => {
       setLoading(true);
       axios
-        .get(`http://localhost:3001/api/v1/${ADMIN_PREFIX}/books`, {
+        .get(`http://localhost:3001/api/v1/${ADMIN_PREFIX}/accounts`, {
           params: {
             ...(status && { status }),
             ...(keyword && { keyWord: keyword }),
@@ -47,10 +45,10 @@ export default function Books() {
           },
         })
         .then((res) => {
-          setBooks(res.data.books || []);
+          setAccounts(res.data.accounts || []);
           setTotal(res.data.total || 0);
         })
-        .catch(() => setBooks([]))
+        .catch(() => setAccounts([]))
         .finally(() => {
           setLoading(false);
           setIsFirstLoad(false);
@@ -68,25 +66,21 @@ export default function Books() {
     setPage(1);
   }, [status, keyword]);
 
-  // lấy tất cả các book ko phân trang
+  // lấy tất cả tài khoản không phân trang
   useEffect(() => {
-    setEditedBooks(books);
-  }, [books]);
+    setEditedAccounts(accounts);
+  }, [accounts]);
 
-  const fetchAllBooks = async () => {
+  const fetchAllAccounts = async () => {
     const res = await axios.get(
-      `http://localhost:3001/api/v1/${ADMIN_PREFIX}/books`,
+      `http://localhost:3001/api/v1/${ADMIN_PREFIX}/accounts`,
       {
         params: { page: 1, limit: 10000 },
       }
     );
-    return res.data.books || [];
+    return res.data.accounts || [];
   };
 
-  // Hàm đổi trạng thái
-  const handleChangeStatus = useChangeStatus(fetchData, "books");
-
-  // hàm xử lí change-multi
   const {
     selectedIds,
     setSelectedIds,
@@ -99,32 +93,33 @@ export default function Books() {
     setPendingDeleteIds,
     executeBulkDelete,
   } = useBulkSelect(
-    books,
+    accounts,
     fetchData,
-    fetchAllBooks,
-    "books",
-    setEditedBooks,
-    editedBooks,
-    "sách"
+    fetchAllAccounts,
+    "accounts",
+    setEditedAccounts,
+    editedAccounts,
+    "tài khoản"
   );
 
-  // hàm xóa 1 item
+  // Hàm đổi trạng thái
+  const handleChangeStatus = useChangeStatus(fetchData, "accounts");
+
   const handleDelete = async () => {
     if (!deleteId) return;
     try {
       await axios.patch(
-        `http://localhost:3001/api/v1/${ADMIN_PREFIX}/books/delete/${deleteId}`
+        `http://localhost:3001/api/v1/${ADMIN_PREFIX}/accounts/delete/${deleteId}`
       );
       setDeleteId(null);
       fetchData();
-      toast.success("Xóa sách thành công!");
+      toast.success("Xóa vai trò thành công!");
     } catch (error) {
       console.log(error);
-      toast.error("Xóa sách thất bại");
+      toast.error("Xóa vai trò thất bại");
     }
   };
 
-  //  Xử lý thay đổi sort từ dropdown
   const handleSortChange = (e: any) => {
     const val = e.target.value;
     switch (val) {
@@ -133,12 +128,6 @@ export default function Books() {
         break;
       case "title_desc":
         setSort({ key: "title", value: -1 });
-        break;
-      case "priceBuy_asc":
-        setSort({ key: "priceBuy", value: 1 });
-        break;
-      case "priceBuy_desc":
-        setSort({ key: "priceBuy", value: -1 });
         break;
       case "createdAt_asc":
         setSort({ key: "createdAt", value: 1 });
@@ -150,6 +139,7 @@ export default function Books() {
         setSort(null);
     }
   };
+
   return (
     <>
       <motion.div
@@ -159,10 +149,11 @@ export default function Books() {
         className="flex justify-between items-center mb-8"
       >
         <h1 className="text-[32px] font-bold m-0 text-primary">
-          📚 Quản lý sách
+          🔑 Quản lý tài khoản
         </h1>
-        <NewAddButton label="Thêm sách mới" source="books" />
+        <NewAddButton label="Thêm tài khoản mới" source="accounts" />
       </motion.div>
+
       <motion.div
         initial={isFirstLoad ? { opacity: 0, y: -20 } : false}
         animate={{ opacity: 1, y: 0 }}
@@ -170,8 +161,9 @@ export default function Books() {
         className="flex items-center justify-between mb-6"
       >
         <StatusFilter value={status} onChange={setStatus} />
-        <Search value={keyword} onChange={setKeyword} label="sách" />
+        <Search value={keyword} onChange={setKeyword} label="tài khoản" />
       </motion.div>
+
       <motion.div
         initial={isFirstLoad ? { opacity: 0, y: -20 } : false}
         animate={{ opacity: 1, y: 0 }}
@@ -180,10 +172,9 @@ export default function Books() {
       >
         <ChangeMulti
           options={[
+            { label: "Xóa tất cả", value: "delete_all" },
             { label: "Hoạt động", value: "active" },
             { label: "Dừng hoạt động", value: "inactive" },
-            { label: "Đổi vị trí", value: "position-change" },
-            { label: "Xóa tất cả", value: "delete_all" },
           ]}
           bulkValue={bulkValue}
           setBulkValue={setBulkValue}
@@ -198,13 +189,12 @@ export default function Books() {
             <option value="">Sắp xếp</option>
             <option value="title_asc">Tên A-Z</option>
             <option value="title_desc">Tên Z-A</option>
-            <option value="priceBuy_asc">Giá mua tăng</option>
-            <option value="priceBuy_desc">Giá mua giảm</option>
             <option value="createdAt_desc">Mới nhất</option>
             <option value="createdAt_asc">Cũ nhất</option>
           </select>
         </div>
       </motion.div>
+
       <AnimatePresence mode="wait">
         {loading ? (
           <motion.div
@@ -217,7 +207,7 @@ export default function Books() {
           >
             Đang tải...
           </motion.div>
-        ) : books.length === 0 ? (
+        ) : accounts.length === 0 ? (
           <motion.div
             key="empty"
             initial={{ opacity: 0, y: 20 }}
@@ -236,10 +226,10 @@ export default function Books() {
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.5 }}
           >
-            <BookTable
-              books={editedBooks}
-              setEditedBooks={setEditedBooks}
+            <AccountTable
+              accounts={editedAccounts}
               onChangeStatus={handleChangeStatus}
+              setEditedAccounts={setEditedAccounts}
               selectedIds={selectedIds}
               onSelect={handleSelect}
               onSelectAll={handleSelectAll}
@@ -248,7 +238,8 @@ export default function Books() {
           </motion.div>
         )}
       </AnimatePresence>
-      {!loading && books.length > 0 && (
+
+      {!loading && accounts.length > 0 && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -262,6 +253,7 @@ export default function Books() {
           />
         </motion.div>
       )}
+
       <ConfirmDeleteModal
         open={!!deleteId || pendingDeleteIds.length > 0}
         onCancel={() => {

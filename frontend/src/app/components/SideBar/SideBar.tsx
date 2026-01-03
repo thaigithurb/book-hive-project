@@ -5,12 +5,12 @@ import { usePathname } from "next/navigation";
 const menu = [
   { label: "📊 Dashboard", key: "dashboard", href: "/admin/dashboard" },
   { label: "📚 Quản lý sách", key: "books", href: "/admin/books" },
-  { label: "👥 Quản lý người dùng", key: "users", href: "/admin/users" },
-  {
-    label: "💰 Quản lý giao dịch",
-    key: "transactions",
-    href: "/admin/transactions",
-  },
+  // { label: "👥 Quản lý người dùng", key: "users", href: "/admin/users" },
+  // {
+  //   label: "💰 Quản lý giao dịch",
+  //   key: "transactions",
+  //   href: "/admin/transactions",
+  // },
   {
     label: "🏷️ Quản lý thể loại",
     key: "categories",
@@ -21,6 +21,11 @@ const menu = [
     label: "🛡️ Phân quyền",
     key: "permissions",
     href: "/admin/roles/permissions",
+  },
+  {
+    label: "🧑‍💼 Quản lý tài khoản",
+    key: "accounts",
+    href: "/admin/accounts",
   },
 ];
 

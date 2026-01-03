@@ -1,15 +1,16 @@
 interface SearchProps {
   value: string;
   onChange: (value: string) => void;
+  label: string
 }
 
-export default function Search({ value, onChange }: SearchProps) {
+export default function Search({ value, onChange, label }: SearchProps) {
   return (
     <>
       <div className="relative w-full max-w-xs">
         <input
           type="text"
-          placeholder="Tìm kiếm sách..."
+          placeholder={`Tìm kiếm ${label}...`}
           className="border hover:border-secondary1 bg-[#ffff] border-gray-300 rounded-lg px-4 py-2 text-[15px] outline-none focus:ring-2 focus:ring-secondary1 focus:border-secondary1 transition shadow-sm w-full pr-10"
           value={value}
           onChange={(e) => onChange(e.target.value)}

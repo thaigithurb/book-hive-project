@@ -1,3 +1,4 @@
+"use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -18,9 +19,10 @@ var __rest = (this && this.__rest) || function (s, e) {
         }
     return t;
 };
+Object.defineProperty(exports, "__esModule", { value: true });
 const Category = require("../../models/category.model");
 const slugify = require("slugify");
-module.exports.index = (req, res) => __awaiter(this, void 0, void 0, function* () {
+module.exports.index = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const status = req.query.status;
         const keyword = req.query.keyWord;
@@ -65,7 +67,7 @@ module.exports.index = (req, res) => __awaiter(this, void 0, void 0, function* (
         res.json("Không tìm thấy!");
     }
 });
-module.exports.changeStatus = (req, res) => __awaiter(this, void 0, void 0, function* () {
+module.exports.changeStatus = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { id, status } = req.params;
         if (!status) {
@@ -88,7 +90,7 @@ module.exports.changeStatus = (req, res) => __awaiter(this, void 0, void 0, func
         res.status(500).json({ message: "Lỗi server!" });
     }
 });
-module.exports.changeMulti = (req, res) => __awaiter(this, void 0, void 0, function* () {
+module.exports.changeMulti = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const type = req.body.type;
         const ids = Array.isArray(req.body.ids)
@@ -171,7 +173,7 @@ module.exports.changeMulti = (req, res) => __awaiter(this, void 0, void 0, funct
         });
     }
 });
-module.exports.delete = (req, res) => __awaiter(this, void 0, void 0, function* () {
+module.exports.delete = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const id = req.params.id;
         yield Category.updateOne({
@@ -195,7 +197,7 @@ module.exports.delete = (req, res) => __awaiter(this, void 0, void 0, function* 
         });
     }
 });
-module.exports.create = (req, res) => __awaiter(this, void 0, void 0, function* () {
+module.exports.create = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let _a = req.body, { position, title } = _a, newCategoryData = __rest(_a, ["position", "title"]);
         const slug = slugify(title, { lower: true, strict: true, locale: "vi" });
@@ -225,7 +227,7 @@ module.exports.create = (req, res) => __awaiter(this, void 0, void 0, function* 
         });
     }
 });
-module.exports.getBySlug = (req, res) => __awaiter(this, void 0, void 0, function* () {
+module.exports.getBySlug = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const slug = req.params.slug;
         const category = yield Category.findOne({ slug: slug, deleted: false });
@@ -243,7 +245,7 @@ module.exports.getBySlug = (req, res) => __awaiter(this, void 0, void 0, functio
         });
     }
 });
-module.exports.edit = (req, res) => __awaiter(this, void 0, void 0, function* () {
+module.exports.edit = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const slug = req.params.slug;
         const category = yield Category.findOne({ slug, deleted: false });

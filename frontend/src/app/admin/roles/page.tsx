@@ -2,19 +2,17 @@
 
 import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
-import StatusFilter from "@/app/components/StatusFilter/StatusFilter";
 import Search from "@/app/components/Search/Search";
 import debounce from "lodash.debounce";
 import Pagination from "@/app/components/Pagination/Pagination";
 import ChangeMulti from "@/app/components/ChangeMulti/ChangeMulti";
-import useChangeStatus from "@/app/utils/useChangeStatus";
 import { useBulkSelect } from "@/app/utils/useBulkSelect";
 import ConfirmDeleteModal from "@/app/components/ConfirmDeleteModal/ConfirmDeleteModal";
-import { useRouter } from "next/navigation";
 import { toast, ToastContainer } from "react-toastify";
 import { motion, AnimatePresence } from "framer-motion";
 import RoleTable from "@/app/components/RoleTable/RoleTable";
 import { Role } from "@/app/interfaces/role.interface";
+import NewAddButton from "@/app/components/NewAddButton/NewAddButton";
 
 const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;
 
@@ -30,7 +28,6 @@ export default function Roles() {
   const [sort, setSort] = useState<{ key: string; value: 1 | -1 } | null>(null);
   const [isFirstLoad, setIsFirstLoad] = useState(true);
   const limit = 5;
-  const router = useRouter();
 
   const fetchData = useCallback(
     debounce(() => {
@@ -98,7 +95,8 @@ export default function Roles() {
     fetchAllRoles,
     "roles",
     setEditedRoles,
-    editedRoles
+    editedRoles,
+    "vai trò"
   );
 
   const handleDelete = async () => {
@@ -147,12 +145,7 @@ export default function Roles() {
         <h1 className="text-[32px] font-bold m-0 text-primary">
           🔑 Nhóm quyền
         </h1>
-        <button
-          className="py-3 px-6 bg-secondary1 transition-colors duration-200 text-white rounded-[8px] text-[16px] font-semibold cursor-pointer hover:bg-blue-600"
-          onClick={() => router.push(`/${ADMIN_PREFIX}/roles/create`)}
-        >
-          ➕ Thêm vai trò mới
-        </button>
+        <NewAddButton label="Thêm vai trò mới" source="roles" />
       </motion.div>
 
       <motion.div
@@ -161,7 +154,7 @@ export default function Roles() {
         transition={{ duration: 0.5, delay: 0.1 }}
         className="flex items-center justify-between mb-6"
       >
-        <Search value={keyword} onChange={setKeyword} />
+        <Search value={keyword} onChange={setKeyword} label="vai trò" />
       </motion.div>
 
       <motion.div

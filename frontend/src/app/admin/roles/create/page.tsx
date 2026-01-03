@@ -16,13 +16,6 @@ export default function CreateRole() {
     permissions: [],
   });
   const [loading, setLoading] = useState(false);
-  const [allPermissions, setAllPermissions] = useState<Permission[]>([]);
-
-  useEffect(() => {
-    axios.get(`http://localhost:3001/api/v1/${ADMIN_PREFIX}/roles/permissions`).then((res) => {
-      setAllPermissions(res.data.permissions);
-    });
-  }, []);
 
   const handleChange = (e: any) => {
     const { name, value, type } = e.target;
@@ -98,7 +91,6 @@ export default function CreateRole() {
         >
           <RoleForm
             form={form}
-            setForm={setForm}
             loading={loading}
             handleSubmit={handleSubmit}
             handleChange={handleChange}

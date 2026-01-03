@@ -1,9 +1,9 @@
-interface BookStatusBadgeProps {
+interface ChangeStatusBadge {
   status: string;
   onClick?: () => void;
 }
 
-export default function BookStatusBadge({ status, onClick }: BookStatusBadgeProps) {
+export default function ChangeStatusBadge({ status, onClick }: ChangeStatusBadge) {
   return (
     <span
       className={`py-1 px-3 rounded-[6px] text-[13.6px] font-semibold transition-colors duration-200  cursor-pointer ${

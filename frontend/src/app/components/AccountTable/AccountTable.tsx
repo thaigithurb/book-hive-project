@@ -1,32 +1,31 @@
 import { useRouter } from "next/navigation";
-import { Category } from "@/app/interfaces/category.interface";
-import CategoryStatusBadge from "../ChangeStatusBadge/ChangeStatusBadge";
-import React from "react";
+import DOMPurify from "dompurify";
+import { Account } from "@/app/interfaces/account.interface";
+import ChangeStatusBadge from "../ChangeStatusBadge/ChangeStatusBadge";
 import TableActions from "../TableActions/TableActions";
 
-interface CategoryTableProps {
-  categories: Category[];
+interface AccountTableProps {
+  accounts: Account[];
   onChangeStatus: (id: string, currentStatus: string) => void;
   selectedIds: string[];
   onSelect: (id: string, checked: boolean) => void;
   onSelectAll: (checked: boolean) => void;
   setDeleteId: (id: string) => void;
-  setEditedCategories: React.Dispatch<React.SetStateAction<Category[]>>;
+  setEditedAccounts: React.Dispatch<React.SetStateAction<Account[]>>;
 }
 
-export default function CategoryTable({
-  categories,
+export default function AccountTable({
+  accounts,
   onChangeStatus,
   selectedIds,
   onSelect,
   onSelectAll,
   setDeleteId,
-  setEditedCategories,
-}: CategoryTableProps) {
+}: AccountTableProps) {
   const router = useRouter();
   const allChecked =
-    categories.length > 0 &&
-    categories.every((b) => b._id !== undefined && selectedIds.includes(b._id));
+    accounts.length > 0 &&
+    accounts.every((b) => b._id !== undefined && selectedIds.includes(b._id));
 
   return (
     <div className="overflow-x-auto rounded-2xl bg-white shadow">
@@ -45,16 +44,19 @@ export default function CategoryTable({
               STT
             </th>
             <th className="py-4 px-4 text-left text-[14.4px] font-semibold text-primary">
-              Thể loại
+              Họ tên
             </th>
             <th className="py-4 px-4 text-left text-[14.4px] font-semibold text-primary">
-              Mô tả
+              Email
+            </th>
+            <th className="py-4 px-4 text-left text-[14.4px] font-semibold text-primary">
+              Số điện thoại
             </th>
             <th className="py-4 px-4 text-left text-[14.4px] font-semibold text-primary">
               Trạng thái
             </th>
             <th className="py-4 px-4 text-left text-[14.4px] font-semibold text-primary">
-              Vị trí
+              Ngày tạo
             </th>
             <th className="py-4 px-4 text-left text-[14.4px] font-semibold text-primary">
               Thao tác
@@ -62,74 +64,64 @@ export default function CategoryTable({
           </tr>
         </thead>
         <tbody>
-          {categories.map((category, idx) => (
+          {(accounts || []).map((account, index) => (
             <tr
               className="border-t"
               style={{ borderColor: "#64748b33" }}
-              key={category._id}
+              key={account._id || index}
             >
               <td className="py-4 px-4">
                 <input
                   type="checkbox"
                   className="cursor-pointer"
                   checked={
-                    category._id !== undefined &&
-                    selectedIds.includes(category._id)
+                    account._id !== undefined &&
+                    selectedIds.includes(account._id)
                   }
                   onChange={(e) => {
-                    if (category._id !== undefined) {
-                      onSelect(category._id, e.target.checked);
+                    if (account._id !== undefined) {
+                      onSelect(account._id, e.target.checked);
                     }
                   }}
                 />
               </td>
               <td className="py-4 px-4 text-[14.4px] text-primary">
-                {idx + 1}
+                {index + 1}
               </td>
               <td className="py-4 px-4 text-[14.4px] text-primary">
-                {category.title}
+                {account.fullName}
               </td>
               <td className="py-4 px-4 text-[14.4px] text-primary">
-                {category.description}
+                {account.email}
               </td>
-              <td className="py-4 px-4">
-                {category._id && (
-                  <CategoryStatusBadge
-                    status={category.status}
+              <td className="py-4 px-4 text-[14.4px] text-primary">
+                {account.phone}
+              </td>
+              <td className="py-4 px-4 text-[14.4px] text-primary">
+                {account._id && (
+                  <ChangeStatusBadge
+                    status={account.status}
                     onClick={() => {
-                      if (category._id) {
-                        onChangeStatus(category._id, category.status);
-                      }
+                      if (account._id)
+                        onChangeStatus(account._id, account.status);
                     }}
                   />
                 )}
               </td>
               <td className="py-4 px-4 text-[14.4px] text-primary">
-                <input
-                  type="number"
-                  min={1}
-                  className="w-16 px-2 py-1 border border-gray-300 outline-none focus:ring-2 focus:ring-secondary1 hover:border-secondary1 focus:border-secondary1 transition rounded text-center"
-                  value={
-                    typeof category.position === "number" &&
-                    category.position > 0
-                      ? category.position
-                      : ""
-                  }
-                  onChange={(e) => {
-                    const newPosition = Number(e.target.value);
-                    setEditedCategories((prev) =>
-                      prev.map((b) =>
-                        b._id === category._id
-                          ? { ...b, position: newPosition }
-                          : b
-                      )
-                    );
-                  }}
-                />
+                {account.createdAt
+                  ? new Date(account.createdAt).toLocaleDateString()
+                  : ""}
               </td>
               <td className="py-4 px-4">
                 <TableActions
                   actions={[
+                    {
+                      label: "Chi tiết",
+                      title: "detail",
+                      class:
+                        "py-1 px-3 rounded-[6px] text-[13.6px] font-semibold bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors duration-200 cursor-pointer",
+                    },
                     {
                       label: "Sửa",
                       title: "edit",
@@ -137,9 +129,9 @@ export default function CategoryTable({
                         "py-1 px-3 rounded-[6px] text-[13.6px] font-semibold bg-yellow-100 text-yellow-700 hover:bg-yellow-200 transition-colors duration-200 cursor-pointer",
                     },
                   ]}
-                  source="categories"
-                  slug={category.slug}
-                  id={category._id}
+                  source="accounts"
+                  slug={account.slug}
+                  id={account._id}
                   onDelete={setDeleteId}
                 />
               </td>
