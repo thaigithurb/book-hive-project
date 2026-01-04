@@ -91,6 +91,13 @@ module.exports.getById = (req, res) => __awaiter(void 0, void 0, void 0, functio
         });
     }
 });
+module.exports.detail = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const slug = req.params.slug;
+    const role = yield Role.findOne({ slug });
+    if (!role)
+        return res.status(404).json({ message: "Không tìm thấy vai trò!" });
+    return res.status(200).json({ role });
+});
 module.exports.edit = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const slug = req.params.slug;
@@ -102,12 +109,18 @@ module.exports.edit = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                 message: "Không tìm thấy vai trò!",
             });
         }
-        else {
-            yield Role.updateOne({ slug: slug }, req.body);
-            res.status(200).json({
-                message: "Cập nhật vai trò thành công!",
+        const updateData = Object.assign({}, req.body);
+        if (req.body.title) {
+            updateData.slug = slugify(req.body.title, {
+                lower: true,
+                strict: true,
+                locale: "vi",
             });
         }
+        yield Role.updateOne({ slug: slug }, updateData);
+        res.status(200).json({
+            message: "Cập nhật vai trò thành công!",
+        });
     }
     catch (error) {
         res.status(400).json({
@@ -117,7 +130,9 @@ module.exports.edit = (req, res) => __awaiter(void 0, void 0, void 0, function* 
 });
 module.exports.permissions = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const permissions = yield Permission.find({});
+        const permissions = yield Permission.find({
+            deleted: false,
+        });
         const permissionGroups = permissions.reduce((acc, perm) => {
             const group = perm.group;
             acc[group] = acc[group] || [];
@@ -203,5 +218,84 @@ module.exports.createPerm = (req, res) => __awaiter(void 0, void 0, void 0, func
     }
     catch (err) {
         return res.status(500).json({ message: "Lỗi server" });
+    }
+});
+module.exports.editPerm = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const slug = req.params.slug;
+        const _a = req.body, { key, label } = _a, permData = __rest(_a, ["key", "label"]);
+        const perm = yield Permission.findOne({
+            slug: slug,
+        });
+        if (!perm) {
+            return res.status(400).json({ message: "Không tìm thấy quyền!" });
+        }
+        const checkKey = yield Permission.findOne({
+            key: { $regex: key, $options: "i" },
+            slug: { $ne: slug },
+        });
+        const checkLabel = yield Permission.findOne({
+            label: { $regex: label, $options: "i" },
+            slug: { $ne: slug },
+        });
+        if (checkKey) {
+            return res.status(400).json({ message: "Key đã tồn tại!" });
+        }
+        if (checkLabel) {
+            return res.status(400).json({ message: "Quyền đã tồn tại!" });
+        }
+        const updateData = Object.assign(Object.assign({}, permData), { key, label });
+        if (req.body.label) {
+            updateData.slug = slugify(req.body.label, {
+                lower: true,
+                strict: true,
+                locale: "vi",
+            });
+        }
+        yield Permission.updateOne({
+            slug: slug,
+        }, updateData);
+        return res.status(200).json({ message: "Cập nhật quyền thành công!" });
+    }
+    catch (err) {
+        return res.status(500).json({ message: "Lỗi server" });
+    }
+});
+module.exports.deletePerm = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const id = req.params.id;
+        const perm = yield Permission.findOne({
+            _id: id,
+        });
+        if (!perm) {
+            return res.status(400).json({ message: "Không tìm thấy quyền!" });
+        }
+        yield Permission.updateOne({
+            _id: id,
+        }, {
+            deleted: true,
+        });
+        return res.status(200).json({ message: "Xóa quyền thành công!" });
+    }
+    catch (err) {
+        return res.status(500).json({ message: "Lỗi server" });
+    }
+});
+module.exports.detailPerm = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const slug = req.params.slug;
+        const perm = yield Permission.findOne({ slug: slug, deleted: false });
+        if (!perm) {
+            return res.status(404).json({ message: "Không tìm thấy quyền!" });
+        }
+        return res.status(200).json({
+            message: "Lấy thông tin quyền thành công!",
+            perm: perm,
+        });
+    }
+    catch (error) {
+        return res.status(500).json({
+            message: "Lỗi khi lấy thông tin quyền!",
+        });
     }
 });

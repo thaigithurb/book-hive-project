@@ -37,7 +37,6 @@ export default function PermissionForm({
           value={form.key}
           onChange={handleChange}
           placeholder="Nhập key, ví dụ: view_reports"
-          required
         />
       </div>
       <div className="mb-4">
@@ -51,24 +50,22 @@ export default function PermissionForm({
           value={form.label}
           onChange={handleChange}
           placeholder="Nhập tên hiển thị, ví dụ: Xem báo cáo"
-          required
         />
       </div>
       <div className="mb-4">
         <label className="mb-1 font-medium text-primary">
-          Nhóm quyền <span className="text-red-500">*</span>
+          Chức năng <span className="text-red-500">*</span>
         </label>
         <select
           name="group"
           className={inputClass}
           value={form.group}
           onChange={handleChange}
-          required
         >
-          <option value="">Chọn nhóm quyền</option>
-          {groupOptions.map((g) => (
-            <option key={g} value={g}>
-              {g}
+          <option value="">Chọn chức năng</option>
+          {groupOptions.map((group) => (
+            <option key={group} value={group}>
+              {group}
             </option>
           ))}
         </select>

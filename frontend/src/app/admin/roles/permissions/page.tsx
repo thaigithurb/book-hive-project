@@ -8,15 +8,22 @@ import DOMPurify from "dompurify";
 import { isEqual, sortBy } from "lodash";
 import { toast, ToastContainer } from "react-toastify";
 import { AnimatePresence, motion } from "framer-motion";
+import NewAddButton from "@/app/components/NewAddButton/NewAddButton";
+import ConfirmDeleteModal from "@/app/components/ConfirmDeleteModal/ConfirmDeleteModal";
+import { useRouter } from "next/navigation";
 
 const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;
 
 export default function Permission() {
+  const router = useRouter();
   const [roles, setRoles] = useState<Role[]>([]);
   const [originalRoles, setOriginalRoles] = useState<Role[]>([]);
   const [permissionGroups, setPermissionGroups] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [hidden, setHidden] = useState(true);
+  const [selectedPerm, setSelectedPerm] = useState<any>(null);
+
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -33,11 +40,15 @@ export default function Permission() {
       .finally(() => setLoading(false));
   }, []);
 
-  useEffect(() => {
+  const fetchPermissions = () => {
     axios
       .get(`http://localhost:3001/api/v1/${ADMIN_PREFIX}/roles/permissions`)
       .then((res) => setPermissionGroups(res.data.permissionGroups || []))
       .catch(() => setPermissionGroups([]));
+  };
+
+  useEffect(() => {
+    fetchPermissions();
   }, []);
 
   const handleChange = (roleIndex: number, permKey: any) => {
@@ -89,6 +100,27 @@ export default function Permission() {
     }
   };
 
+  const handleDeletePermission = (perm: any) => {
+    setSelectedPerm(perm);
+    setDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!selectedPerm) return;
+    try {
+      await axios.patch(
+        `http://localhost:3001/api/v1/${ADMIN_PREFIX}/roles/permissions/delete/${selectedPerm._id}`
+      );
+      toast.success("Xóa quyền thành công!");
+      fetchPermissions();
+    } catch {
+      toast.error("Xóa quyền thất bại!");
+    } finally {
+      setDeleteModalOpen(false);
+      setSelectedPerm(null);
+    }
+  };
+
   return (
     <>
       {loading ? (
@@ -112,28 +144,9 @@ export default function Permission() {
           <h1 className="text-[32px] font-bold m-0 mb-2 text-primary">
             🛡️ Phân quyền
           </h1>
-          <motion.div
-            className="mb-5 text-right"
-            initial={false}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
-            <AnimatePresence>
-              {!hidden && (
-                <motion.button
-                  key="save-btn"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                  transition={{ duration: 0.3 }}
-                  className="py-3 px-6 bg-secondary1 transition-colors duration-200 text-white rounded-lg text-[16px] font-semibold cursor-pointer hover:bg-blue-600 p-[10px]"
-                  onClick={handleSave}
-                >
-                  Lưu thay đổi
-                </motion.button>
-              )}
-            </AnimatePresence>
-          </motion.div>
+          <div className="text-right mb-4">
+            <NewAddButton label="Thêm mới" source="roles/permissions" />
+          </div>
           <motion.div
             key={hidden ? "table-hidden" : "table-visible"}
             initial={{ y: 30 }}
@@ -194,8 +207,24 @@ export default function Permission() {
                     </tr>
                     {(perms as any[]).map((perm: any) => (
                       <tr key={perm.key}>
-                        <td className="py-3 px-4 text-[14px] text-gray-800 border-b border-gray-100">
+                        <td className="py-3 px-4 flex items-center text-[14px] text-gray-800 border-b border-gray-100">
                           {perm.label}
+                          <button
+                            className="ml-2 text-blue-500 hover:underline cursor-pointer text-xs"
+                            onClick={() =>
+                              router.push(
+                                `/${ADMIN_PREFIX}/roles/permissions/edit/${perm.slug}`
+                              )
+                            }
+                          >
+                            Sửa
+                          </button>
+                          <button
+                            className="ml-2 text-red-500 hover:underline cursor-pointer text-xs"
+                            onClick={() => handleDeletePermission(perm)}
+                          >
+                            Xóa
+                          </button>
                         </td>
                         {roles.map((role, index) => (
                           <td key={role.title} className="text-center">
@@ -214,6 +243,28 @@ export default function Permission() {
               </tbody>
             </table>
           </motion.div>
+          <motion.div
+            className="mb-5 text-right"
+            initial={false}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            <AnimatePresence>
+              {!hidden && (
+                <motion.button
+                  key="save-btn"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  transition={{ duration: 0.3 }}
+                  className="py-3 px-6 mt-[20px] bg-secondary1 transition-colors duration-200 text-white rounded-lg text-[16px] font-semibold cursor-pointer hover:bg-blue-600 p-[10px]"
+                  onClick={handleSave}
+                >
+                  Lưu thay đổi
+                </motion.button>
+              )}
+            </AnimatePresence>
+          </motion.div>
           <ToastContainer
             autoClose={1500}
             hideProgressBar={true}
@@ -221,6 +272,16 @@ export default function Permission() {
           />
         </motion.div>
       )}
+      <ConfirmDeleteModal
+        open={deleteModalOpen}
+        onCancel={() => setDeleteModalOpen(false)}
+        onConfirm={handleConfirmDelete}
+        message={
+          selectedPerm
+            ? `Bạn có chắc muốn xóa quyền "${selectedPerm.label}"?`
+            : ""
+        }
+      />
     </>
   );
 }

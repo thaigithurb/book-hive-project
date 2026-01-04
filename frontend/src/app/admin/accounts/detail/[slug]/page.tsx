@@ -27,13 +27,18 @@ export default function AccountDetail() {
         setAccount(res.data.account);
 
         if (res.data.account.role_id) {
-          const roleRes = await axios.get(
-            `http://localhost:3001/api/v1/${ADMIN_PREFIX}/roles/${res.data.account.role_id}`
-          );
-          setRole(roleRes.data.role);
+          try {
+            const roleRes = await axios.get(
+              `http://localhost:3001/api/v1/${ADMIN_PREFIX}/roles/${res.data.account.role_id}`
+            );
+            setRole(roleRes.data.role);
+          } catch {
+            setRole(null);
+          }
         }
       } catch (err) {
         toast.error("Không tìm thấy tài khoản!");
+        router.back();
       } finally {
         setLoading(false);
       }
@@ -48,6 +53,8 @@ export default function AccountDetail() {
       </div>
     );
   }
+
+  if (!account) return null;
 
   return (
     <motion.div

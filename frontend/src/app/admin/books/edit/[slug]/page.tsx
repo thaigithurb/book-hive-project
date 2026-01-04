@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { BackButton } from "@/app/components/BackButton/BackButton";
 import BookForm from "@/app/components/BookForm/BookForm";
 import { motion, AnimatePresence } from "framer-motion"; 
@@ -13,6 +13,7 @@ const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;
 export default function EditBook() {
   const params = useParams();
   const slug = params.slug;
+  const router = useRouter();
 
   const [form, setForm] = useState({
     title: "",
@@ -94,6 +95,7 @@ export default function EditBook() {
         setPreview(book.image || null);
       } catch (err) {
         toast.error("Không tìm thấy sách!");
+        router.back();
       } finally {
         setIsPageLoading(false); 
       }

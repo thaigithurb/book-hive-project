@@ -10,12 +10,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import AccountForm from "@/app/components/AccountForm/AccountForm";
 import { Role } from "@/app/interfaces/role.interface";
 import { Account } from "@/app/interfaces/account.interface";
+import { useRouter } from "next/navigation";
 
 const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;
 
 export default function EditBook() {
   const params = useParams();
   const slug = params.slug;
+  const router = useRouter();
 
   const [form, setForm] = useState({
     fullName: "",
@@ -84,7 +86,8 @@ export default function EditBook() {
         });
         setPreview(account.avatar || null);
       } catch (err) {
-        toast.error("Không tìm thấy sách!");
+        toast.error("Không tìm thấy tài khoản!");
+        router.back();
       } finally {
         setIsPageLoading(false);
       }

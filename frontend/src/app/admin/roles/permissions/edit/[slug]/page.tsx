@@ -1,23 +1,29 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import { BackButton } from "@/app/components/BackButton/BackButton";
+import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import PermissionForm from "@/app/components/PermissionForm/PermissionForm";
 
 const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;
 
-export default function CreatePermission() {
+export default function EditPermission() {
   const [form, setForm] = useState({
     key: "",
     label: "",
     group: "",
+    slug: "",
   });
   const [loading, setLoading] = useState(false);
-  const [allPermissions, setAllPermissions] = useState<Permission[]>([]);
+  const [allPermissions, setAllPermissions] = useState<any>({});
   let groupNames: string[] = [];
+
+  const params = useParams();
+  const router = useRouter();
+  const { slug } = params as { slug: string };
 
   useEffect(() => {
     axios
@@ -31,8 +37,30 @@ export default function CreatePermission() {
     groupNames = Object.keys(allPermissions);
   }
 
+  useEffect(() => {
+    if (!slug) return;
+    axios
+      .get(
+        `http://localhost:3001/api/v1/${ADMIN_PREFIX}/roles/permissions/detail/${slug}`
+      )
+      .then((res) => {
+        const perm = res.data.perm;
+        setForm({
+          key: perm.key,
+          label: perm.label,
+          group: perm.group,
+          slug: perm.slug,
+        });
+      })
+      .catch((err) => {
+        console.log(err);
+        toast.error("Không tìm thấy quyền!");
+        router.back();
+      });
+  }, [slug, router]);
+
   const handleChange = (e: any) => {
-    const { name, value, type } = e.target;
+    const { name, value } = e.target;
     setForm((prev) => ({
       ...prev,
       [name]: value,
@@ -47,16 +75,17 @@ export default function CreatePermission() {
       key: form.key,
       label: form.label,
       group: form.group,
+      slug: form.slug,
     };
 
     toast
       .promise(
-        axios.post(
-          `http://localhost:3001/api/v1/${ADMIN_PREFIX}/roles/permissions/create`,
+        axios.patch(
+          `http://localhost:3001/api/v1/${ADMIN_PREFIX}/roles/permissions/edit/${slug}`,
           data
         ),
         {
-          pending: "Đang tạo quyền...",
+          pending: "Đang cập nhật quyền...",
           success: {
             render({ data }) {
               return data?.data?.message;
@@ -67,18 +96,11 @@ export default function CreatePermission() {
               if (axios.isAxiosError(data)) {
                 return data.response?.data?.message;
               }
-              return "Tạo quyền thất bại";
+              return "Cập nhật quyền thất bại";
             },
           },
         }
       )
-      .then(() => {
-        setForm({
-          key: "",
-          label: "",
-          group: "",
-        });
-      })
       .finally(() => setLoading(false));
   };
 
@@ -96,7 +118,7 @@ export default function CreatePermission() {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="text-2xl font-bold mb-6 text-primary"
         >
-          Tạo mới quyền
+          Chỉnh sửa quyền
         </motion.h1>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -108,7 +130,7 @@ export default function CreatePermission() {
             loading={loading}
             handleSubmit={handleSubmit}
             handleChange={handleChange}
-            buttonLabel="Tạo mới"
+            buttonLabel="Lưu thay đổi"
             groupOptions={groupNames}
           />
         </motion.div>

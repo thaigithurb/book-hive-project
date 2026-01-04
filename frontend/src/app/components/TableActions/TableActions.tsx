@@ -8,6 +8,8 @@ interface TableActionsProps {
   onDelete: (id: string) => void;
 }
 
+const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;
+
 export default function TableActions({
   actions,
   source,
@@ -25,7 +27,7 @@ export default function TableActions({
             key={index}
             className={action.class}
             onClick={() => {
-              router.push(`/admin/${source}/${action.title}/${slug}`);
+              router.push(`/${ADMIN_PREFIX}/${source}/${action.title}/${slug}`);
             }}
           >
             {action.label}

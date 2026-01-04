@@ -23,7 +23,7 @@ export default function BookDetail() {
         );
         setBook(res.data.book);
       } catch (err) {
-        setBook(null);
+        router.back();
       } finally {
         setLoading(false);
       }

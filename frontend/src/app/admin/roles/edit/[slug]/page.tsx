@@ -5,13 +5,14 @@ import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import { BackButton } from "@/app/components/BackButton/BackButton";
 import { AnimatePresence, motion } from "framer-motion";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import RoleForm from "@/app/components/RoleForm/RoleForm";
 
 const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;
 
 export default function EditRole() {
   const params = useParams();
+  const router = useRouter();
   const slug = params.slug;
 
   const [form, setForm] = useState({
@@ -33,7 +34,7 @@ export default function EditRole() {
     const fetchRole = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:3001/api/v1/${ADMIN_PREFIX}/roles/${params.slug}`
+          `http://localhost:3001/api/v1/${ADMIN_PREFIX}/roles/detail/${slug}`
         );
         const role = res.data.role;
         setForm({
@@ -41,13 +42,14 @@ export default function EditRole() {
           description: role.description,
         });
       } catch (err) {
-        toast.error("Không tìm thấy thể loại!");
+        toast.error("Không tìm thấy vai trò!");
+        router.back();
       } finally {
         setIsPageLoading(false);
       }
     };
     fetchRole();
-  }, [params.slug]);
+  }, [slug]);
 
   const handleSubmit = (e: any) => {
     e.preventDefault();
