@@ -1,4 +1,5 @@
-import slugify from "slugify";
+const slugify = require("slugify");
+const bcrypt = require("bcryptjs");
 
 const Account = require("../../models/account.model");
 
@@ -139,7 +140,7 @@ module.exports.changeMulti = async (req, res) => {
 // [POST] /api/v1/admin/accounts/create
 module.exports.create = async (req, res) => {
   try {
-    let { fullName, ...newAccData } = req.body;
+    let { fullName, password, ...newAccData } = req.body;
 
     const slug = slugify(fullName, { lower: true, strict: true, locale: "vi" });
 
@@ -149,12 +150,16 @@ module.exports.create = async (req, res) => {
       avatar = req.file.path;
     }
 
+    // Mã hóa mật khẩu trước khi lưu
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     // tạo acc và lưu acc mới
     const newAcc = new Account({
       ...newAccData,
       avatar,
       slug,
       fullName,
+      password: hashedPassword,
     });
     await newAcc.save();
 
@@ -252,3 +257,5 @@ module.exports.delete = async (req, res) => {
     });
   }
 };
+
+export {};

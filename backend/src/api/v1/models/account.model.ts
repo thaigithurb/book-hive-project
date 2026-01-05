@@ -1,14 +1,16 @@
 const mongoose = require("mongoose");
-const generate = require("../../../helpers/generate");
 
 const accountSchema = new mongoose.Schema(
   {
     fullName: String,
     email: String,
     password: String,
-    token: {
+    refreshToken: {
       type: String,
-      default: generate.generateRandomString(20),
+      default: null,
+    },
+    refreshTokenExpiresAt: {
+      type: Date,
     },
     phone: String,
     avatar: String,

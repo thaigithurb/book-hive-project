@@ -20,7 +20,8 @@ var __rest = (this && this.__rest) || function (s, e) {
     return t;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const slugify_1 = require("slugify");
+const slugify = require("slugify");
+const bcrypt = require("bcryptjs");
 const Account = require("../../models/account.model");
 module.exports.index = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -129,15 +130,16 @@ module.exports.changeMulti = (req, res) => __awaiter(void 0, void 0, void 0, fun
 });
 module.exports.create = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        let _a = req.body, { fullName } = _a, newAccData = __rest(_a, ["fullName"]);
-        const slug = (0, slugify_1.default)(fullName, { lower: true, strict: true, locale: "vi" });
+        let _a = req.body, { fullName, password } = _a, newAccData = __rest(_a, ["fullName", "password"]);
+        const slug = slugify(fullName, { lower: true, strict: true, locale: "vi" });
         let avatar = "";
         if (req.file) {
             avatar = req.file.path;
         }
+        const hashedPassword = yield bcrypt.hash(password, 10);
         const newAcc = new Account(Object.assign(Object.assign({}, newAccData), { avatar,
             slug,
-            fullName }));
+            fullName, password: hashedPassword }));
         yield newAcc.save();
         return res.status(200).json({
             message: "Tạo mới tài khoản thành công!",
@@ -183,7 +185,7 @@ module.exports.edit = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             updateData.image = req.file.path;
         }
         if (req.body.title) {
-            updateData.slug = (0, slugify_1.default)(req.body.title, {
+            updateData.slug = slugify(req.body.title, {
                 lower: true,
                 strict: true,
                 locale: "vi",
