@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 
+const accessToken = localStorage.getItem("accessToken");
+
 export function useBulkSelect(
   items: any[],
   fetchData: () => void,
@@ -57,7 +59,13 @@ export function useBulkSelect(
     const bulkPromise = axios
       .patch(
         `http://localhost:3001/api/v1/admin/${resource}/change-multi`,
-        payload
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+          withCredentials: true,
+        }
       )
       .then(async () => {
         const allItems = await fetchAllItems();
@@ -83,6 +91,10 @@ export function useBulkSelect(
       .patch(`http://localhost:3001/api/v1/admin/${resource}/change-multi`, {
         ids: pendingDeleteIds,
         type: "delete_all",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+        withCredentials: true,
       })
       .then(async () => {
         const allItems = await fetchAllItems();

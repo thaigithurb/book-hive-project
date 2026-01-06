@@ -35,14 +35,6 @@ module.exports.login = async (req, res) => {
       expires: user.refreshTokenExpiresAt,
     });
 
-    // check hết hạn
-    if (user.refreshTokenExpiresAt < new Date()) {
-      user.refreshToken = null;
-      user.refreshTokenExpiresAt = null;
-      await user.save();
-      return res.status(400).json({ message: "refreshToken hết hạn" });
-    }
-
     // tạo mới accessToken
     const accessToken = jwt.sign(
       { id: user._id, email: user.email, role_id: user.role_id },
@@ -57,6 +49,94 @@ module.exports.login = async (req, res) => {
   } catch (error) {
     return res.status(400).json({
       message: "Đăng nhập thất bại",
+    });
+  }
+};
+
+// [POST] /api/v1/admin/auth/refresh
+module.exports.refresh = async (req, res) => {
+  try {
+    const refreshToken = req.cookies.refreshToken;
+    if (!refreshToken) {
+      return res.status(401).json({ message: "Không có refreshToken" });
+    }
+
+    const user = await Account.findOne({ refreshToken });
+    if (
+      !user ||
+      !user.refreshTokenExpiresAt ||
+      user.refreshTokenExpiresAt < new Date()
+    ) {
+      return res
+        .status(401)
+        .json({ message: "RefreshToken không hợp lệ hoặc đã hết hạn" });
+    }
+
+    // Tạo accessToken mới
+    const accessToken = jwt.sign(
+      { id: user._id, email: user.email, role_id: user.role_id },
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRES_IN }
+    );
+
+    return res.status(200).json({
+      message: "Làm mới accessToken thành công!",
+      accessToken,
+    });
+  } catch (error) {
+    return res.status(400).json({
+      message: "Làm mới accessToken thất bại",
+    });
+  }
+};
+
+// [POST] /api/v1/admin/auth/verify
+module.exports.verify = async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({ message: "Không có accessToken" });
+    }
+
+    const token = authHeader.split(" ")[1];
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    if (!decoded) {
+      return res.status(400).json({ message: "Token không hợp lệ!" });
+    }
+
+    req.user = decoded;
+    return res.status(200).json({ message: "Token hợp lệ!" });
+  } catch (error) {
+    return res.status(400).json({
+      message: "Xác thực không thành công",
+    });
+  }
+};
+
+// [POST] /api/v1/admin/auth/logout
+module.exports.logout = async (req, res) => {
+  try {
+    const refreshToken = req.cookies.refreshToken;
+
+    await Account.findOneAndUpdate(
+      {
+        refreshToken: refreshToken,
+      },
+      { refreshToken: null, refreshTokenExpiresAt: null }
+    );
+
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    });
+
+    return res.status(200).json({ message: "Đăng xuất thành công!" });
+  } catch (error) {
+    return res.status(400).json({
+      message: "Đăng xuất thất bại",
     });
   }
 };

@@ -17,6 +17,8 @@ export default function CreatePermission() {
   });
   const [loading, setLoading] = useState(false);
   const [allPermissions, setAllPermissions] = useState<Permission[]>([]);
+  const accessToken = localStorage.getItem("accessToken");
+
   let groupNames: string[] = [];
 
   useEffect(() => {
@@ -53,7 +55,13 @@ export default function CreatePermission() {
       .promise(
         axios.post(
           `http://localhost:3001/api/v1/${ADMIN_PREFIX}/roles/permissions/create`,
-          data
+          data,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+            withCredentials: true,
+          }
         ),
         {
           pending: "Đang tạo quyền...",

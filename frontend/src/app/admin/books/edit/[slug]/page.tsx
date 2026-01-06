@@ -6,7 +6,7 @@ import { ToastContainer, toast } from "react-toastify";
 import { useParams, useRouter } from "next/navigation";
 import { BackButton } from "@/app/components/BackButton/BackButton";
 import BookForm from "@/app/components/BookForm/BookForm";
-import { motion, AnimatePresence } from "framer-motion"; 
+import { motion, AnimatePresence } from "framer-motion";
 
 const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;
 
@@ -27,11 +27,12 @@ export default function EditBook() {
     image: "",
   });
   const [loading, setLoading] = useState(false);
-  const [isPageLoading, setIsPageLoading] = useState(true); 
+  const [isPageLoading, setIsPageLoading] = useState(true);
   const [preview, setPreview] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [categories, setCategories] = useState<any[]>([]);
   const fileInputRef = useRef<any>(null);
+  const accessToken = localStorage.getItem("accessToken");
 
   const handleMoneyChange = (e: any) => {
     let value = e.target.value.replace(/\D/g, "");
@@ -44,7 +45,12 @@ export default function EditBook() {
 
   useEffect(() => {
     axios
-      .get(`http://localhost:3001/api/v1/${ADMIN_PREFIX}/categories`)
+      .get(`http://localhost:3001/api/v1/${ADMIN_PREFIX}/categories`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+        withCredentials: true,
+      })
       .then((res) => setCategories(res.data.categories || []))
       .catch(() => setCategories([]));
   }, []);
@@ -78,7 +84,13 @@ export default function EditBook() {
     const fetchBook = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:3001/api/v1/${ADMIN_PREFIX}/books/${params.slug}`
+          `http://localhost:3001/api/v1/${ADMIN_PREFIX}/books/${params.slug}`,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+            withCredentials: true,
+          }
         );
         const book = res.data.book;
         setForm({
@@ -97,7 +109,7 @@ export default function EditBook() {
         toast.error("Không tìm thấy sách!");
         router.back();
       } finally {
-        setIsPageLoading(false); 
+        setIsPageLoading(false);
       }
     };
     fetchBook();
@@ -116,7 +128,13 @@ export default function EditBook() {
       .promise(
         axios.patch(
           `http://localhost:3001/api/v1/${ADMIN_PREFIX}/books/edit/${slug}`,
-          formData
+          formData,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+            withCredentials: true,
+          }
         ),
         {
           pending: "Đang cập nhật...",
@@ -161,7 +179,7 @@ export default function EditBook() {
           className="max-w-2xl mx-auto mt-8 bg-white p-8 rounded-xl shadow relative"
         >
           <BackButton className="absolute -top-10 -left-80 flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 transition cursor-pointer" />
-          
+
           <motion.h1
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}

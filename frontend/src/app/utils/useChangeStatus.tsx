@@ -1,7 +1,12 @@
 import axios from "axios";
 import { toast } from "react-toastify";
 
-export default function useChangeStatus(fetchData: () => void, resource: String) {
+const accessToken = localStorage.getItem("accessToken");
+
+export default function useChangeStatus(
+  fetchData: () => void,
+  resource: String
+) {
   return async (id: string, currentStatus: string) => {
     let newStatus;
     if (currentStatus === "active") {
@@ -13,7 +18,13 @@ export default function useChangeStatus(fetchData: () => void, resource: String)
     }
     try {
       await axios.patch(
-        `http://localhost:3001/api/v1/admin/${resource}/change-status/${newStatus}/${id}`
+        `http://localhost:3001/api/v1/admin/${resource}/change-status/${newStatus}/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+          withCredentials: true,
+        }
       );
       fetchData();
       toast.success("Cập nhật trạng thái thành công!");

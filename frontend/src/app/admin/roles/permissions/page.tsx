@@ -9,7 +9,7 @@ import { isEqual, sortBy } from "lodash";
 import { toast, ToastContainer } from "react-toastify";
 import { AnimatePresence, motion } from "framer-motion";
 import NewAddButton from "@/app/components/NewAddButton/NewAddButton";
-import ConfirmDeleteModal from "@/app/components/ConfirmDeleteModal/ConfirmDeleteModal";
+import ConfirmModal from "@/app/components/ConfirmModal/ConfirmModal";
 import { useRouter } from "next/navigation";
 
 const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;
@@ -24,11 +24,17 @@ export default function Permission() {
   const [selectedPerm, setSelectedPerm] = useState<any>(null);
 
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const accessToken = localStorage.getItem("accessToken");
 
   useEffect(() => {
     setLoading(true);
     axios
-      .get(`http://localhost:3001/api/v1/${ADMIN_PREFIX}/roles`)
+      .get(`http://localhost:3001/api/v1/${ADMIN_PREFIX}/roles`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+        withCredentials: true,
+      })
       .then((res) => {
         setRoles(res.data.roles || []);
         setOriginalRoles(res.data.roles || []);
@@ -42,7 +48,12 @@ export default function Permission() {
 
   const fetchPermissions = () => {
     axios
-      .get(`http://localhost:3001/api/v1/${ADMIN_PREFIX}/roles/permissions`)
+      .get(`http://localhost:3001/api/v1/${ADMIN_PREFIX}/roles/permissions`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+        withCredentials: true,
+      })
       .then((res) => setPermissionGroups(res.data.permissionGroups || []))
       .catch(() => setPermissionGroups([]));
   };
@@ -85,7 +96,13 @@ export default function Permission() {
     try {
       await axios.patch(
         `http://localhost:3001/api/v1/${ADMIN_PREFIX}/roles/permissions/edit`,
-        { roles }
+        {
+          roles,
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+          withCredentials: true,
+        }
       );
       setOriginalRoles(
         roles.map((role) => ({
@@ -109,7 +126,13 @@ export default function Permission() {
     if (!selectedPerm) return;
     try {
       await axios.patch(
-        `http://localhost:3001/api/v1/${ADMIN_PREFIX}/roles/permissions/delete/${selectedPerm._id}`
+        `http://localhost:3001/api/v1/${ADMIN_PREFIX}/roles/permissions/delete/${selectedPerm._id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+          withCredentials: true,
+        }
       );
       toast.success("Xóa quyền thành công!");
       fetchPermissions();
@@ -272,7 +295,7 @@ export default function Permission() {
           />
         </motion.div>
       )}
-      <ConfirmDeleteModal
+      <ConfirmModal
         open={deleteModalOpen}
         onCancel={() => setDeleteModalOpen(false)}
         onConfirm={handleConfirmDelete}

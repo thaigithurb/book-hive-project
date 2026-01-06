@@ -20,6 +20,7 @@ export default function EditPermission() {
   const [loading, setLoading] = useState(false);
   const [allPermissions, setAllPermissions] = useState<any>({});
   let groupNames: string[] = [];
+  const accessToken = localStorage.getItem("accessToken");
 
   const params = useParams();
   const router = useRouter();
@@ -27,7 +28,12 @@ export default function EditPermission() {
 
   useEffect(() => {
     axios
-      .get(`http://localhost:3001/api/v1/${ADMIN_PREFIX}/roles/permissions`)
+      .get(`http://localhost:3001/api/v1/${ADMIN_PREFIX}/roles/permissions`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+        withCredentials: true,
+      })
       .then((res) => {
         setAllPermissions(res.data.permissionGroups);
       });
@@ -41,7 +47,13 @@ export default function EditPermission() {
     if (!slug) return;
     axios
       .get(
-        `http://localhost:3001/api/v1/${ADMIN_PREFIX}/roles/permissions/detail/${slug}`
+        `http://localhost:3001/api/v1/${ADMIN_PREFIX}/roles/permissions/detail/${slug}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+          withCredentials: true,
+        }
       )
       .then((res) => {
         const perm = res.data.perm;
@@ -82,7 +94,13 @@ export default function EditPermission() {
       .promise(
         axios.patch(
           `http://localhost:3001/api/v1/${ADMIN_PREFIX}/roles/permissions/edit/${slug}`,
-          data
+          data,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+            withCredentials: true,
+          }
         ),
         {
           pending: "Đang cập nhật quyền...",

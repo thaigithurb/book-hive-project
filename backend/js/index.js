@@ -1,6 +1,7 @@
 const express = require("express");
 require("dotenv").config();
 const cors = require("cors");
+const cookieParser = require("cookie-parser");
 const database = require("./config/database");
 const clientRoutesApiVer1 = require("./api/v1/client/routes/index.route");
 const adminRoutesApiVer1 = require("./api/v1/admin/routes/index.route");
@@ -12,6 +13,7 @@ app.use(cors({
     origin: "http://localhost:3000",
     credentials: true,
 }));
+app.use(cookieParser());
 app.use(bodyParser.json());
 clientRoutesApiVer1(app);
 adminRoutesApiVer1(app);

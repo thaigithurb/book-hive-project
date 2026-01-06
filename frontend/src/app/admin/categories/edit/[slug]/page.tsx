@@ -6,7 +6,7 @@ import { ToastContainer, toast } from "react-toastify";
 import { useParams, useRouter } from "next/navigation";
 import { BackButton } from "@/app/components/BackButton/BackButton";
 import BookForm from "@/app/components/BookForm/BookForm";
-import { motion, AnimatePresence } from "framer-motion"; 
+import { motion, AnimatePresence } from "framer-motion";
 import CategoryForm from "@/app/components/CategoryForm/CategoryForm";
 
 const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;
@@ -23,7 +23,8 @@ export default function EditCategory() {
     status: "active",
   });
   const [loading, setLoading] = useState(false);
-  const [isPageLoading, setIsPageLoading] = useState(true); 
+  const [isPageLoading, setIsPageLoading] = useState(true);
+  const accessToken = localStorage.getItem("accessToken");
 
   const handleChange = (e: any) => {
     const { name, value, type } = e.target;
@@ -37,7 +38,13 @@ export default function EditCategory() {
     const fetchCategory = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:3001/api/v1/${ADMIN_PREFIX}/categories/${params.slug}`
+          `http://localhost:3001/api/v1/${ADMIN_PREFIX}/categories/${params.slug}`,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+            withCredentials: true,
+          }
         );
         const category = res.data.category;
         setForm({
@@ -50,7 +57,7 @@ export default function EditCategory() {
         toast.error("Không tìm thấy thể loại!");
         router.back();
       } finally {
-        setIsPageLoading(false); 
+        setIsPageLoading(false);
       }
     };
     fetchCategory();
@@ -71,7 +78,13 @@ export default function EditCategory() {
       .promise(
         axios.patch(
           `http://localhost:3001/api/v1/${ADMIN_PREFIX}/categories/edit/${slug}`,
-          data
+          data,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+            withCredentials: true,
+          }
         ),
         {
           pending: "Đang cập nhật...",
@@ -116,7 +129,7 @@ export default function EditCategory() {
           className="max-w-2xl mx-auto mt-8 bg-white p-8 rounded-xl shadow relative"
         >
           <BackButton className="absolute -top-10 -left-80 flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 transition cursor-pointer" />
-          
+
           <motion.h1
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}

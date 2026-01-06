@@ -21,6 +21,7 @@ export default function EditRole() {
   });
   const [loading, setLoading] = useState(false);
   const [isPageLoading, setIsPageLoading] = useState(true);
+  const accessToken = localStorage.getItem("accessToken");
 
   const handleChange = (e: any) => {
     const { name, value, type } = e.target;
@@ -34,7 +35,13 @@ export default function EditRole() {
     const fetchRole = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:3001/api/v1/${ADMIN_PREFIX}/roles/detail/${slug}`
+          `http://localhost:3001/api/v1/${ADMIN_PREFIX}/roles/detail/${slug}`,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+            withCredentials: true,
+          }
         );
         const role = res.data.role;
         setForm({
@@ -64,7 +71,13 @@ export default function EditRole() {
       .promise(
         axios.patch(
           `http://localhost:3001/api/v1/${ADMIN_PREFIX}/roles/edit/${slug}`,
-          data
+          data,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+            withCredentials: true,
+          }
         ),
         {
           pending: "Đang cập nhật...",

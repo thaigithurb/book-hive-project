@@ -13,6 +13,7 @@ export default function AccountDetail() {
   const params = useParams();
   const router = useRouter();
   const slug = params.slug;
+  const accessToken = localStorage.getItem("accessToken");
 
   const [account, setAccount] = useState<any>(null);
   const [role, setRole] = useState<any>(null);
@@ -22,14 +23,26 @@ export default function AccountDetail() {
     const fetchAccount = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:3001/api/v1/${ADMIN_PREFIX}/accounts/detail/${slug}`
+          `http://localhost:3001/api/v1/${ADMIN_PREFIX}/accounts/detail/${slug}`,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+            withCredentials: true,
+          }
         );
         setAccount(res.data.account);
 
         if (res.data.account.role_id) {
           try {
             const roleRes = await axios.get(
-              `http://localhost:3001/api/v1/${ADMIN_PREFIX}/roles/${res.data.account.role_id}`
+              `http://localhost:3001/api/v1/${ADMIN_PREFIX}/roles/${res.data.account.role_id}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${accessToken}`,
+                },
+                withCredentials: true,
+              }
             );
             setRole(roleRes.data.role);
           } catch {

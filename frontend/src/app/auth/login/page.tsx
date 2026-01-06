@@ -17,7 +17,9 @@ export default function Login() {
   const inputClass =
     "border bg-[#ffff] border-gray-300 rounded-lg px-4 py-2 text-[15px] outline-none focus:ring-2 focus:ring-secondary1 hover:border-secondary1 focus:border-secondary1 transition duration-200 w-full";
 
-  const handleSubmit = (e: React.FormEvent) => {
+
+
+  const handleSubmit = (e: any) => {
     e.preventDefault();
     setLoading(true);
 
@@ -38,6 +40,7 @@ export default function Login() {
               localStorage.setItem("accessToken", data?.data?.accessToken);
               setEmail("");
               setPassword("");
+              router.push("/admin/dashboard");
               return data?.data?.message;
             },
           },
@@ -53,7 +56,6 @@ export default function Login() {
       )
       .finally(() => {
         setLoading(false);
-        router.push("/home");
       });
   };
 

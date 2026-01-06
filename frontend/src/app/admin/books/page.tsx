@@ -11,10 +11,11 @@ import Pagination from "@/app/components/Pagination/Pagination";
 import ChangeMulti from "@/app/components/ChangeMulti/ChangeMulti";
 import useChangeStatus from "@/app/utils/useChangeStatus";
 import { useBulkSelect } from "@/app/utils/useBulkSelect";
-import ConfirmDeleteModal from "@/app/components/ConfirmDeleteModal/ConfirmDeleteModal";
+import ConfirmModal from "@/app/components/ConfirmModal/ConfirmModal";
 import { toast, ToastContainer } from "react-toastify";
 import { AnimatePresence, motion } from "framer-motion";
 import NewAddButton from "@/app/components/NewAddButton/NewAddButton";
+import { useRouter } from "next/navigation";
 
 const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;
 
@@ -26,11 +27,11 @@ export default function Books() {
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [bulkDeleteIds, setBulkDeleteIds] = useState<string[]>([]);
   const [editedBooks, setEditedBooks] = useState<Book[]>([]);
   const [sort, setSort] = useState<{ key: string; value: 1 | -1 } | null>(null);
   const [isFirstLoad, setIsFirstLoad] = useState(true);
   const limit = 5;
+  const accessToken = localStorage.getItem("accessToken");
 
   // xử lí load data cùng với lọc và tìm kiếm
   const fetchData = useCallback(
@@ -45,12 +46,16 @@ export default function Books() {
             page,
             limit,
           },
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+          withCredentials: true,
         })
         .then((res) => {
           setBooks(res.data.books || []);
           setTotal(res.data.total || 0);
         })
-        .catch(() => setBooks([]))
+        .catch((errors) => setBooks([]))
         .finally(() => {
           setLoading(false);
           setIsFirstLoad(false);
@@ -78,6 +83,10 @@ export default function Books() {
       `http://localhost:3001/api/v1/${ADMIN_PREFIX}/books`,
       {
         params: { page: 1, limit: 10000 },
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+        withCredentials: true,
       }
     );
     return res.data.books || [];
@@ -113,13 +122,18 @@ export default function Books() {
     if (!deleteId) return;
     try {
       await axios.patch(
-        `http://localhost:3001/api/v1/${ADMIN_PREFIX}/books/delete/${deleteId}`
+        `http://localhost:3001/api/v1/${ADMIN_PREFIX}/books/delete/${deleteId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+          withCredentials: true,
+        }
       );
       setDeleteId(null);
       fetchData();
       toast.success("Xóa sách thành công!");
     } catch (error) {
-      console.log(error);
       toast.error("Xóa sách thất bại");
     }
   };
@@ -150,6 +164,7 @@ export default function Books() {
         setSort(null);
     }
   };
+
   return (
     <>
       <motion.div
@@ -262,7 +277,7 @@ export default function Books() {
           />
         </motion.div>
       )}
-      <ConfirmDeleteModal
+      <ConfirmModal
         open={!!deleteId || pendingDeleteIds.length > 0}
         onCancel={() => {
           setDeleteId(null);
@@ -282,6 +297,7 @@ export default function Books() {
             ? "Bạn có chắc chắn muốn xóa mục này?"
             : ""
         }
+        label="Xóa"
       />
       <ToastContainer
         autoClose={1500}

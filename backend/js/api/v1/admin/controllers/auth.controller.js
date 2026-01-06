@@ -34,12 +34,6 @@ module.exports.login = (req, res) => __awaiter(void 0, void 0, void 0, function*
             sameSite: "strict",
             expires: user.refreshTokenExpiresAt,
         });
-        if (user.refreshTokenExpiresAt < new Date()) {
-            user.refreshToken = null;
-            user.refreshTokenExpiresAt = null;
-            yield user.save();
-            return res.status(400).json({ message: "refreshToken hết hạn" });
-        }
         const accessToken = jwt.sign({ id: user._id, email: user.email, role_id: user.role_id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });
         return res.status(200).json({
             message: "Đăng nhập thành công!",
@@ -49,6 +43,71 @@ module.exports.login = (req, res) => __awaiter(void 0, void 0, void 0, function*
     catch (error) {
         return res.status(400).json({
             message: "Đăng nhập thất bại",
+        });
+    }
+});
+module.exports.refresh = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const refreshToken = req.cookies.refreshToken;
+        if (!refreshToken) {
+            return res.status(401).json({ message: "Không có refreshToken" });
+        }
+        const user = yield Account.findOne({ refreshToken });
+        if (!user ||
+            !user.refreshTokenExpiresAt ||
+            user.refreshTokenExpiresAt < new Date()) {
+            return res
+                .status(401)
+                .json({ message: "RefreshToken không hợp lệ hoặc đã hết hạn" });
+        }
+        const accessToken = jwt.sign({ id: user._id, email: user.email, role_id: user.role_id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });
+        return res.status(200).json({
+            message: "Làm mới accessToken thành công!",
+            accessToken,
+        });
+    }
+    catch (error) {
+        return res.status(400).json({
+            message: "Làm mới accessToken thất bại",
+        });
+    }
+});
+module.exports.verify = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const authHeader = req.headers.authorization;
+        if (!authHeader || !authHeader.startsWith("Bearer ")) {
+            return res.status(401).json({ message: "Không có accessToken" });
+        }
+        const token = authHeader.split(" ")[1];
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        if (!decoded) {
+            return res.status(400).json({ message: "Token không hợp lệ!" });
+        }
+        req.user = decoded;
+        return res.status(200).json({ message: "Token hợp lệ!" });
+    }
+    catch (error) {
+        return res.status(400).json({
+            message: "Xác thực không thành công",
+        });
+    }
+});
+module.exports.logout = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const refreshToken = req.cookies.refreshToken;
+        yield Account.findOneAndUpdate({
+            refreshToken: refreshToken,
+        }, { refreshToken: null, refreshTokenExpiresAt: null });
+        res.clearCookie("refreshToken", {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+        });
+        return res.status(200).json({ message: "Đăng xuất thành công!" });
+    }
+    catch (error) {
+        return res.status(400).json({
+            message: "Đăng xuất thất bại",
         });
     }
 });

@@ -23,12 +23,18 @@ export default function CreateAccount() {
   const [preview, setPreview] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [roles, setRoles] = useState<Role[]>([]);
+  const accessToken = localStorage.getItem("accessToken");
 
   const fileInputRef = useRef<any>(null);
 
   useEffect(() => {
     axios
-      .get(`http://localhost:3001/api/v1/${ADMIN_PREFIX}/roles`)
+      .get(`http://localhost:3001/api/v1/${ADMIN_PREFIX}/roles`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+        withCredentials: true,
+      })
       .then((res) => setRoles(res.data.roles || []))
       .catch(() => setRoles([]));
   }, []);
@@ -71,7 +77,13 @@ export default function CreateAccount() {
       .promise(
         axios.post(
           `http://localhost:3001/api/v1/${ADMIN_PREFIX}/accounts/create`,
-          formData
+          formData,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+            withCredentials: true,
+          }
         ),
         {
           pending: "Đang tạo tài khoản...",

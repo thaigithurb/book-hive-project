@@ -2,19 +2,21 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 
-interface ConfirmDeleteModalProps {
+interface ConfirmModalProps {
   open: boolean;
   onCancel: () => void;
   onConfirm: () => void;
   message: string;
+  label: string;
 }
 
-export default function ConfirmDeleteModal({
+export default function ConfirmModal({
   open,
   onCancel,
   onConfirm,
   message,
-}: ConfirmDeleteModalProps) {
+  label
+}: ConfirmModalProps) {
   return (
     <AnimatePresence>
       {open && (
@@ -48,7 +50,7 @@ export default function ConfirmDeleteModal({
                 className="px-5 py-2 rounded-lg bg-red-500 transition-all duration-200 text-white cursor-pointer hover:bg-red-600 font-medium shadow-md hover:shadow-lg"
                 onClick={onConfirm}
               >
-                Xóa
+                {label}
               </button>
             </div>
           </motion.div>

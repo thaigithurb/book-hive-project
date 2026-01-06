@@ -1,10 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import { BackButton } from "@/app/components/BackButton/BackButton";
-import BookForm from "@/app/components/BookForm/BookForm";
 import CategoryForm from "@/app/components/CategoryForm/CategoryForm";
 import { motion } from "framer-motion";
 
@@ -18,6 +17,7 @@ export default function Create() {
     status: "active",
   });
   const [loading, setLoading] = useState(false);
+  const accessToken = localStorage.getItem("accessToken");
 
   const handleChange = (e: any) => {
     const { name, value, type } = e.target;
@@ -42,7 +42,13 @@ export default function Create() {
       .promise(
         axios.post(
           `http://localhost:3001/api/v1/${ADMIN_PREFIX}/categories/create`,
-          data
+          data,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+            withCredentials: true,
+          }
         ),
         {
           pending: "Đang tạo thể loại...",

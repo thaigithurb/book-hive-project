@@ -24,12 +24,18 @@ export default function Create() {
   const [preview, setPreview] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [categories, setCategories] = useState<any[]>([]);
+  const accessToken = localStorage.getItem("accessToken");
 
   const fileInputRef = useRef<any>(null);
 
   useEffect(() => {
     axios
-      .get(`http://localhost:3001/api/v1/${ADMIN_PREFIX}/categories`)
+      .get(`http://localhost:3001/api/v1/${ADMIN_PREFIX}/categories`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+        withCredentials: true,
+      })
       .then((res) => setCategories(res.data.categories || []))
       .catch(() => setCategories([]));
   }, []);
@@ -81,7 +87,13 @@ export default function Create() {
       .promise(
         axios.post(
           `http://localhost:3001/api/v1/${ADMIN_PREFIX}/books/create`,
-          formData
+          formData,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+            withCredentials: true,
+          }
         ),
         {
           pending: "Đang tạo sách...",

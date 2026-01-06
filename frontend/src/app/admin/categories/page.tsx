@@ -11,7 +11,7 @@ import Pagination from "@/app/components/Pagination/Pagination";
 import ChangeMulti from "@/app/components/ChangeMulti/ChangeMulti";
 import useChangeStatus from "@/app/utils/useChangeStatus";
 import { useBulkSelect } from "@/app/utils/useBulkSelect";
-import ConfirmDeleteModal from "@/app/components/ConfirmDeleteModal/ConfirmDeleteModal";
+import ConfirmModal from "@/app/components/ConfirmModal/ConfirmModal";
 import { toast, ToastContainer } from "react-toastify";
 import { motion, AnimatePresence } from "framer-motion";
 import NewAddButton from "@/app/components/NewAddButton/NewAddButton";
@@ -30,6 +30,7 @@ export default function Categories() {
   const [sort, setSort] = useState<{ key: string; value: 1 | -1 } | null>(null);
   const [isFirstLoad, setIsFirstLoad] = useState(true);
   const limit = 5;
+  const accessToken = localStorage.getItem("accessToken");
 
   const fetchData = useCallback(
     debounce(() => {
@@ -43,6 +44,10 @@ export default function Categories() {
             page,
             limit,
           },
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+          withCredentials: true,
         })
         .then((res) => {
           setCategories(res.data.categories || []);
@@ -75,6 +80,10 @@ export default function Categories() {
       `http://localhost:3001/api/v1/${ADMIN_PREFIX}/categories`,
       {
         params: { page: 1, limit: 10000 },
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+        withCredentials: true,
       }
     );
     return res.data.categories || [];
@@ -107,13 +116,18 @@ export default function Categories() {
     if (!deleteId) return;
     try {
       await axios.patch(
-        `http://localhost:3001/api/v1/${ADMIN_PREFIX}/categories/delete/${deleteId}`
+        `http://localhost:3001/api/v1/${ADMIN_PREFIX}/categories/delete/${deleteId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+          withCredentials: true,
+        }
       );
       setDeleteId(null);
       fetchData();
       toast.success("Xóa thể loại thành công!");
     } catch (error) {
-      console.log(error);
       toast.error("Xóa thể loại thất bại");
     }
   };
@@ -253,7 +267,7 @@ export default function Categories() {
         </motion.div>
       )}
 
-      <ConfirmDeleteModal
+      <ConfirmModal
         open={!!deleteId || pendingDeleteIds.length > 0}
         onCancel={() => {
           setDeleteId(null);
@@ -273,6 +287,7 @@ export default function Categories() {
             ? "Bạn có chắc chắn muốn xóa mục này?"
             : ""
         }
+        label="Xóa"
       />
       <ToastContainer
         autoClose={1500}

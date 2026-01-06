@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams, useRouter } from "next/navigation";
 import { BackButton } from "@/app/components/BackButton/BackButton";
-import { motion, AnimatePresence } from "framer-motion"; 
+import { motion, AnimatePresence } from "framer-motion";
 import DOMPurify from "dompurify";
 
 const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;
@@ -14,12 +14,19 @@ export default function BookDetail() {
   const [book, setBook] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const accessToken = localStorage.getItem("accessToken");
 
   useEffect(() => {
     const fetchBook = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:3001/api/v1/${ADMIN_PREFIX}/books/detail/${slug}`
+          `http://localhost:3001/api/v1/${ADMIN_PREFIX}/books/detail/${slug}`,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+            withCredentials: true,
+          }
         );
         setBook(res.data.book);
       } catch (err) {
