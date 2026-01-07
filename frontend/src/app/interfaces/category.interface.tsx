@@ -1,3 +1,8 @@
+export interface UserRef {
+  _id: string;
+  fullName: string;
+}
+
 export interface Category {
   _id: string;
   title: string;
@@ -9,4 +14,7 @@ export interface Category {
   deletedAt: Date;
   slug: string;
   position: number;
+  createdBy: UserRef;
+  deletedBy: UserRef;
+  updatedBy: UserRef;
 }

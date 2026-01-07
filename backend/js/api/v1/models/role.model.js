@@ -12,6 +12,9 @@ const roleSchema = new mongoose.Schema({
         type: Boolean,
         default: false,
     },
+    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "Account" },
+    deletedBy: { type: mongoose.Schema.Types.ObjectId, ref: "Account" },
+    updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: "Account" },
     deletedAt: Date,
     slug: { type: String, required: true, unique: true },
 }, {

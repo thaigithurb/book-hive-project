@@ -24,5 +24,5 @@ export interface Book {
   _id: string; 
   createdBy: UserRef;
   deletedBy: UserRef;
-  updatedBy: UserRef
+  updatedBy: UserRef;
 }

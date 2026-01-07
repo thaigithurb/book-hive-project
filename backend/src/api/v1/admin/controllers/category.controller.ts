@@ -34,7 +34,10 @@ module.exports.index = async (req, res) => {
     const categories = await Category.find(find)
       .skip(skip)
       .limit(limit)
-      .sort(sort);
+      .sort(sort)
+      .populate("updatedBy", "fullName")
+      .populate("createdBy", "fullName")
+      .populate("deletedBy", "fullName");
 
     const total = await Category.countDocuments(find);
 
@@ -70,6 +73,7 @@ module.exports.changeStatus = async (req, res) => {
       },
       {
         status: status,
+        updatedBy: req.user.id,
       }
     );
 
@@ -96,14 +100,17 @@ module.exports.changeMulti = async (req, res) => {
 
     switch (type) {
       case "active":
-        await Category.updateMany({ _id: { $in: ids } }, { status: "active" });
+        await Category.updateMany(
+          { _id: { $in: ids } },
+          { status: "active", updatedBy: req.user.id }
+        );
         return res.status(200).json({
           message: `Cập nhật trạng thái thành công ${ids.length} thể loại!`,
         });
       case "inactive":
         await Category.updateMany(
           { _id: { $in: ids } },
-          { status: "inactive" }
+          { status: "inactive", updatedBy: req.user.id }
         );
         return res.status(200).json({
           message: `Cập nhật trạng thái thành công ${ids.length} thể loại!`,
@@ -111,7 +118,7 @@ module.exports.changeMulti = async (req, res) => {
       case "delete_all":
         await Category.updateMany(
           { _id: { $in: ids } },
-          { deleted: true, deletedAt: new Date() }
+          { deleted: true, deletedAt: new Date(), deletedBy: req.user.id }
         );
 
         // Sau khi xóa, cập nhật lại position cho các thể loại còn lại
@@ -158,7 +165,10 @@ module.exports.changeMulti = async (req, res) => {
             );
           }
 
-          await Category.updateOne({ _id: id }, { position: newPos });
+          await Category.updateOne(
+            { _id: id },
+            { position: newPos, updatedBy: req.user.id }
+          );
 
           const categories = await Category.find({ deleted: false }).sort({
             position: 1,
@@ -174,7 +184,10 @@ module.exports.changeMulti = async (req, res) => {
         for (let i = 0; i < ids.length; i++) {
           const [id, newPosStr] = ids[i].split("-");
           const newPos = parseInt(newPosStr);
-          await Category.updateOne({ _id: id }, { position: newPos });
+          await Category.updateOne(
+            { _id: id },
+            { position: newPos, updatedBy: req.user.id }
+          );
         }
 
         // Sắp xếp lại vị trí cho tất cả thể loại để tránh trùng/thiếu
@@ -215,6 +228,7 @@ module.exports.delete = async (req, res) => {
       },
       {
         deleted: true,
+        deletedBy: req.user.id,
       }
     );
 
@@ -225,7 +239,7 @@ module.exports.delete = async (req, res) => {
     for (let i = 0; i < categoriesLeft.length; i++) {
       await Category.updateOne(
         { _id: categoriesLeft[i]._id },
-        { position: i + 1 }
+        { position: i + 1, updatedBy: req.user.id }
       );
     }
 
@@ -268,6 +282,7 @@ module.exports.create = async (req, res) => {
       position,
       slug,
       title,
+      createdBy: req.user.id
     });
     await newCategory.save();
 
@@ -338,6 +353,8 @@ module.exports.edit = async (req, res) => {
         locale: "vi",
       });
     }
+
+    updateData.updatedBy = req.user.id;
 
     // Cập nhật thể loại
     await Category.updateOne({ _id: category._id }, updateData);

@@ -47,7 +47,10 @@ module.exports.index = (req, res) => __awaiter(void 0, void 0, void 0, function*
         const accounts = yield Account.find(find)
             .skip(skip)
             .limit(limit)
-            .sort(sort);
+            .sort(sort)
+            .populate("updatedBy", "fullName")
+            .populate("createdBy", "fullName")
+            .populate("deletedBy", "fullName");
         const total = yield Account.countDocuments(find);
         if (accounts) {
             return res.status(200).json({
@@ -75,6 +78,7 @@ module.exports.changeStatus = (req, res) => __awaiter(void 0, void 0, void 0, fu
             _id: id,
         }, {
             status: status,
+            updatedBy: req.user.id,
         });
         if (!account) {
             return res.status(404).json({ message: "Không tìm thấy tài khoản!" });
@@ -96,17 +100,17 @@ module.exports.changeMulti = (req, res) => __awaiter(void 0, void 0, void 0, fun
             : req.body.ids.split(", ");
         switch (type) {
             case "active":
-                yield Account.updateMany({ _id: { $in: ids } }, { status: "active" });
+                yield Account.updateMany({ _id: { $in: ids } }, { status: "active", updatedBy: req.user.id });
                 return res.status(200).json({
                     message: `Cập nhật trạng thái thành công ${ids.length} tài khoản!`,
                 });
             case "inactive":
-                yield Account.updateMany({ _id: { $in: ids } }, { status: "inactive" });
+                yield Account.updateMany({ _id: { $in: ids } }, { status: "inactive", updatedBy: req.user.id });
                 return res.status(200).json({
                     message: `Cập nhật trạng thái thành công ${ids.length} tài khoản!`,
                 });
             case "delete_all":
-                yield Account.updateMany({ _id: { $in: ids } }, { deleted: true, deletedAt: new Date() });
+                yield Account.updateMany({ _id: { $in: ids } }, { deleted: true, deletedAt: new Date(), deletedBy: req.user.id });
                 const accountsLeft = yield Account.find({ deleted: false }).sort({
                     position: 1,
                 });
@@ -139,7 +143,7 @@ module.exports.create = (req, res) => __awaiter(void 0, void 0, void 0, function
         const hashedPassword = yield bcrypt.hash(password, 10);
         const newAcc = new Account(Object.assign(Object.assign({}, newAccData), { avatar,
             slug,
-            fullName, password: hashedPassword }));
+            fullName, password: hashedPassword, createdBy: req.user.id }));
         yield newAcc.save();
         return res.status(200).json({
             message: "Tạo mới tài khoản thành công!",
@@ -194,6 +198,7 @@ module.exports.edit = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                 locale: "vi",
             });
         }
+        updateData.createdBy = req.user.id;
         yield Account.updateOne({ _id: account._id }, updateData);
         return res.status(200).json({
             message: "Cập nhật thông tin thành công!",
@@ -212,6 +217,8 @@ module.exports.delete = (req, res) => __awaiter(void 0, void 0, void 0, function
             _id: id,
         }, {
             deleted: true,
+            deletedBy: req.user.id,
+            deletedAt: new Date()
         });
         return res.status(200).json({
             message: "Xóa thành công!",
@@ -240,6 +247,7 @@ module.exports.resetPassword = (req, res) => __awaiter(void 0, void 0, void 0, f
             slug: slug,
         }, {
             password: hashedPassword,
+            updatedBy: req.user.id,
         });
         return res.status(200).json({
             message: "Cập nhật thành công!",

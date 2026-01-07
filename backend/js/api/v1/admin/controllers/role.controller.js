@@ -40,7 +40,13 @@ module.exports.index = (req, res) => __awaiter(void 0, void 0, void 0, function*
         if (req.query.sortKey && req.query.sortValue) {
             sort[req.query.sortKey] = Number(req.query.sortValue);
         }
-        const roles = yield Role.find(find).skip(skip).limit(limit).sort(sort);
+        const roles = yield Role.find(find)
+            .skip(skip)
+            .limit(limit)
+            .sort(sort)
+            .populate("updatedBy", "fullName")
+            .populate("createdBy", "fullName")
+            .populate("deletedBy", "fullName");
         const total = yield Role.countDocuments(find);
         if (roles) {
             return res.status(200).json({
@@ -63,7 +69,7 @@ module.exports.create = (req, res) => __awaiter(void 0, void 0, void 0, function
         const _a = req.body, { title } = _a, newRoleData = __rest(_a, ["title"]);
         const slug = slugify(title, { lower: true, strict: true, locale: "vi" });
         const newRole = new Role(Object.assign(Object.assign({}, newRoleData), { slug,
-            title }));
+            title, createdBy: req.user.id }));
         yield newRole.save();
         return res.status(200).json({
             message: "Tạo mới vai trò thành công",
@@ -117,6 +123,8 @@ module.exports.edit = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                 locale: "vi",
             });
         }
+        ;
+        updateData.updatedBy = req.user.id;
         yield Role.updateOne({ slug: slug }, updateData);
         res.status(200).json({
             message: "Cập nhật vai trò thành công!",
@@ -149,7 +157,7 @@ module.exports.permissionsEdit = (req, res) => __awaiter(void 0, void 0, void 0,
     try {
         const { roles } = req.body;
         for (const role of roles) {
-            yield Role.findByIdAndUpdate(role._id, { permissions: role.permissions });
+            yield Role.findByIdAndUpdate(role._id, { permissions: role.permissions, updatedBy: req.user.id, });
         }
         res.status(200).json({ message: "Cập nhật thành công" });
     }
@@ -162,7 +170,7 @@ module.exports.delete = (req, res) => __awaiter(void 0, void 0, void 0, function
         const id = req.params.id;
         const role = yield Role.findOne({ _id: id });
         if (role) {
-            yield Role.updateOne({ _id: id }, { deleted: true });
+            yield Role.updateOne({ _id: id }, { deleted: true, deletedBy: req.user.id, deletedAt: new Date() });
             res.status(200).json({ message: "Đã xóa vai trò!" });
         }
         else {
@@ -181,7 +189,7 @@ module.exports.changeMulti = (req, res) => __awaiter(void 0, void 0, void 0, fun
             : req.body.ids.split(", ");
         switch (type) {
             case "delete_all":
-                yield Role.updateMany({ _id: { $in: ids } }, { deleted: true, deletedAt: new Date() });
+                yield Role.updateMany({ _id: { $in: ids } }, { deleted: true, deletedAt: new Date(), deletedBy: req.user.id, });
                 return res.status(200).json({
                     message: `Đã xóa ${ids.length} vai trò!`,
                 });
@@ -212,6 +220,7 @@ module.exports.createPerm = (req, res) => __awaiter(void 0, void 0, void 0, func
         if (checkLabel) {
             return res.status(400).json({ message: "Quyền đã tồn tại!" });
         }
+        permissionData.createdBy = req.user.id;
         const newPerm = new Permission(Object.assign({ key, label }, permissionData));
         yield newPerm.save();
         return res.status(200).json({ message: "Tạo quyền mới thành công!" });
@@ -252,6 +261,7 @@ module.exports.editPerm = (req, res) => __awaiter(void 0, void 0, void 0, functi
                 locale: "vi",
             });
         }
+        updateData.updatedBy = req.user.id;
         yield Permission.updateOne({
             slug: slug,
         }, updateData);

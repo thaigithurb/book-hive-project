@@ -49,7 +49,10 @@ module.exports.index = (req, res) => __awaiter(void 0, void 0, void 0, function*
         const categories = yield Category.find(find)
             .skip(skip)
             .limit(limit)
-            .sort(sort);
+            .sort(sort)
+            .populate("updatedBy", "fullName")
+            .populate("createdBy", "fullName")
+            .populate("deletedBy", "fullName");
         const total = yield Category.countDocuments(find);
         if (categories) {
             return res.status(200).json({
@@ -77,6 +80,7 @@ module.exports.changeStatus = (req, res) => __awaiter(void 0, void 0, void 0, fu
             _id: id,
         }, {
             status: status,
+            updatedBy: req.user.id,
         });
         if (!category) {
             return res.status(404).json({ message: "Không tìm thấy thể loại!" });
@@ -98,17 +102,17 @@ module.exports.changeMulti = (req, res) => __awaiter(void 0, void 0, void 0, fun
             : req.body.ids.split(", ");
         switch (type) {
             case "active":
-                yield Category.updateMany({ _id: { $in: ids } }, { status: "active" });
+                yield Category.updateMany({ _id: { $in: ids } }, { status: "active", updatedBy: req.user.id });
                 return res.status(200).json({
                     message: `Cập nhật trạng thái thành công ${ids.length} thể loại!`,
                 });
             case "inactive":
-                yield Category.updateMany({ _id: { $in: ids } }, { status: "inactive" });
+                yield Category.updateMany({ _id: { $in: ids } }, { status: "inactive", updatedBy: req.user.id });
                 return res.status(200).json({
                     message: `Cập nhật trạng thái thành công ${ids.length} thể loại!`,
                 });
             case "delete_all":
-                yield Category.updateMany({ _id: { $in: ids } }, { deleted: true, deletedAt: new Date() });
+                yield Category.updateMany({ _id: { $in: ids } }, { deleted: true, deletedAt: new Date(), deletedBy: req.user.id });
                 const categoriesLeft = yield Category.find({ deleted: false }).sort({
                     position: 1,
                 });
@@ -138,7 +142,7 @@ module.exports.changeMulti = (req, res) => __awaiter(void 0, void 0, void 0, fun
                     else {
                         yield Category.updateMany({ position: { $gte: newPos, $lt: oldPos }, deleted: false }, { $inc: { position: 1 } });
                     }
-                    yield Category.updateOne({ _id: id }, { position: newPos });
+                    yield Category.updateOne({ _id: id }, { position: newPos, updatedBy: req.user.id });
                     const categories = yield Category.find({ deleted: false }).sort({
                         position: 1,
                     });
@@ -150,7 +154,7 @@ module.exports.changeMulti = (req, res) => __awaiter(void 0, void 0, void 0, fun
                 for (let i = 0; i < ids.length; i++) {
                     const [id, newPosStr] = ids[i].split("-");
                     const newPos = parseInt(newPosStr);
-                    yield Category.updateOne({ _id: id }, { position: newPos });
+                    yield Category.updateOne({ _id: id }, { position: newPos, updatedBy: req.user.id });
                 }
                 const allCategories = yield Category.find({ deleted: false }).sort({
                     position: 1,
@@ -180,12 +184,13 @@ module.exports.delete = (req, res) => __awaiter(void 0, void 0, void 0, function
             _id: id,
         }, {
             deleted: true,
+            deletedBy: req.user.id,
         });
         const categoriesLeft = yield Category.find({ deleted: false }).sort({
             position: 1,
         });
         for (let i = 0; i < categoriesLeft.length; i++) {
-            yield Category.updateOne({ _id: categoriesLeft[i]._id }, { position: i + 1 });
+            yield Category.updateOne({ _id: categoriesLeft[i]._id }, { position: i + 1, updatedBy: req.user.id });
         }
         return res.status(200).json({
             message: "Xóa thành công!",
@@ -213,7 +218,7 @@ module.exports.create = (req, res) => __awaiter(void 0, void 0, void 0, function
         }
         const newCategory = new Category(Object.assign(Object.assign({}, newCategoryData), { position,
             slug,
-            title }));
+            title, createdBy: req.user.id }));
         yield newCategory.save();
         return res.status(200).json({
             message: "Tạo mới sản phẩm thành công!",
@@ -270,6 +275,7 @@ module.exports.edit = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                 locale: "vi",
             });
         }
+        updateData.updatedBy = req.user.id;
         yield Category.updateOne({ _id: category._id }, updateData);
         return res.status(200).json({
             message: "Cập nhật thông tin thành công!",

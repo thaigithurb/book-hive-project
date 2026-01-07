@@ -1,3 +1,8 @@
+export interface UserRef {
+  _id: string;
+  fullName: string;
+}
+
 export interface Role {
   title: string;
   description: string;
@@ -8,4 +13,7 @@ export interface Role {
   updatedAt?: Date;
   slug: string;
   _id: string;
+  createdBy: UserRef;
+  deletedBy: UserRef;
+  updatedBy: UserRef;
 }

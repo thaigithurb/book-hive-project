@@ -25,7 +25,13 @@ module.exports.index = async (req, res) => {
       sort[req.query.sortKey] = Number(req.query.sortValue);
     }
 
-    const roles = await Role.find(find).skip(skip).limit(limit).sort(sort);
+    const roles = await Role.find(find)
+      .skip(skip)
+      .limit(limit)
+      .sort(sort)
+      .populate("updatedBy", "fullName")
+      .populate("createdBy", "fullName")
+      .populate("deletedBy", "fullName");
 
     const total = await Role.countDocuments(find);
 
@@ -56,6 +62,7 @@ module.exports.create = async (req, res) => {
       ...newRoleData,
       slug,
       title,
+      createdBy: req.user.id,
     });
     await newRole.save();
     return res.status(200).json({
@@ -90,7 +97,8 @@ module.exports.getById = async (req, res) => {
 module.exports.detail = async (req, res) => {
   const slug = req.params.slug;
   const role = await Role.findOne({ slug });
-  if (!role) return res.status(404).json({ message: "Không tìm thấy vai trò!" });
+  if (!role)
+    return res.status(404).json({ message: "Không tìm thấy vai trò!" });
   return res.status(200).json({ role });
 };
 
@@ -115,7 +123,9 @@ module.exports.edit = async (req, res) => {
         strict: true,
         locale: "vi",
       });
-    }
+    };
+
+    updateData.updatedBy = req.user.id;
 
     await Role.updateOne({ slug: slug }, updateData);
     res.status(200).json({
@@ -151,7 +161,7 @@ module.exports.permissionsEdit = async (req, res) => {
   try {
     const { roles } = req.body;
     for (const role of roles) {
-      await Role.findByIdAndUpdate(role._id, { permissions: role.permissions });
+      await Role.findByIdAndUpdate(role._id, { permissions: role.permissions, updatedBy: req.user.id, });
     }
     res.status(200).json({ message: "Cập nhật thành công" });
   } catch (err) {
@@ -165,7 +175,7 @@ module.exports.delete = async (req, res) => {
     const id = req.params.id;
     const role = await Role.findOne({ _id: id });
     if (role) {
-      await Role.updateOne({ _id: id }, { deleted: true });
+      await Role.updateOne({ _id: id }, { deleted: true, deletedBy: req.user.id, deletedAt: new Date() });
       res.status(200).json({ message: "Đã xóa vai trò!" });
     } else {
       res.status(400).json({ message: "Không tìm thấy vai trò!" });
@@ -187,7 +197,7 @@ module.exports.changeMulti = async (req, res) => {
       case "delete_all":
         await Role.updateMany(
           { _id: { $in: ids } },
-          { deleted: true, deletedAt: new Date() }
+          { deleted: true, deletedAt: new Date(), deletedBy: req.user.id, }
         );
 
         return res.status(200).json({
@@ -223,6 +233,8 @@ module.exports.createPerm = async (req, res) => {
     if (checkLabel) {
       return res.status(400).json({ message: "Quyền đã tồn tại!" });
     }
+
+    permissionData.createdBy = req.user.id;
 
     const newPerm = new Permission({ key, label, ...permissionData });
     await newPerm.save();
@@ -272,6 +284,8 @@ module.exports.editPerm = async (req, res) => {
         locale: "vi",
       });
     }
+
+    updateData.updatedBy = req.user.id;
 
     await Permission.updateOne(
       {

@@ -1,3 +1,8 @@
+export interface UserRef {
+  _id: string;
+  fullName: string;
+}
+
 export interface Account {
   _id: string;
   fullName: string;
@@ -11,4 +16,7 @@ export interface Account {
   slug: string;
   createdAt?: Date;
   updatedAt?: Date;
+  createdBy: UserRef;
+  deletedBy: UserRef;
+  updatedBy: UserRef;
 }

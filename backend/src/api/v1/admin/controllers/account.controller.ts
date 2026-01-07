@@ -34,7 +34,10 @@ module.exports.index = async (req, res) => {
     const accounts = await Account.find(find)
       .skip(skip)
       .limit(limit)
-      .sort(sort);
+      .sort(sort)
+      .populate("updatedBy", "fullName")
+      .populate("createdBy", "fullName")
+      .populate("deletedBy", "fullName");
 
     const total = await Account.countDocuments(find);
 
@@ -70,6 +73,7 @@ module.exports.changeStatus = async (req, res) => {
       },
       {
         status: status,
+        updatedBy: req.user.id,
       }
     );
 
@@ -96,19 +100,25 @@ module.exports.changeMulti = async (req, res) => {
 
     switch (type) {
       case "active":
-        await Account.updateMany({ _id: { $in: ids } }, { status: "active" });
+        await Account.updateMany(
+          { _id: { $in: ids } },
+          { status: "active", updatedBy: req.user.id }
+        );
         return res.status(200).json({
           message: `Cập nhật trạng thái thành công ${ids.length} tài khoản!`,
         });
       case "inactive":
-        await Account.updateMany({ _id: { $in: ids } }, { status: "inactive" });
+        await Account.updateMany(
+          { _id: { $in: ids } },
+          { status: "inactive", updatedBy: req.user.id }
+        );
         return res.status(200).json({
           message: `Cập nhật trạng thái thành công ${ids.length} tài khoản!`,
         });
       case "delete_all":
         await Account.updateMany(
           { _id: { $in: ids } },
-          { deleted: true, deletedAt: new Date() }
+          { deleted: true, deletedAt: new Date(), deletedBy: req.user.id }
         );
 
         // Sau khi xóa, cập nhật lại position cho các tài khoản còn lại
@@ -160,6 +170,7 @@ module.exports.create = async (req, res) => {
       slug,
       fullName,
       password: hashedPassword,
+      createdBy: req.user.id,
     });
     await newAcc.save();
 
@@ -223,6 +234,8 @@ module.exports.edit = async (req, res) => {
       });
     }
 
+    updateData.createdBy = req.user.id;
+
     // Cập nhật acc
     await Account.updateOne({ _id: account._id }, updateData);
 
@@ -248,6 +261,8 @@ module.exports.delete = async (req, res) => {
       },
       {
         deleted: true,
+        deletedBy: req.user.id,
+        deletedAt: new Date()
       }
     );
 
@@ -285,6 +300,7 @@ module.exports.resetPassword = async (req, res) => {
       },
       {
         password: hashedPassword,
+        updatedBy: req.user.id,
       }
     );
 
