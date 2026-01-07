@@ -3,6 +3,7 @@ import DOMPurify from "dompurify";
 import { Account } from "@/app/interfaces/account.interface";
 import ChangeStatusBadge from "../ChangeStatusBadge/ChangeStatusBadge";
 import TableActions from "../TableActions/TableActions";
+import ActivityLog from "../ActivityLog/ActivityLog";
 
 interface AccountTableProps {
   accounts: Account[];
@@ -59,6 +60,9 @@ export default function AccountTable({
               Ngày tạo
             </th>
             <th className="py-4 px-4 text-left text-[14.4px] font-semibold text-primary">
+              Log activity
+            </th>
+            <th className="py-4 px-4 text-left text-[14.4px] font-semibold text-primary">
               Thao tác
             </th>
           </tr>
@@ -112,6 +116,9 @@ export default function AccountTable({
                 {account.createdAt
                   ? new Date(account.createdAt).toLocaleDateString()
                   : ""}
+              </td>
+              <td className="py-4 px-4 text-[13px] text-gray-700">
+                <ActivityLog record={account} />
               </td>
               <td className="py-4 px-4">
                 <TableActions

@@ -3,6 +3,7 @@ import { Category } from "@/app/interfaces/category.interface";
 import CategoryStatusBadge from "../ChangeStatusBadge/ChangeStatusBadge";
 import React from "react";
 import TableActions from "../TableActions/TableActions";
+import ActivityLog from "../ActivityLog/ActivityLog";
 
 interface CategoryTableProps {
   categories: Category[];
@@ -55,6 +56,9 @@ export default function CategoryTable({
             </th>
             <th className="py-4 px-4 text-left text-[14.4px] font-semibold text-primary">
               Vị trí
+            </th>
+            <th className="py-4 px-4 text-left text-[14.4px] font-semibold text-primary">
+              Log activity
             </th>
             <th className="py-4 px-4 text-left text-[14.4px] font-semibold text-primary">
               Thao tác
@@ -126,6 +130,9 @@ export default function CategoryTable({
                     );
                   }}
                 />
+              </td>
+               <td className="py-4 px-4 text-[13px] text-gray-700">
+                  <ActivityLog record={category} />
               </td>
               <td className="py-4 px-4">
                 <TableActions

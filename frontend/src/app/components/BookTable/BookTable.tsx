@@ -2,6 +2,7 @@ import { Book } from "@/app/interfaces/book.interface";
 import { useRouter } from "next/navigation";
 import ChangeStatusBadge from "../ChangeStatusBadge/ChangeStatusBadge";
 import TableActions from "../TableActions/TableActions";
+import ActivityLog from "../ActivityLog/ActivityLog";
 
 interface BookTableProps {
   books: Book[];
@@ -149,22 +150,7 @@ export default function BookTable({
                 />
               </td>
               <td className="py-4 px-4 text-[13px] text-gray-700">
-                <div>
-                  <div>
-                    <span className="font-semibold">Tạo:</span>{" "}
-                    {typeof book.createdBy === "object" &&
-                    book.createdBy?.fullName
-                      ? book.createdBy.fullName
-                      : "-"}
-                  </div>
-                  <div>
-                    <span className="font-semibold">Cập nhật:</span>{" "}
-                    {typeof book.updatedBy === "object" &&
-                    book.updatedBy?.fullName
-                      ? book.updatedBy.fullName
-                      : "-"}
-                  </div>
-                </div>
+                <ActivityLog record={book}/>
               </td>
               <td className="py-4 px-4">
                 <TableActions

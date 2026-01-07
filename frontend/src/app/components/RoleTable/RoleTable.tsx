@@ -2,6 +2,7 @@ import { Role } from "@/app/interfaces/role.interface";
 import { useRouter } from "next/navigation";
 import DOMPurify from "dompurify";
 import TableActions from "../TableActions/TableActions";
+import ActivityLog from "../ActivityLog/ActivityLog";
 
 interface RoleTableProps {
   roles: Role[];
@@ -47,6 +48,9 @@ export default function RoleTable({
               Mô tả ngắn
             </th>
             <th className="py-4 px-4 text-left text-[14.4px] font-semibold text-primary">
+              Log activity
+            </th>
+            <th className="py-4 px-4 text-left text-[14.4px] font-semibold text-primary">
               Thao tác
             </th>
           </tr>
@@ -84,6 +88,9 @@ export default function RoleTable({
                   __html: DOMPurify.sanitize(role.description),
                 }}
               ></td>
+              <td className="py-4 px-4 text-[13px] text-gray-700">
+                <ActivityLog record={role} />
+              </td>
               <td className="py-4 px-4">
                 <TableActions
                   actions={[
