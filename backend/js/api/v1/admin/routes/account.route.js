@@ -11,4 +11,5 @@ router.post("/create", uploadImageHelper.single("image"), controller.create);
 router.get("/detail/:slug", controller.detail);
 router.patch("/edit/:slug", uploadImageHelper.single("image"), controller.edit);
 router.patch("/delete/:id", controller.delete);
+router.patch("/reset-password/:slug", controller.resetPassword);
 module.exports = router;

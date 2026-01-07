@@ -22,6 +22,8 @@ router.patch(
 
 router.patch("/delete/:id", controller.delete);
 
+router.patch("/reset-password/:slug", controller.resetPassword);
+
 module.exports = router;
 
 export {};

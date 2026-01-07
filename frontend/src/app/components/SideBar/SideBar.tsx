@@ -69,7 +69,7 @@ export const SideBar = () => {
         </nav>
         <Logout 
           url={`http://localhost:3001/api/v1/${ADMIN_PREFIX}/auth/logout`}
-          href={'auth/login'}
+          href={'/auth/login'}
         />
       </aside>
       <ToastContainer

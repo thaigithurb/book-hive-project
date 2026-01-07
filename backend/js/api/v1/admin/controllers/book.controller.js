@@ -22,6 +22,7 @@ var __rest = (this && this.__rest) || function (s, e) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const Book = require("../../models/book.model");
 const Category = require("../../models/category.model");
+const Account = require("../../models/account.model");
 const slugify = require("slugify");
 module.exports.index = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -185,10 +186,15 @@ module.exports.changeMulti = (req, res) => __awaiter(void 0, void 0, void 0, fun
 module.exports.delete = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const id = req.params.id;
+        const user = yield Account.findOne({
+            _id: req.user.id,
+        }).select("fullName");
         yield Book.updateOne({
             _id: id,
         }, {
             deleted: true,
+            deletedBy: user.fullName,
+            deletedAt: new Date(),
         });
         const booksLeft = yield Book.find({ deleted: false }).sort({
             position: 1,
@@ -226,12 +232,15 @@ module.exports.create = (req, res) => __awaiter(void 0, void 0, void 0, function
         else {
             yield Book.updateMany({ position: { $gte: position } }, { $inc: { position: 1 } });
         }
+        const user = yield Account.findOne({
+            _id: req.user.id,
+        }).select("fullName");
         const newBook = new Book(Object.assign(Object.assign({}, newBookData), { position,
             image,
             priceBuy,
             priceRent,
             slug,
-            title }));
+            title, createdBy: user.fullName }));
         yield newBook.save();
         return res.status(200).json({
             message: "Tạo mới sản phẩm thành công!",
@@ -293,6 +302,10 @@ module.exports.edit = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                 locale: "vi",
             });
         }
+        const user = yield Account.findOne({
+            _id: req.user.id,
+        }).select("fullName");
+        updateData.updatedBy = user.fullName;
         yield Book.updateOne({ _id: book._id }, updateData);
         return res.status(200).json({
             message: "Cập nhật thông tin thành công!",

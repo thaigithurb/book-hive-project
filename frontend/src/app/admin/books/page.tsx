@@ -123,6 +123,7 @@ export default function Books() {
     try {
       await axios.patch(
         `http://localhost:3001/api/v1/${ADMIN_PREFIX}/books/delete/${deleteId}`,
+        {},
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,

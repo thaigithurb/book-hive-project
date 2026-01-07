@@ -155,7 +155,10 @@ module.exports.create = (req, res) => __awaiter(void 0, void 0, void 0, function
 module.exports.detail = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const slug = req.params.slug;
-        const account = yield Account.findOne({ slug: slug, deleted: false });
+        const account = yield Account.findOne({
+            slug: slug,
+            deleted: false,
+        }).select("-password");
         if (!account) {
             return res.status(404).json({ message: "Không tìm thấy tài khoản!" });
         }
@@ -217,6 +220,34 @@ module.exports.delete = (req, res) => __awaiter(void 0, void 0, void 0, function
     catch (error) {
         return res.status(400).json({
             message: "Xóa thất bại",
+        });
+    }
+});
+module.exports.resetPassword = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const slug = req.params.slug;
+        const { newPassword } = req.body;
+        const account = yield Account.findOne({
+            slug: slug,
+        });
+        if (!account) {
+            return res.status(404).json({
+                message: "Không tìm thấy tài khoản!",
+            });
+        }
+        const hashedPassword = yield bcrypt.hash(newPassword, 10);
+        yield Account.updateOne({
+            slug: slug,
+        }, {
+            password: hashedPassword,
+        });
+        return res.status(200).json({
+            message: "Cập nhật thành công!",
+        });
+    }
+    catch (error) {
+        return res.status(400).json({
+            message: "Cập nhật thất bại!",
         });
     }
 });

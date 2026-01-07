@@ -1,5 +1,6 @@
 const Book = require("../../models/book.model");
 const Category = require("../../models/category.model");
+const Account = require("../../models/account.model");
 const slugify = require("slugify");
 
 // [GET] /api/v1/admin/books
@@ -209,6 +210,10 @@ module.exports.delete = async (req, res) => {
   try {
     const id = req.params.id;
 
+    const user = await Account.findOne({
+      _id: req.user.id,
+    }).select("fullName");
+
     // xóa sách
     await Book.updateOne(
       {
@@ -216,6 +221,8 @@ module.exports.delete = async (req, res) => {
       },
       {
         deleted: true,
+        deletedBy: user.fullName,
+        deletedAt: new Date(),
       }
     );
 
@@ -269,6 +276,10 @@ module.exports.create = async (req, res) => {
       );
     }
 
+    const user = await Account.findOne({
+      _id: req.user.id,
+    }).select("fullName");
+
     // tạo sách và lưu sách mới
     const newBook = new Book({
       ...newBookData,
@@ -278,6 +289,7 @@ module.exports.create = async (req, res) => {
       priceRent,
       slug,
       title,
+      createdBy: user.fullName,
     });
     await newBook.save();
 
@@ -354,6 +366,12 @@ module.exports.edit = async (req, res) => {
         locale: "vi",
       });
     }
+
+    const user = await Account.findOne({
+      _id: req.user.id,
+    }).select("fullName");
+
+    updateData.updatedBy = user.fullName;
 
     // Cập nhật sách
     await Book.updateOne({ _id: book._id }, updateData);

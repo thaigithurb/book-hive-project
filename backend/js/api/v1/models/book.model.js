@@ -32,6 +32,9 @@ const bookSchema = new mongoose.Schema({
         type: Boolean,
         default: false,
     },
+    createdBy: String,
+    deletedBy: String,
+    updatedBy: String,
     deletedAt: Date,
     slug: { type: String, required: true, unique: true },
 }, {

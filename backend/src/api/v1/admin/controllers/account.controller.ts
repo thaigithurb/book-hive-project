@@ -178,7 +178,10 @@ module.exports.create = async (req, res) => {
 module.exports.detail = async (req, res) => {
   try {
     const slug = req.params.slug;
-    const account = await Account.findOne({ slug: slug, deleted: false });
+    const account = await Account.findOne({
+      slug: slug,
+      deleted: false,
+    }).select("-password");
     if (!account) {
       return res.status(404).json({ message: "Không tìm thấy tài khoản!" });
     }
@@ -254,6 +257,43 @@ module.exports.delete = async (req, res) => {
   } catch (error) {
     return res.status(400).json({
       message: "Xóa thất bại",
+    });
+  }
+};
+
+// [PATCH] /api/v1/admin/accounts/reset-password/:slug
+module.exports.resetPassword = async (req, res) => {
+  try {
+    const slug = req.params.slug;
+    const { newPassword } = req.body;
+
+    const account = await Account.findOne({
+      slug: slug,
+    });
+
+    if (!account) {
+      return res.status(404).json({
+        message: "Không tìm thấy tài khoản!",
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    await Account.updateOne(
+      {
+        slug: slug,
+      },
+      {
+        password: hashedPassword,
+      }
+    );
+
+    return res.status(200).json({
+      message: "Cập nhật thành công!",
+    });
+  } catch (error) {
+    return res.status(400).json({
+      message: "Cập nhật thất bại!",
     });
   }
 };

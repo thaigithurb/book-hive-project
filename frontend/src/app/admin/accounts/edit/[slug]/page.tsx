@@ -5,11 +5,9 @@ import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import { useParams } from "next/navigation";
 import { BackButton } from "@/app/components/BackButton/BackButton";
-import BookForm from "@/app/components/BookForm/BookForm";
 import { motion, AnimatePresence } from "framer-motion";
 import AccountForm from "@/app/components/AccountForm/AccountForm";
 import { Role } from "@/app/interfaces/role.interface";
-import { Account } from "@/app/interfaces/account.interface";
 import { useRouter } from "next/navigation";
 
 const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;
@@ -22,23 +20,28 @@ export default function EditBook() {
   const [form, setForm] = useState({
     fullName: "",
     email: "",
-    password: "",
     phone: "",
     status: "active",
     role_id: "",
-    avatar: ""
+    avatar: "",
   });
   const [loading, setLoading] = useState(false);
   const [isPageLoading, setIsPageLoading] = useState(true);
   const [preview, setPreview] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [roles, setRoles] = useState<Role[]>([]);
-  const [accounts, setAccounts] = useState<Account[]>([]);
   const fileInputRef = useRef<any>(null);
+
+  const accessToken = localStorage.getItem("accessToken");
 
   useEffect(() => {
     axios
-      .get(`http://localhost:3001/api/v1/${ADMIN_PREFIX}/roles`)
+      .get(`http://localhost:3001/api/v1/${ADMIN_PREFIX}/roles`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+        withCredentials: true,
+      })
       .then((res) => setRoles(res.data.roles || []))
       .catch(() => setRoles([]));
   }, []);
@@ -72,17 +75,22 @@ export default function EditBook() {
     const fetchAccount = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:3001/api/v1/${ADMIN_PREFIX}/accounts/detail/${params.slug}`
+          `http://localhost:3001/api/v1/${ADMIN_PREFIX}/accounts/detail/${params.slug}`,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+            withCredentials: true,
+          }
         );
         const account = res.data.account;
         setForm({
           fullName: account.fullName,
           email: account.email,
-          password: account.password,
           phone: account.phone,
           status: account.status,
           role_id: account.role_id,
-          avatar: account.avatar
+          avatar: account.avatar,
         });
         setPreview(account.avatar || null);
       } catch (err) {
@@ -183,6 +191,16 @@ export default function EditBook() {
               buttonLabel="Cập nhật"
               roles={roles}
             />
+
+            <button
+              type="button"
+              className=" transition-colors duration-200 bg-[#979797] cursor-pointer hover:bg-[#676767] text-white px-2 py-2 rounded font-semibold mt-4"
+              onClick={() =>
+                router.push(`/admin/accounts/reset-password/${slug}`)
+              }
+            >
+              Reset mật khẩu
+            </button>
           </motion.div>
 
           <ToastContainer

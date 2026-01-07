@@ -17,4 +17,7 @@ export interface Book {
   updatedAt?: Date;
   slug: string;
   _id: string; 
+  createdBy: string;
+  deletedBy: string;
+  updatedBy: string
 }

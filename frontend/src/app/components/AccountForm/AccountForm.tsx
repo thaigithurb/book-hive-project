@@ -40,11 +40,6 @@ export default function AccountForm({
   buttonLabel,
   roles,
 }: AccountFormProps) {
-  console.log("form.role_id:", form.role_id);
-  console.log(
-    "roles:",
-    roles.map((r) => r._id)
-  );
   return (
     <form onSubmit={handleSubmit}>
       <div className="mb-4">
@@ -71,20 +66,6 @@ export default function AccountForm({
           value={form.email}
           onChange={handleChange}
           placeholder="Nhập email"
-        />
-      </div>
-
-      <div className="mb-4">
-        <label className="mb-1 font-medium text-primary">
-          Mật khẩu <span className="text-red-500">*</span>
-        </label>
-        <input
-          type="password"
-          name="password"
-          className={inputClass}
-          value={form.password || ""}
-          onChange={handleChange}
-          placeholder="Nhập mật khẩu"
         />
       </div>
 

@@ -82,7 +82,7 @@ export default function Create() {
     if (imageFile) {
       formData.append("image", imageFile);
     }
-
+    
     toast
       .promise(
         axios.post(
@@ -105,7 +105,7 @@ export default function Create() {
           error: {
             render({ data }) {
               if (axios.isAxiosError(data)) {
-                return data.response?.data?.message;
+                return "File ảnh không hợp lệ!";
               }
               return "Tạo sách thất bại";
             },
