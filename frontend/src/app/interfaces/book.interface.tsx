@@ -1,3 +1,8 @@
+export interface UserRef {
+  _id: string;
+  fullName: string;
+}
+
 export interface Book {
   title: string;
   author: string;
@@ -17,7 +22,7 @@ export interface Book {
   updatedAt?: Date;
   slug: string;
   _id: string; 
-  createdBy: string;
-  deletedBy: string;
-  updatedBy: string
+  createdBy: UserRef;
+  deletedBy: UserRef;
+  updatedBy: UserRef
 }

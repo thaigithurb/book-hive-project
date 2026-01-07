@@ -48,7 +48,12 @@ module.exports.index = (req, res) => __awaiter(void 0, void 0, void 0, function*
         else {
             sort.position = "desc";
         }
-        const books = yield Book.find(find).skip(skip).limit(limit).sort(sort);
+        const books = yield Book.find(find)
+            .skip(skip)
+            .limit(limit)
+            .sort(sort)
+            .populate("updatedBy", "fullName")
+            .populate("createdBy", "fullName");
         const total = yield Book.countDocuments(find);
         if (books && books.length > 0) {
             const booksWithCategory = [];
@@ -87,6 +92,7 @@ module.exports.changeStatus = (req, res) => __awaiter(void 0, void 0, void 0, fu
             _id: id,
         }, {
             status: status,
+            updatedBy: req.user.id
         });
         if (!book) {
             return res.status(404).json({ message: "Không tìm thấy sách!" });
@@ -113,12 +119,12 @@ module.exports.changeMulti = (req, res) => __awaiter(void 0, void 0, void 0, fun
                     message: `Cập nhật trạng thái thành công ${ids.length} sách!`,
                 });
             case "inactive":
-                yield Book.updateMany({ _id: { $in: ids } }, { status: "inactive" });
+                yield Book.updateMany({ _id: { $in: ids } }, { status: "inactive", updatedBy: req.user.id });
                 return res.status(200).json({
                     message: `Cập nhật trạng thái thành công ${ids.length} sách!`,
                 });
             case "delete_all":
-                yield Book.updateMany({ _id: { $in: ids } }, { deleted: true, deletedAt: new Date() });
+                yield Book.updateMany({ _id: { $in: ids } }, { deleted: true, deletedAt: new Date(), updatedBy: req.user.id, deletedBy: req.user.id });
                 const booksLeft = yield Book.find({ deleted: false }).sort({
                     position: 1,
                 });
@@ -146,7 +152,7 @@ module.exports.changeMulti = (req, res) => __awaiter(void 0, void 0, void 0, fun
                     else {
                         yield Book.updateMany({ position: { $gte: newPos, $lt: oldPos }, deleted: false }, { $inc: { position: 1 } });
                     }
-                    yield Book.updateOne({ _id: id }, { position: newPos });
+                    yield Book.updateOne({ _id: id }, { position: newPos, updatedBy: req.user.id });
                     const books = yield Book.find({ deleted: false }).sort({
                         position: 1,
                     });
@@ -158,13 +164,13 @@ module.exports.changeMulti = (req, res) => __awaiter(void 0, void 0, void 0, fun
                 for (let i = 0; i < ids.length; i++) {
                     const [id, newPosStr] = ids[i].split("-");
                     const newPos = parseInt(newPosStr);
-                    yield Book.updateOne({ _id: id }, { position: newPos });
+                    yield Book.updateOne({ _id: id }, { position: newPos, updatedBy: req.user.id });
                 }
                 const allBooks = yield Book.find({ deleted: false }).sort({
                     position: 1,
                 });
                 for (let i = 0; i < allBooks.length; i++) {
-                    yield Book.updateOne({ _id: allBooks[i]._id }, { position: i + 1 });
+                    yield Book.updateOne({ _id: allBooks[i]._id }, { position: i + 1, updatedBy: req.user.id });
                 }
                 const books = yield Book.find({ deleted: false }).sort({ position: 1 });
                 return res.status(200).json({
@@ -232,15 +238,12 @@ module.exports.create = (req, res) => __awaiter(void 0, void 0, void 0, function
         else {
             yield Book.updateMany({ position: { $gte: position } }, { $inc: { position: 1 } });
         }
-        const user = yield Account.findOne({
-            _id: req.user.id,
-        }).select("fullName");
         const newBook = new Book(Object.assign(Object.assign({}, newBookData), { position,
             image,
             priceBuy,
             priceRent,
             slug,
-            title, createdBy: user.fullName }));
+            title, createdBy: req.user.id }));
         yield newBook.save();
         return res.status(200).json({
             message: "Tạo mới sản phẩm thành công!",
@@ -302,10 +305,7 @@ module.exports.edit = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                 locale: "vi",
             });
         }
-        const user = yield Account.findOne({
-            _id: req.user.id,
-        }).select("fullName");
-        updateData.updatedBy = user.fullName;
+        updateData.updatedBy = req.user.id;
         yield Book.updateOne({ _id: book._id }, updateData);
         return res.status(200).json({
             message: "Cập nhật thông tin thành công!",

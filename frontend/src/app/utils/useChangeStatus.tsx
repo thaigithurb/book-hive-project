@@ -19,6 +19,7 @@ export default function useChangeStatus(
     try {
       await axios.patch(
         `http://localhost:3001/api/v1/admin/${resource}/change-status/${newStatus}/${id}`,
+        {},
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,

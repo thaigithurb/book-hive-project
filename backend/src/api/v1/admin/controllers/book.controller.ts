@@ -33,7 +33,12 @@ module.exports.index = async (req, res) => {
       sort.position = "desc";
     }
 
-    const books = await Book.find(find).skip(skip).limit(limit).sort(sort);
+    const books = await Book.find(find)
+      .skip(skip)
+      .limit(limit)
+      .sort(sort)
+      .populate("updatedBy", "fullName")
+      .populate("createdBy", "fullName");
     const total = await Book.countDocuments(find);
 
     if (books && books.length > 0) {
@@ -81,6 +86,7 @@ module.exports.changeStatus = async (req, res) => {
       },
       {
         status: status,
+        updatedBy: req.user.id
       }
     );
 
@@ -112,14 +118,14 @@ module.exports.changeMulti = async (req, res) => {
           message: `Cập nhật trạng thái thành công ${ids.length} sách!`,
         });
       case "inactive":
-        await Book.updateMany({ _id: { $in: ids } }, { status: "inactive" });
+        await Book.updateMany({ _id: { $in: ids } }, { status: "inactive", updatedBy: req.user.id });
         return res.status(200).json({
           message: `Cập nhật trạng thái thành công ${ids.length} sách!`,
         });
       case "delete_all":
         await Book.updateMany(
           { _id: { $in: ids } },
-          { deleted: true, deletedAt: new Date() }
+          { deleted: true, deletedAt: new Date(), updatedBy: req.user.id, deletedBy: req.user.id }
         );
 
         // Sau khi xóa, cập nhật lại position cho các sách còn lại
@@ -161,7 +167,7 @@ module.exports.changeMulti = async (req, res) => {
             );
           }
 
-          await Book.updateOne({ _id: id }, { position: newPos });
+          await Book.updateOne({ _id: id }, { position: newPos, updatedBy: req.user.id });
 
           const books = await Book.find({ deleted: false }).sort({
             position: 1,
@@ -177,7 +183,7 @@ module.exports.changeMulti = async (req, res) => {
         for (let i = 0; i < ids.length; i++) {
           const [id, newPosStr] = ids[i].split("-");
           const newPos = parseInt(newPosStr);
-          await Book.updateOne({ _id: id }, { position: newPos });
+          await Book.updateOne({ _id: id }, { position: newPos, updatedBy: req.user.id });
         }
 
         // Sắp xếp lại vị trí cho tất cả sách để tránh trùng/thiếu
@@ -185,7 +191,7 @@ module.exports.changeMulti = async (req, res) => {
           position: 1,
         });
         for (let i = 0; i < allBooks.length; i++) {
-          await Book.updateOne({ _id: allBooks[i]._id }, { position: i + 1 });
+          await Book.updateOne({ _id: allBooks[i]._id }, { position: i + 1, updatedBy: req.user.id });
         }
 
         const books = await Book.find({ deleted: false }).sort({ position: 1 });
@@ -276,10 +282,6 @@ module.exports.create = async (req, res) => {
       );
     }
 
-    const user = await Account.findOne({
-      _id: req.user.id,
-    }).select("fullName");
-
     // tạo sách và lưu sách mới
     const newBook = new Book({
       ...newBookData,
@@ -289,7 +291,7 @@ module.exports.create = async (req, res) => {
       priceRent,
       slug,
       title,
-      createdBy: user.fullName,
+      createdBy: req.user.id,
     });
     await newBook.save();
 
@@ -367,11 +369,7 @@ module.exports.edit = async (req, res) => {
       });
     }
 
-    const user = await Account.findOne({
-      _id: req.user.id,
-    }).select("fullName");
-
-    updateData.updatedBy = user.fullName;
+    updateData.updatedBy = req.user.id;
 
     // Cập nhật sách
     await Book.updateOne({ _id: book._id }, updateData);

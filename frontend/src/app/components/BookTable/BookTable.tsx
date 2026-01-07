@@ -152,11 +152,17 @@ export default function BookTable({
                 <div>
                   <div>
                     <span className="font-semibold">Tạo:</span>{" "}
-                    {book.createdBy || "-"}
+                    {typeof book.createdBy === "object" &&
+                    book.createdBy?.fullName
+                      ? book.createdBy.fullName
+                      : "-"}
                   </div>
                   <div>
                     <span className="font-semibold">Cập nhật:</span>{" "}
-                    {book.updatedBy || "-"}
+                    {typeof book.updatedBy === "object" &&
+                    book.updatedBy?.fullName
+                      ? book.updatedBy.fullName
+                      : "-"}
                   </div>
                 </div>
               </td>
