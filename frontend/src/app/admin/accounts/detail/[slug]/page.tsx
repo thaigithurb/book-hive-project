@@ -32,23 +32,6 @@ export default function AccountDetail() {
           }
         );
         setAccount(res.data.account);
-
-        if (res.data.account.role_id) {
-          try {
-            const roleRes = await axios.get(
-              `http://localhost:3001/api/v1/${ADMIN_PREFIX}/roles/${res.data.account.role_id}`,
-              {
-                headers: {
-                  Authorization: `Bearer ${accessToken}`,
-                },
-                withCredentials: true,
-              }
-            );
-            setRole(roleRes.data.role);
-          } catch {
-            setRole(null);
-          }
-        }
       } catch (err) {
         toast.error("Không tìm thấy tài khoản!");
         router.back();
@@ -113,7 +96,7 @@ export default function AccountDetail() {
         <div className="w-full">
           <span className="text-slate-800 font-semibold">Vai trò: </span>
           <span className="text-slate-500">
-            {role ? role.title : account.role_id}
+            {account.role_id.title}
           </span>
         </div>
       </div>

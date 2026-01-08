@@ -10,7 +10,7 @@ import AccountForm from "@/app/components/AccountForm/AccountForm";
 import { Role } from "@/app/interfaces/role.interface";
 import { useRouter } from "next/navigation";
 
-const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;
+const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX ?? "admin";
 
 export default function EditBook() {
   const params = useParams();
@@ -38,7 +38,7 @@ export default function EditBook() {
     axios
       .get(`http://localhost:3001/api/v1/${ADMIN_PREFIX}/roles`, {
         headers: {
-          Authorization: `Bearer ${accessToken}`,
+          Authorization: accessToken ? `Bearer ${accessToken}` : "",
         },
         withCredentials: true,
       })
@@ -84,12 +84,13 @@ export default function EditBook() {
           }
         );
         const account = res.data.account;
+        console.log(account);
         setForm({
           fullName: account.fullName,
           email: account.email,
           phone: account.phone,
           status: account.status,
-          role_id: account.role_id,
+          role_id: account.role_id._id,
           avatar: account.avatar,
         });
         setPreview(account.avatar || null);
@@ -116,7 +117,13 @@ export default function EditBook() {
       .promise(
         axios.patch(
           `http://localhost:3001/api/v1/${ADMIN_PREFIX}/accounts/edit/${slug}`,
-          formData
+          formData,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+            withCredentials: true,
+          }
         ),
         {
           pending: "Đang cập nhật...",
@@ -190,6 +197,7 @@ export default function EditBook() {
               handleRemoveImage={handleRemoveImage}
               buttonLabel="Cập nhật"
               roles={roles}
+              showPasswordField={false}
             />
 
             <button

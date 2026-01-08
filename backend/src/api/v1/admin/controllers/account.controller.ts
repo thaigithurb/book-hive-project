@@ -192,7 +192,9 @@ module.exports.detail = async (req, res) => {
     const account = await Account.findOne({
       slug: slug,
       deleted: false,
-    }).select("-password");
+    })
+      .select("-password")
+      .populate("role_id", "title");
     if (!account) {
       return res.status(404).json({ message: "Không tìm thấy tài khoản!" });
     }
@@ -234,7 +236,7 @@ module.exports.edit = async (req, res) => {
       });
     }
 
-    updateData.createdBy = req.user.id;
+    updateData.updatedBy = req.user.id;
 
     // Cập nhật acc
     await Account.updateOne({ _id: account._id }, updateData);
@@ -262,7 +264,7 @@ module.exports.delete = async (req, res) => {
       {
         deleted: true,
         deletedBy: req.user.id,
-        deletedAt: new Date()
+        deletedAt: new Date(),
       }
     );
 
@@ -310,6 +312,30 @@ module.exports.resetPassword = async (req, res) => {
   } catch (error) {
     return res.status(400).json({
       message: "Cập nhật thất bại!",
+    });
+  }
+};
+
+// [GET] /api/v1/admin/accounts/profile
+module.exports.profile = async (req, res) => {
+  try {
+    const id = req.user.id;
+    const account = await Account.findOne({
+      _id: id,
+    })
+      .select("-password")
+      .populate("role_id", "title");
+    if (!account) {
+      return res.status(404).json({ message: "Không tìm thấy hồ sơ!" });
+    }
+
+    return res.status(200).json({
+      message: "Lấy thông tin hồ sơ thành công!",
+      account: account,
+    });
+  } catch (error) {
+    return res.status(400).json({
+      message: "Lỗi khi lấy thông tin hồ sơ!",
     });
   }
 };

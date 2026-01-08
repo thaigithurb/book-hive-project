@@ -216,7 +216,7 @@ export default function Categories() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="text-center py-8"
+            className="text-center py-8 text-gray-500"
           >
             Đang tải...
           </motion.div>

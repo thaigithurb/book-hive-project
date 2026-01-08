@@ -153,6 +153,7 @@ export default function CreateAccount() {
             handleRemoveImage={handleRemoveImage}
             buttonLabel="Tạo mới"
             roles={roles}
+            showPasswordField={true}
           />
         </motion.div>
         <ToastContainer

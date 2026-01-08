@@ -29,6 +29,11 @@ const menu = [
     key: "accounts",
     href: "/admin/accounts",
   },
+  {
+    label: "👤 Thông tin cá nhân",
+    key: "profile",
+    href: "/admin/profile",
+  },
 ];
 
 const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;

@@ -24,6 +24,12 @@ module.exports.login = (req, res) => __awaiter(void 0, void 0, void 0, function*
         if (!isMatch) {
             return res.status(400).json({ message: "Mật khẩu không đúng" });
         }
+        if (user.deleted === true) {
+            return res.status(400).json({ message: "Tài khoản đã bị xóa" });
+        }
+        if (user.status === "inactive") {
+            return res.status(400).json({ message: "Tài khoản đang bị khóa" });
+        }
         const refreshToken = generate.generateRefreshToken();
         user.refreshToken = refreshToken;
         user.refreshTokenExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);

@@ -304,6 +304,7 @@ export default function Permission() {
             ? `Bạn có chắc muốn xóa quyền "${selectedPerm.label}"?`
             : ""
         }
+        label="Xóa"
       />
     </>
   );

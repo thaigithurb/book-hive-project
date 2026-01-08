@@ -1,4 +1,5 @@
 import { Role } from "@/app/interfaces/role.interface";
+import { useState } from "react";
 
 type AccountFormData = {
   fullName: string;
@@ -23,6 +24,7 @@ type AccountFormProps = {
   handleRemoveImage: () => void;
   buttonLabel: string;
   roles: Role[];
+  showPasswordField: boolean;
 };
 
 const inputClass =
@@ -39,7 +41,10 @@ export default function AccountForm({
   handleRemoveImage,
   buttonLabel,
   roles,
+  showPasswordField,
 }: AccountFormProps) {
+  const [showPassword, setShowPassword] = useState(false);
+
   return (
     <form onSubmit={handleSubmit}>
       <div className="mb-4">
@@ -82,6 +87,32 @@ export default function AccountForm({
           placeholder="Nhập số điện thoại"
         />
       </div>
+      {showPasswordField && (
+        <div className="mb-4">
+          <label className="mb-1 font-medium text-primary">
+            Mật khẩu <span className="text-red-500">*</span>
+          </label>
+          <div className="relative">
+            <input
+              type={showPassword ? "text" : "password"}
+              name="password"
+              className={inputClass}
+              value={form.password || ""}
+              onChange={handleChange}
+              placeholder="Nhập mật khẩu"
+              autoComplete="new-password"
+            />
+            <button
+              type="button"
+              className="absolute right-3 top-1/2 cursor-pointer -translate-y-1/2 text-gray-500"
+              onClick={() => setShowPassword((v) => !v)}
+              tabIndex={-1}
+            >
+              {showPassword ? "Ẩn" : "Hiện"}
+            </button>
+          </div>
+        </div>
+      )}
       <div className="mb-4">
         <div>
           <label className="mb-1 font-medium text-primary flex justify-between">

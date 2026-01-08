@@ -27,7 +27,7 @@ export default function Home() {
         <div className="container">
           <div className="grid grid-cols-3 gap-[24px]">
             {loading ? (
-              <div>Đang tải...</div>
+              <div className="text-gray-500" >Đang tải...</div>
             ) : (
               books.map((book, index) => <BookCard key={index} book={book} />)
             )}

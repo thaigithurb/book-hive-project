@@ -5,6 +5,7 @@ import axios from "axios";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
+import DOMPurify from "dompurify";
 
 export default function Detail() {
   const router = useRouter();
@@ -32,7 +33,7 @@ export default function Detail() {
   if (loading) {
     return (
       <div className="bg-blue-50 min-h-screen flex items-center justify-center">
-        <div className="text-xl text-secondary1 font-semibold animate-pulse">
+        <div className="text-xl text-gray-500 font-semibold animate-pulse">
           Đang tải dữ liệu sách...
         </div>
       </div>
@@ -85,9 +86,12 @@ export default function Detail() {
               <p className="text-base text-slate-400 mb-6">
                 Thể loại: {book.category_name}
               </p>
-              <p className="text-base text-slate-800 mb-8 leading-relaxed">
-                {book.description}
-              </p>
+              <p
+                className="text-base text-slate-800 mb-8 leading-relaxed"
+                dangerouslySetInnerHTML={{
+                  __html: DOMPurify.sanitize(book.description),
+                }}
+              ></p>
               <div className="bg-white rounded-xl p-6 mb-6 shadow">
                 <div className="flex justify-between items-center mb-4">
                   <span className="text-base text-slate-800">Giá mua:</span>

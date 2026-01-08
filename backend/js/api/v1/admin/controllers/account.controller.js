@@ -162,7 +162,9 @@ module.exports.detail = (req, res) => __awaiter(void 0, void 0, void 0, function
         const account = yield Account.findOne({
             slug: slug,
             deleted: false,
-        }).select("-password");
+        })
+            .select("-password")
+            .populate("role_id", "title");
         if (!account) {
             return res.status(404).json({ message: "Không tìm thấy tài khoản!" });
         }
@@ -198,7 +200,7 @@ module.exports.edit = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                 locale: "vi",
             });
         }
-        updateData.createdBy = req.user.id;
+        updateData.updatedBy = req.user.id;
         yield Account.updateOne({ _id: account._id }, updateData);
         return res.status(200).json({
             message: "Cập nhật thông tin thành công!",
@@ -218,7 +220,7 @@ module.exports.delete = (req, res) => __awaiter(void 0, void 0, void 0, function
         }, {
             deleted: true,
             deletedBy: req.user.id,
-            deletedAt: new Date()
+            deletedAt: new Date(),
         });
         return res.status(200).json({
             message: "Xóa thành công!",
@@ -256,6 +258,28 @@ module.exports.resetPassword = (req, res) => __awaiter(void 0, void 0, void 0, f
     catch (error) {
         return res.status(400).json({
             message: "Cập nhật thất bại!",
+        });
+    }
+});
+module.exports.profile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const id = req.user.id;
+        const account = yield Account.findOne({
+            _id: id,
+        })
+            .select("-password")
+            .populate("role_id", "title");
+        if (!account) {
+            return res.status(404).json({ message: "Không tìm thấy hồ sơ!" });
+        }
+        return res.status(200).json({
+            message: "Lấy thông tin hồ sơ thành công!",
+            account: account,
+        });
+    }
+    catch (error) {
+        return res.status(400).json({
+            message: "Lỗi khi lấy thông tin hồ sơ!",
         });
     }
 });
