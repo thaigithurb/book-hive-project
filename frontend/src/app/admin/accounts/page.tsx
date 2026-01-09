@@ -15,6 +15,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import AccountTable from "@/app/components/AccountTable/AccountTable";
 import { Account } from "@/app/interfaces/account.interface";
 import NewAddButton from "@/app/components/NewAddButton/NewAddButton";
+import { usePageChange } from "@/app/utils/usePageChange";
+import { useSortChange } from "@/app/utils/useSortChange";
+import SortSelect from "@/app/components/SortSelect/SortSelect";
 
 const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;
 
@@ -31,6 +34,13 @@ export default function Accounts() {
   const [isFirstLoad, setIsFirstLoad] = useState(true);
   const limit = 5;
   const accessToken = localStorage.getItem("accessToken");
+  const [sortValue, setSortValue] = useState("");
+  const sortOptions = [
+    { value: "", label: "Sắp xếp" },
+    { value: "title_asc", label: "Tên A-Z" },
+    { value: "createdAt_desc", label: "Mới nhất" },
+    { value: "createdAt_asc", label: "Cũ nhất" },
+  ];
 
   const fetchData = useCallback(
     debounce(() => {
@@ -134,25 +144,11 @@ export default function Accounts() {
     }
   };
 
-  const handleSortChange = (e: any) => {
-    const val = e.target.value;
-    switch (val) {
-      case "title_asc":
-        setSort({ key: "title", value: 1 });
-        break;
-      case "title_desc":
-        setSort({ key: "title", value: -1 });
-        break;
-      case "createdAt_asc":
-        setSort({ key: "createdAt", value: 1 });
-        break;
-      case "createdAt_desc":
-        setSort({ key: "createdAt", value: -1 });
-        break;
-      default:
-        setSort(null);
-    }
-  };
+  // hàm thay đổi trang
+  const handlePageChange = usePageChange("accounts", setPage);
+
+  //  Xử lý thay đổi sort từ dropdown
+  const handleSortChange = useSortChange("accounts");
 
   return (
     <>
@@ -196,16 +192,14 @@ export default function Accounts() {
           disabled={!bulkValue || selectedIds.length === 0}
         />
         <div className="mb-6">
-          <select
-            onChange={handleSortChange}
-            className="border bg-white border-gray-300 rounded-lg px-4 py-2 text-[15px] outline-none focus:ring-2 focus:ring-secondary1 focus:border-secondary1 transition shadow-sm hover:border-secondary1 cursor-pointer"
-          >
-            <option value="">Sắp xếp</option>
-            <option value="title_asc">Tên A-Z</option>
-            <option value="title_desc">Tên Z-A</option>
-            <option value="createdAt_desc">Mới nhất</option>
-            <option value="createdAt_asc">Cũ nhất</option>
-          </select>
+          <SortSelect
+            sortValue={sortValue}
+            onChange={(e) => {
+              handleSortChange(e, setSort, setPage);
+              setSortValue(e.target.value);
+            }}
+            options={sortOptions}
+          />
         </div>
       </motion.div>
 
@@ -263,7 +257,7 @@ export default function Accounts() {
             page={page}
             total={total}
             limit={limit}
-            onPageChange={setPage}
+            onPageChange={handlePageChange}
           />
         </motion.div>
       )}

@@ -29,7 +29,7 @@ module.exports.index = (req, res) => __awaiter(void 0, void 0, void 0, function*
         const status = req.query.status;
         const keyword = req.query.keyWord;
         const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 5;
+        const limit = parseInt(req.query.limit) || 7;
         const skip = (page - 1) * limit;
         const find = {
             deleted: false,

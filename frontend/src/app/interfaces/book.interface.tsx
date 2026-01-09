@@ -15,6 +15,7 @@ export interface Book {
   reviews: number;
   image: string;
   status: string;
+  featured: boolean;
   position: number;
   deleted: boolean;
   deletedAt?: Date;

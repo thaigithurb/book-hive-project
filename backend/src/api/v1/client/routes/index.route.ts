@@ -8,3 +8,5 @@ module.exports = (app) => {
 
     app.use(version + "/books", bookRoutes);
 }
+
+export {};

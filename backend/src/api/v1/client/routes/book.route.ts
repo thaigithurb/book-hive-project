@@ -5,6 +5,8 @@ const controller = require("../controllers/book.controller");
 
 router.get("/", controller.index);
 
+router.get("/featured", controller.featured);
+
 router.get("/detail/:bookSlug", controller.detail);
 
 module.exports = router;

@@ -4,6 +4,7 @@ import CategoryStatusBadge from "../ChangeStatusBadge/ChangeStatusBadge";
 import React from "react";
 import TableActions from "../TableActions/TableActions";
 import ActivityLog from "../ActivityLog/ActivityLog";
+import DOMPurify from "dompurify";
 
 interface CategoryTableProps {
   categories: Category[];
@@ -93,9 +94,15 @@ export default function CategoryTable({
               <td className="py-4 px-4 text-[14.4px] text-primary">
                 {category.title}
               </td>
-              <td className="py-4 px-4 text-[14.4px] text-primary">
-                {category.description}
+              <td className="py-4 px-4 text-[14.4px] text-primary max-w-[500px]">
+                <div
+                  className="line-clamp-2"
+                  dangerouslySetInnerHTML={{
+                    __html: DOMPurify.sanitize(category.description),
+                  }}
+                />
               </td>
+
               <td className="py-4 px-4">
                 {category._id && (
                   <CategoryStatusBadge
@@ -131,8 +138,8 @@ export default function CategoryTable({
                   }}
                 />
               </td>
-               <td className="py-4 px-4 text-[13px] text-gray-700">
-                  <ActivityLog record={category} />
+              <td className="py-4 px-4 text-[13px] text-gray-700">
+                <ActivityLog record={category} />
               </td>
               <td className="py-4 px-4">
                 <TableActions

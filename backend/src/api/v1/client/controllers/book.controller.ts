@@ -1,20 +1,58 @@
-// @ts-ignore
+
+
 const Book = require("../../models/book.model");
-// @ts-ignore
 const Category = require("../../models/category.model");
 
 // [GET] /api/v1/books
 module.exports.index = async (req, res) => {
   try {
-    const books = await Book.find({
-      deleted: false,
-      status: "active",
-    }).sort({ position: -1 });
+    const keyword = req.query.keyWord;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 12;
+    const skip = (page - 1) * limit;
 
-    if (books) {
+    const find: any = {
+      deleted: false,
+    };
+
+    if (keyword) {
+      const regex = new RegExp(keyword, "i");
+      find.$or = [{ title: regex }, { author: regex }];
+    }
+
+    // sort
+    let sort: any = {};
+    if (req.query.sortKey && req.query.sortValue) {
+      sort[req.query.sortKey] = Number(req.query.sortValue);
+    } else {
+      sort.position = "desc";
+    }
+
+    const books = await Book.find(find)
+      .skip(skip)
+      .limit(limit)
+      .sort(sort);
+    const total = await Book.countDocuments(find);
+
+    if (books && books.length > 0) {
+      const booksWithCategory = [];
+
+      for (const book of books) {
+        const bookObj = book.toObject();
+        if (book.category_id) {
+          const category = await Category.findOne({
+            _id: book.category_id,
+          }).select("title");
+          bookObj.category_name = category.title;
+        }
+        booksWithCategory.push(bookObj);
+      }
+
       return res.status(200).json({
         message: "Thành công!",
-        books: books,
+        books: booksWithCategory,
+        total: total,
+        limit: limit,
       });
     }
 
@@ -58,3 +96,29 @@ module.exports.detail = async (req, res) => {
     });
   }
 };
+
+// [GET] /api/v1/books/featured
+module.exports.featured = async (req, res) => {
+  try {
+    const books = await Book.find({
+      deleted: false,
+      status: "active",
+      featured: true
+    }).sort({ position: -1 });
+
+    if (books) {
+      return res.status(200).json({
+        message: "Thành công!",
+        books: books,
+      });
+    }
+
+    return res.status(400).json({
+      message: "Không có sách nào",
+    });
+  } catch (error) {
+    res.json("Không tìm thấy!");
+  }
+};
+
+export {};

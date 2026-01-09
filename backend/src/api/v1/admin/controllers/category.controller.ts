@@ -7,7 +7,7 @@ module.exports.index = async (req, res) => {
     const status = req.query.status;
     const keyword = req.query.keyWord;
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 7;
+    const limit = parseInt(req.query.limit) || 0;
     const skip = (page - 1) * limit;
 
     const find: any = {
@@ -287,13 +287,13 @@ module.exports.create = async (req, res) => {
     await newCategory.save();
 
     return res.status(200).json({
-      message: "Tạo mới sản phẩm thành công!",
+      message: "Tạo mới thể loại thành công!",
       newCategory: newCategory,
     });
   } catch (error) {
     return res.status(400).json({
       error: error,
-      message: "Tạo mới sản phẩm thất bại",
+      message: "Tạo mới thể loại thất bại",
     });
   }
 };

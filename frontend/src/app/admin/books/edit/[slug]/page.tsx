@@ -25,6 +25,7 @@ export default function EditBook() {
     position: "",
     status: "active",
     image: "",
+    featured: false,
   });
   const [loading, setLoading] = useState(false);
   const [isPageLoading, setIsPageLoading] = useState(true);
@@ -76,7 +77,7 @@ export default function EditBook() {
     const { name, value, type } = e.target;
     setForm((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: type === "checkbox" ? value : value,
     }));
   };
 
@@ -103,6 +104,7 @@ export default function EditBook() {
           position: book.position,
           status: book.status,
           image: book.image,
+          featured: book.featured,
         });
         setPreview(book.image || null);
       } catch (err) {
@@ -119,7 +121,9 @@ export default function EditBook() {
     e.preventDefault();
     setLoading(true);
     const formData = new FormData();
-    Object.entries(form).forEach(([key, value]) => formData.append(key, value));
+    Object.entries(form).forEach(([key, value]) => {
+      formData.append(key, typeof value === "boolean" ? String(value) : value);
+    });
     if (imageFile) {
       formData.append("image", imageFile);
     }

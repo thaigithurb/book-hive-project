@@ -10,6 +10,7 @@ type BookFormData = {
   priceRent: number | string;
   position?: number | string;
   status: string;
+  featured: boolean;
 };
 
 type BookFormProps = {
@@ -128,16 +129,16 @@ export default function BookForm({
               forecolor backcolor
             `,
             content_style: "body { font-family: Arial; font-size: 14px; }",
-            entity_encoding: "raw"
+            entity_encoding: "raw",
           }}
           onEditorChange={(content) => {
-            editorHtmlRef.current = content; 
+            editorHtmlRef.current = content;
           }}
           onBlur={() => {
             handleChange({
               target: {
                 name: "description",
-                value: editorHtmlRef.current, 
+                value: editorHtmlRef.current,
               },
             });
           }}
@@ -241,6 +242,26 @@ export default function BookForm({
             Dừng hoạt động
           </label>
         </div>
+      </div>
+      <div className="mb-4">
+        <label className="flex items-center gap-2 mt-3">
+          <input
+            type="checkbox"
+            name="featured"
+            className="accent-secondary1"
+            checked={form.featured}
+            onChange={(e) =>
+              handleChange({
+                target: {
+                  name: "featured",
+                  value: e.target.checked,
+                  type: "checkbox",
+                },
+              })
+            }
+          />
+          <span className="text-primary font-medium">Nổi bật</span>
+        </label>
       </div>
       <button
         type="submit"

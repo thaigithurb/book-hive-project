@@ -1,3 +1,5 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 const homeRoutes = require("./home.route");
 const bookRoutes = require("./book.route");
 module.exports = (app) => {

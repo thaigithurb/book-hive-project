@@ -9,7 +9,7 @@ module.exports.index = async (req, res) => {
     const status = req.query.status;
     const keyword = req.query.keyWord;
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 5;
+    const limit = parseInt(req.query.limit) || 7;
     const skip = (page - 1) * limit;
 
     const find: any = {
@@ -114,7 +114,10 @@ module.exports.changeMulti = async (req, res) => {
 
     switch (type) {
       case "active":
-        await Book.updateMany({ _id: { $in: ids } }, { status: "active", updatedBy: req.user.id });
+        await Book.updateMany(
+          { _id: { $in: ids } },
+          { status: "active", updatedBy: req.user.id }
+        );
         return res.status(200).json({
           message: `Cập nhật trạng thái thành công ${ids.length} sách!`,
         });
@@ -205,10 +208,7 @@ module.exports.changeMulti = async (req, res) => {
           position: 1,
         });
         for (let i = 0; i < allBooks.length; i++) {
-          await Book.updateOne(
-            { _id: allBooks[i]._id },
-            { position: i + 1 }
-          );
+          await Book.updateOne({ _id: allBooks[i]._id }, { position: i + 1 });
         }
 
         const books = await Book.find({ deleted: false }).sort({ position: 1 });

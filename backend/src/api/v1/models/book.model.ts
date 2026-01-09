@@ -32,6 +32,7 @@ const bookSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    featured: Boolean,
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "Account" },
     deletedBy: { type: mongoose.Schema.Types.ObjectId, ref: "Account" },
     updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: "Account" },

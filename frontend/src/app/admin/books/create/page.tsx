@@ -19,6 +19,7 @@ export default function Create() {
     priceRent: "",
     position: "",
     status: "active",
+    featured: false,
   });
   const [loading, setLoading] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
@@ -70,7 +71,7 @@ export default function Create() {
     const { name, value, type } = e.target;
     setForm((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: type === "checkbox" ? value : value,
     }));
   };
 
@@ -78,11 +79,13 @@ export default function Create() {
     e.preventDefault();
     setLoading(true);
     const formData = new FormData();
-    Object.entries(form).forEach(([key, value]) => formData.append(key, value));
+    Object.entries(form).forEach(([key, value]) => {
+      formData.append(key, typeof value === "boolean" ? String(value) : value);
+    });
     if (imageFile) {
       formData.append("image", imageFile);
     }
-    
+
     toast
       .promise(
         axios.post(
@@ -105,7 +108,7 @@ export default function Create() {
           error: {
             render({ data }) {
               if (axios.isAxiosError(data)) {
-                return "File ảnh không hợp lệ!";
+                return data.response?.data?.message ?? "File ảnh không hợp lệ!";
               }
               return "Tạo sách thất bại";
             },
@@ -122,6 +125,7 @@ export default function Create() {
           priceRent: "",
           position: "",
           status: "active",
+          featured: false,
         });
         setPreview(null);
         setImageFile(null);
