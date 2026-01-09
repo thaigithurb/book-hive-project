@@ -38,6 +38,7 @@ export default function Accounts() {
   const sortOptions = [
     { value: "", label: "Sắp xếp" },
     { value: "title_asc", label: "Tên A-Z" },
+    { value: "title_desc", label: "Tên Z-A" },
     { value: "createdAt_desc", label: "Mới nhất" },
     { value: "createdAt_asc", label: "Cũ nhất" },
   ];
