@@ -50,10 +50,10 @@ export default function AccountTable({
             <th className="py-4 px-4 text-left text-[14.4px] font-semibold text-primary">
               Email
             </th>
-            <th className="py-4 px-4 text-left text-[14.4px] font-semibold text-primary">
+            <th className="py-4 px-4 text-left text-[14.4px]    font-semibold text-primary">
               Số điện thoại
             </th>
-            <th className="py-4 px-4 text-left text-[14.4px] font-semibold text-primary">
+            <th className="py-4 px-4 text-left lg:w-[150px] text-[14.4px] font-semibold text-primary">
               Trạng thái
             </th>
             <th className="py-4 px-4 text-left text-[14.4px] font-semibold text-primary">

@@ -52,7 +52,7 @@ export default function CategoryTable({
             <th className="py-4 px-4 text-left text-[14.4px] font-semibold text-primary">
               Mô tả
             </th>
-            <th className="py-4 px-4 text-left text-[14.4px] font-semibold text-primary">
+            <th className="py-4 px-4  lg:w-[150px] text-left text-[14.4px] font-semibold text-primary">
               Trạng thái
             </th>
             <th className="py-4 px-4 text-left text-[14.4px] font-semibold text-primary">

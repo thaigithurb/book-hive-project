@@ -58,7 +58,7 @@ export default function BookTable({
             <th className="py-4 px-4 text-left text-[14.4px] font-semibold text-primary">
               Giá
             </th>
-            <th className="py-4 px-4 text-left text-[14.4px] font-semibold text-primary">
+            <th className="py-4 px-4 text-left xl:w-[150px] text-[14.4px] font-semibold text-primary">
               Trạng thái
             </th>
             <th className="py-4 px-4 text-left text-[14.4px] font-semibold text-primary">
@@ -103,7 +103,7 @@ export default function BookTable({
                     alt={book.title}
                     className="w-16 h-16 object-cover rounded bg-gray-100"
                   />
-                  <span className="text-[16px] font-semibold text-primary">
+                  <span className="lg:text-[16px] font-semibold text-primary">
                     {book.title}
                   </span>
                 </div>
@@ -149,7 +149,7 @@ export default function BookTable({
                   }}
                 />
               </td>
-              <td className="py-4 px-4 text-[13px] text-gray-700">
+              <td className="py-4 px-4 text-[13px] text-gray-700 ">
                 <ActivityLog record={book}/>
               </td>
               <td className="py-4 px-4">
@@ -165,7 +165,7 @@ export default function BookTable({
                       label: "Sửa",
                       title: "edit",
                       class:
-                        "py-1 px-3 rounded-[6px] text-[13.6px] font-semibold bg-yellow-100 text-yellow-700 hover:bg-yellow-200 transition-colors duration-200 cursor-pointer",
+                        "xl:py-1 xl:px-3 lg:py-0.5 lg:px-2 rounded-[6px] lg:text-[12px] xl:text-[13.6px] font-semibold bg-yellow-100 text-yellow-700 hover:bg-yellow-200 transition-colors duration-200 cursor-pointer",
                     },
                   ]}
                   source="books"

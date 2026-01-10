@@ -19,13 +19,13 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import SortSelect from "@/app/components/SortSelect/SortSelect";
 import { usePageChange } from "@/app/utils/usePageChange";
 import { useSortChange } from "@/app/utils/useSortChange";
+import { useSyncParams } from "@/app/utils/useSyncParams";
 
 const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;
 
 export default function Books() {
   const searchParams = useSearchParams();
   const initialPage = Number(searchParams.get("page")) || 1;
-  console.log(initialPage);
 
   const [books, setBooks] = useState<Book[]>([]);
   const [keyword, setKeyword] = useState("");
@@ -108,6 +108,9 @@ export default function Books() {
     );
     return res.data.books || [];
   };
+
+  // ĐỒNG BỘ page với URL mỗi khi searchParams thay đổi
+  useSyncParams(setPage, setSortValue, setSort);
 
   // Hàm đổi trạng thái
   const handleChangeStatus = useChangeStatus(fetchData, "books");
@@ -207,7 +210,7 @@ export default function Books() {
             sortValue={sortValue}
             onChange={(e) => {
               setSortValue(e.target.value);
-              handleSortChange(e, setSort, setPage);
+              handleSortChange(e, setSort);
             }}
             options={sortOptions}
           />

@@ -18,6 +18,7 @@ import NewAddButton from "@/app/components/NewAddButton/NewAddButton";
 import { usePageChange } from "@/app/utils/usePageChange";
 import { useSortChange } from "@/app/utils/useSortChange";
 import SortSelect from "@/app/components/SortSelect/SortSelect";
+import { useSyncParams } from "@/app/utils/useSyncParams";
 
 const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;
 
@@ -101,6 +102,9 @@ export default function Categories() {
   };
 
   const handleChangeStatus = useChangeStatus(fetchData, "categories");
+
+  // ĐỒNG BỘ page với URL mỗi khi searchParams thay đổi
+  useSyncParams(setPage, setSortValue, setSort);
 
   const {
     selectedIds,
@@ -195,7 +199,7 @@ export default function Categories() {
           <SortSelect
             sortValue={sortValue}
             onChange={(e) => {
-              handleSortChange(e, setSort, setPage);
+              handleSortChange(e, setSort);
               setSortValue(e.target.value);
             }}
             options={sortOptions}

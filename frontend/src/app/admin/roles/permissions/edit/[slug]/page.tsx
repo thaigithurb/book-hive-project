@@ -129,7 +129,7 @@ export default function EditPermission() {
       transition={{ duration: 0.5 }}
     >
       <div className="max-w-xl mx-auto mt-8 bg-white p-8 rounded-xl shadow relative">
-        <BackButton className="absolute -top-10 -left-90 flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 transition cursor-pointer" />
+        <BackButton className="absolute -top-10 -left-70 flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 transition cursor-pointer" />
         <motion.h1
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}

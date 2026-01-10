@@ -24,7 +24,7 @@ export const BookCard = ({ book, featured }: BookCardProps) => {
             alt={book.title}
           />
         </div>
-        <h3 className="text-[20px] line-clamp-1 min-h-[28px] font-[700] mb-[8px] text-primary">
+        <h3 className="text-[17px] line-clamp-1 min-h-[28px] font-[700] mb-[8px] text-primary">
           {book.title}
         </h3>
         <p className="text-[14.4px] text-secondary2 mb-[8px]">{book.author}</p>
