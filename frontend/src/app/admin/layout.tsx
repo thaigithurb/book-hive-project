@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import React from "react";
 import { SideBar } from "../components/SideBar/SideBar";
-import AdminAuthGuard from "../components/AuthGuard/AuthGuard";
+import AdminAuthGuard from "../components/Auth/AuthGuard/AuthGuard";
 
 export const metadata: Metadata = {
   title: "BookHive",

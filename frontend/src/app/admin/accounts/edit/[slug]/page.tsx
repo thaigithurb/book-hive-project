@@ -4,9 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import { useParams } from "next/navigation";
-import { BackButton } from "@/app/components/BackButton/BackButton";
+import { BackButton } from "@/app/components/Button/BackButton/BackButton";
 import { motion, AnimatePresence } from "framer-motion";
-import AccountForm from "@/app/components/AccountForm/AccountForm";
+import AccountForm from "@/app/components/Form/AccountForm/AccountForm";
 import { Role } from "@/app/interfaces/role.interface";
 import { useRouter } from "next/navigation";
 

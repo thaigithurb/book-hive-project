@@ -1,34 +1,33 @@
+import { Book } from "@/app/interfaces/book.interface";
 import { useRouter } from "next/navigation";
-import { Category } from "@/app/interfaces/category.interface";
-import CategoryStatusBadge from "../ChangeStatusBadge/ChangeStatusBadge";
-import React from "react";
-import TableActions from "../TableActions/TableActions";
 import ActivityLog from "../ActivityLog/ActivityLog";
-import DOMPurify from "dompurify";
+import ChangeStatusBadge from "../../ChangeStatusBadge/ChangeStatusBadge";
+import TableActions from "../TableActions/TableActions";
 
-interface CategoryTableProps {
-  categories: Category[];
+interface BookTableProps {
+  books: Book[];
   onChangeStatus: (id: string, currentStatus: string) => void;
   selectedIds: string[];
   onSelect: (id: string, checked: boolean) => void;
   onSelectAll: (checked: boolean) => void;
   setDeleteId: (id: string) => void;
-  setEditedCategories: React.Dispatch<React.SetStateAction<Category[]>>;
+  setEditedBooks: React.Dispatch<React.SetStateAction<Book[]>>;
 }
 
-export default function CategoryTable({
-  categories,
+export default function BookTable({
+  books,
   onChangeStatus,
   selectedIds,
   onSelect,
   onSelectAll,
   setDeleteId,
-  setEditedCategories,
-}: CategoryTableProps) {
+  setEditedBooks,
+}: BookTableProps) {
   const router = useRouter();
+  // Kiểm tra xem đã chọn hết chưa
   const allChecked =
-    categories.length > 0 &&
-    categories.every((b) => b._id !== undefined && selectedIds.includes(b._id));
+    books.length > 0 &&
+    books.every((b) => b._id !== undefined && selectedIds.includes(b._id));
 
   return (
     <div className="overflow-x-auto rounded-2xl bg-white shadow">
@@ -46,13 +45,20 @@ export default function CategoryTable({
             <th className="py-4 px-4 text-left text-[14.4px] font-semibold text-primary">
               STT
             </th>
+
+            <th className="py-4 px-4 text-left text-[14.4px] font-semibold text-primary">
+              Sách
+            </th>
+            <th className="py-4 px-4 text-left text-[14.4px] font-semibold text-primary">
+              Tác giả
+            </th>
             <th className="py-4 px-4 text-left text-[14.4px] font-semibold text-primary">
               Thể loại
             </th>
             <th className="py-4 px-4 text-left text-[14.4px] font-semibold text-primary">
-              Mô tả
+              Giá
             </th>
-            <th className="py-4 px-4  lg:w-[150px] text-left text-[14.4px] font-semibold text-primary">
+            <th className="py-4 px-4 text-left xl:w-[150px] text-[14.4px] font-semibold text-primary">
               Trạng thái
             </th>
             <th className="py-4 px-4 text-left text-[14.4px] font-semibold text-primary">
@@ -67,49 +73,57 @@ export default function CategoryTable({
           </tr>
         </thead>
         <tbody>
-          {categories.map((category, idx) => (
+          {books.map((book, index) => (
             <tr
+              key={book.title}
               className="border-t"
               style={{ borderColor: "#64748b33" }}
-              key={category._id}
             >
               <td className="py-4 px-4">
                 <input
                   type="checkbox"
                   className="cursor-pointer"
                   checked={
-                    category._id !== undefined &&
-                    selectedIds.includes(category._id)
+                    book._id !== undefined && selectedIds.includes(book._id)
                   }
                   onChange={(e) => {
-                    if (category._id !== undefined) {
-                      onSelect(category._id, e.target.checked);
+                    if (book._id !== undefined) {
+                      onSelect(book._id, e.target.checked);
                     }
                   }}
                 />
               </td>
               <td className="py-4 px-4 text-[14.4px] text-primary">
-                {idx + 1}
+                {index + 1}
+              </td>
+              <td className="py-4 px-4">
+                <div className="flex items-center gap-3">
+                  <img
+                    src={book.image}
+                    alt={book.title}
+                    className="w-16 h-16 object-cover rounded bg-gray-100"
+                  />
+                  <span className="lg:text-[16px] font-semibold text-primary">
+                    {book.title}
+                  </span>
+                </div>
               </td>
               <td className="py-4 px-4 text-[14.4px] text-primary">
-                {category.title}
+                {book.author}
               </td>
-              <td className="py-4 px-4 text-[14.4px] text-primary max-w-[500px]">
-                <div
-                  className="line-clamp-2"
-                  dangerouslySetInnerHTML={{
-                    __html: DOMPurify.sanitize(category.description),
-                  }}
-                />
+              <td className="py-4 px-4 text-[14.4px] text-primary">
+                {book.category_name}
               </td>
-
+              <td className="py-4 px-4 text-[14.4px] text-primary">
+                {book.priceBuy.toLocaleString("vi-VN")}đ
+              </td>
               <td className="py-4 px-4">
-                {category._id && (
-                  <CategoryStatusBadge
-                    status={category.status}
+                {book._id && (
+                  <ChangeStatusBadge
+                    status={book.status}
                     onClick={() => {
-                      if (category._id) {
-                        onChangeStatus(category._id, category.status);
+                      if (book._id) {
+                        onChangeStatus(book._id, book.status);
                       }
                     }}
                   />
@@ -121,39 +135,42 @@ export default function CategoryTable({
                   min={1}
                   className="w-16 px-2 py-1 border border-gray-300 outline-none focus:ring-2 focus:ring-secondary1 hover:border-secondary1 focus:border-secondary1 transition rounded text-center"
                   value={
-                    typeof category.position === "number" &&
-                    category.position > 0
-                      ? category.position
+                    typeof book.position === "number" && book.position > 0
+                      ? book.position
                       : ""
                   }
                   onChange={(e) => {
                     const newPosition = Number(e.target.value);
-                    setEditedCategories((prev) =>
+                    setEditedBooks((prev) =>
                       prev.map((b) =>
-                        b._id === category._id
-                          ? { ...b, position: newPosition }
-                          : b
+                        b._id === book._id ? { ...b, position: newPosition } : b
                       )
                     );
                   }}
                 />
               </td>
-              <td className="py-4 px-4 text-[13px] text-gray-700">
-                <ActivityLog record={category} />
+              <td className="py-4 px-4 text-[13px] text-gray-700 ">
+                <ActivityLog record={book}/>
               </td>
               <td className="py-4 px-4">
                 <TableActions
                   actions={[
                     {
+                      label: "Chi tiết",
+                      title: "detail",
+                      class:
+                        "py-1 px-3 rounded-[6px] text-[13.6px] font-semibold bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors duration-200 cursor-pointer",
+                    },
+                    {
                       label: "Sửa",
                       title: "edit",
                       class:
-                        "py-1 px-3 rounded-[6px] text-[13.6px] font-semibold bg-yellow-100 text-yellow-700 hover:bg-yellow-200 transition-colors duration-200 cursor-pointer",
+                        "xl:py-1 xl:px-3 lg:py-0.5 lg:px-2 rounded-[6px] lg:text-[12px] xl:text-[13.6px] font-semibold bg-yellow-100 text-yellow-700 hover:bg-yellow-200 transition-colors duration-200 cursor-pointer",
                     },
                   ]}
-                  source="categories"
-                  slug={category.slug}
-                  id={category._id}
+                  source="books"
+                  slug={book.slug}
+                  id={book._id}
                   onDelete={setDeleteId}
                 />
               </td>

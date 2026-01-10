@@ -1,33 +1,31 @@
-import { Book } from "@/app/interfaces/book.interface";
 import { useRouter } from "next/navigation";
-import ChangeStatusBadge from "../ChangeStatusBadge/ChangeStatusBadge";
+import { Account } from "@/app/interfaces/account.interface";
 import TableActions from "../TableActions/TableActions";
 import ActivityLog from "../ActivityLog/ActivityLog";
+import ChangeStatusBadge from "../../ChangeStatusBadge/ChangeStatusBadge";
 
-interface BookTableProps {
-  books: Book[];
+interface AccountTableProps {
+  accounts: Account[];
   onChangeStatus: (id: string, currentStatus: string) => void;
   selectedIds: string[];
   onSelect: (id: string, checked: boolean) => void;
   onSelectAll: (checked: boolean) => void;
   setDeleteId: (id: string) => void;
-  setEditedBooks: React.Dispatch<React.SetStateAction<Book[]>>;
+  setEditedAccounts: React.Dispatch<React.SetStateAction<Account[]>>;
 }
 
-export default function BookTable({
-  books,
+export default function AccountTable({
+  accounts,
   onChangeStatus,
   selectedIds,
   onSelect,
   onSelectAll,
   setDeleteId,
-  setEditedBooks,
-}: BookTableProps) {
+}: AccountTableProps) {
   const router = useRouter();
-  // Kiểm tra xem đã chọn hết chưa
   const allChecked =
-    books.length > 0 &&
-    books.every((b) => b._id !== undefined && selectedIds.includes(b._id));
+    accounts.length > 0 &&
+    accounts.every((b) => b._id !== undefined && selectedIds.includes(b._id));
 
   return (
     <div className="overflow-x-auto rounded-2xl bg-white shadow">
@@ -45,24 +43,20 @@ export default function BookTable({
             <th className="py-4 px-4 text-left text-[14.4px] font-semibold text-primary">
               STT
             </th>
-
             <th className="py-4 px-4 text-left text-[14.4px] font-semibold text-primary">
-              Sách
+              Họ tên
             </th>
             <th className="py-4 px-4 text-left text-[14.4px] font-semibold text-primary">
-              Tác giả
+              Email
             </th>
-            <th className="py-4 px-4 text-left text-[14.4px] font-semibold text-primary">
-              Thể loại
+            <th className="py-4 px-4 text-left text-[14.4px]    font-semibold text-primary">
+              Số điện thoại
             </th>
-            <th className="py-4 px-4 text-left text-[14.4px] font-semibold text-primary">
-              Giá
-            </th>
-            <th className="py-4 px-4 text-left xl:w-[150px] text-[14.4px] font-semibold text-primary">
+            <th className="py-4 px-4 text-left lg:w-[150px] text-[14.4px] font-semibold text-primary">
               Trạng thái
             </th>
             <th className="py-4 px-4 text-left text-[14.4px] font-semibold text-primary">
-              Vị trí
+              Ngày tạo
             </th>
             <th className="py-4 px-4 text-left text-[14.4px] font-semibold text-primary">
               Log activity
@@ -73,22 +67,23 @@ export default function BookTable({
           </tr>
         </thead>
         <tbody>
-          {books.map((book, index) => (
+          {(accounts || []).map((account, index) => (
             <tr
-              key={book.title}
               className="border-t"
               style={{ borderColor: "#64748b33" }}
+              key={account._id || index}
             >
               <td className="py-4 px-4">
                 <input
                   type="checkbox"
                   className="cursor-pointer"
                   checked={
-                    book._id !== undefined && selectedIds.includes(book._id)
+                    account._id !== undefined &&
+                    selectedIds.includes(account._id)
                   }
                   onChange={(e) => {
-                    if (book._id !== undefined) {
-                      onSelect(book._id, e.target.checked);
+                    if (account._id !== undefined) {
+                      onSelect(account._id, e.target.checked);
                     }
                   }}
                 />
@@ -96,61 +91,33 @@ export default function BookTable({
               <td className="py-4 px-4 text-[14.4px] text-primary">
                 {index + 1}
               </td>
-              <td className="py-4 px-4">
-                <div className="flex items-center gap-3">
-                  <img
-                    src={book.image}
-                    alt={book.title}
-                    className="w-16 h-16 object-cover rounded bg-gray-100"
-                  />
-                  <span className="lg:text-[16px] font-semibold text-primary">
-                    {book.title}
-                  </span>
-                </div>
+              <td className="py-4 px-4 text-[14.4px] text-primary">
+                {account.fullName}
               </td>
               <td className="py-4 px-4 text-[14.4px] text-primary">
-                {book.author}
+                {account.email}
               </td>
               <td className="py-4 px-4 text-[14.4px] text-primary">
-                {book.category_name}
+                {account.phone}
               </td>
               <td className="py-4 px-4 text-[14.4px] text-primary">
-                {book.priceBuy.toLocaleString("vi-VN")}đ
-              </td>
-              <td className="py-4 px-4">
-                {book._id && (
+                {account._id && (
                   <ChangeStatusBadge
-                    status={book.status}
+                    status={account.status}
                     onClick={() => {
-                      if (book._id) {
-                        onChangeStatus(book._id, book.status);
-                      }
+                      if (account._id)
+                        onChangeStatus(account._id, account.status);
                     }}
                   />
                 )}
               </td>
               <td className="py-4 px-4 text-[14.4px] text-primary">
-                <input
-                  type="number"
-                  min={1}
-                  className="w-16 px-2 py-1 border border-gray-300 outline-none focus:ring-2 focus:ring-secondary1 hover:border-secondary1 focus:border-secondary1 transition rounded text-center"
-                  value={
-                    typeof book.position === "number" && book.position > 0
-                      ? book.position
-                      : ""
-                  }
-                  onChange={(e) => {
-                    const newPosition = Number(e.target.value);
-                    setEditedBooks((prev) =>
-                      prev.map((b) =>
-                        b._id === book._id ? { ...b, position: newPosition } : b
-                      )
-                    );
-                  }}
-                />
+                {account.createdAt
+                  ? new Date(account.createdAt).toLocaleDateString()
+                  : ""}
               </td>
-              <td className="py-4 px-4 text-[13px] text-gray-700 ">
-                <ActivityLog record={book}/>
+              <td className="py-4 px-4 text-[13px] text-gray-700">
+                <ActivityLog record={account} />
               </td>
               <td className="py-4 px-4">
                 <TableActions
@@ -165,12 +132,12 @@ export default function BookTable({
                       label: "Sửa",
                       title: "edit",
                       class:
-                        "xl:py-1 xl:px-3 lg:py-0.5 lg:px-2 rounded-[6px] lg:text-[12px] xl:text-[13.6px] font-semibold bg-yellow-100 text-yellow-700 hover:bg-yellow-200 transition-colors duration-200 cursor-pointer",
+                        "py-1 px-3 rounded-[6px] text-[13.6px] font-semibold bg-yellow-100 text-yellow-700 hover:bg-yellow-200 transition-colors duration-200 cursor-pointer",
                     },
                   ]}
-                  source="books"
-                  slug={book.slug}
-                  id={book._id}
+                  source="accounts"
+                  slug={account.slug}
+                  id={account._id}
                   onDelete={setDeleteId}
                 />
               </td>

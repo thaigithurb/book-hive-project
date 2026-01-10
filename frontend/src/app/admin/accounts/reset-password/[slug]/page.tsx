@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
-import { BackButton } from "@/app/components/BackButton/BackButton";
+import { BackButton } from "@/app/components/Button/BackButton/BackButton";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import { useParams } from "next/navigation";

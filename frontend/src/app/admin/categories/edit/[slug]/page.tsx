@@ -4,10 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import { useParams, useRouter } from "next/navigation";
-import { BackButton } from "@/app/components/BackButton/BackButton";
-import BookForm from "@/app/components/BookForm/BookForm";
+import { BackButton } from "@/app/components/Button/BackButton/BackButton";
+import BookForm from "@/app/components/Form/BookForm/BookForm";
 import { motion, AnimatePresence } from "framer-motion";
-import CategoryForm from "@/app/components/CategoryForm/CategoryForm";
+import CategoryForm from "@/app/components/Form/CategoryForm/CategoryForm";
 
 const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { BackButton } from "@/app/components/BackButton/BackButton";
+import { BackButton } from "@/app/components/Button/BackButton/BackButton";
 import axios from "axios";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";

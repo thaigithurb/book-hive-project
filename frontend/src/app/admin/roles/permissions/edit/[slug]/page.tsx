@@ -3,10 +3,10 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
-import { BackButton } from "@/app/components/BackButton/BackButton";
+import { BackButton } from "@/app/components/Button/BackButton/BackButton";
 import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import PermissionForm from "@/app/components/PermissionForm/PermissionForm";
+import PermissionForm from "@/app/components/Form/PermissionForm/PermissionForm";
 
 const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;
 

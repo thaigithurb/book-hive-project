@@ -8,7 +8,7 @@ import DOMPurify from "dompurify";
 import { isEqual, sortBy } from "lodash";
 import { toast, ToastContainer } from "react-toastify";
 import { AnimatePresence, motion } from "framer-motion";
-import NewAddButton from "@/app/components/NewAddButton/NewAddButton";
+import NewAddButton from "@/app/components/Button/NewAddButton/NewAddButton";
 import ConfirmModal from "@/app/components/ConfirmModal/ConfirmModal";
 import { useRouter } from "next/navigation";
 

@@ -1,6 +1,6 @@
 import { MdLogout } from "react-icons/md";
 import { toast } from "react-toastify";
-import ConfirmModal from "../ConfirmModal/ConfirmModal";
+import ConfirmModal from "../../ConfirmModal/ConfirmModal";
 import { useState } from "react";
 import axios from "axios";
 

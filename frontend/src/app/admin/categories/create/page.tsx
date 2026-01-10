@@ -3,8 +3,8 @@
 import { useState } from "react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
-import { BackButton } from "@/app/components/BackButton/BackButton";
-import CategoryForm from "@/app/components/CategoryForm/CategoryForm";
+import { BackButton } from "@/app/components/Button/BackButton/BackButton";
+import CategoryForm from "@/app/components/Form/CategoryForm/CategoryForm";
 import { motion } from "framer-motion";
 
 const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;

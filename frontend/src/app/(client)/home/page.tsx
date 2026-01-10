@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 import axios from "axios";
 import { Book } from "@/app/interfaces/book.interface";
-import { BookCard } from "@/app/components/BookCard/BookCard";
+import { BookCard } from "@/app/components/Card/BookCard/BookCard";
 
 export default function Home() {
   const [featuredBooks, setFeaturedBooks] = useState<Book[]>([]);

@@ -1,24 +1,24 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import StatusFilter from "@/app/components/StatusFilter/StatusFilter";
 import Search from "@/app/components/Search/Search";
-import debounce from "lodash.debounce";
 import Pagination from "@/app/components/Pagination/Pagination";
 import ChangeMulti from "@/app/components/ChangeMulti/ChangeMulti";
-import useChangeStatus from "@/app/utils/useChangeStatus";
 import { useBulkSelect } from "@/app/utils/useBulkSelect";
 import ConfirmModal from "@/app/components/ConfirmModal/ConfirmModal";
 import { toast, ToastContainer } from "react-toastify";
 import { motion, AnimatePresence } from "framer-motion";
-import AccountTable from "@/app/components/AccountTable/AccountTable";
 import { Account } from "@/app/interfaces/account.interface";
-import NewAddButton from "@/app/components/NewAddButton/NewAddButton";
+import NewAddButton from "@/app/components/Button/NewAddButton/NewAddButton";
 import { usePageChange } from "@/app/utils/usePageChange";
 import { useSortChange } from "@/app/utils/useSortChange";
 import SortSelect from "@/app/components/SortSelect/SortSelect";
 import { useSyncParams } from "@/app/utils/useSyncParams";
+import { useFetchData } from "@/app/utils/useFetchData";
+import AccountTable from "@/app/components/Table/AccountTable/AccountTable";
+import useChangeStatus from "@/app/utils/useChangeStatus";
 
 const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;
 
@@ -44,35 +44,24 @@ export default function Accounts() {
     { value: "createdAt_asc", label: "Cũ nhất" },
   ];
 
-  const fetchData = useCallback(
-    debounce(() => {
-      setLoading(true);
-      axios
-        .get(`http://localhost:3001/api/v1/${ADMIN_PREFIX}/accounts`, {
-          params: {
-            ...(status && { status }),
-            ...(keyword && { keyWord: keyword }),
-            ...(sort && { sortKey: sort.key, sortValue: sort.value }),
-            page,
-            limit,
-          },
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-          withCredentials: true,
-        })
-        .then((res) => {
-          setAccounts(res.data.accounts || []);
-          setTotal(res.data.total || 0);
-        })
-        .catch(() => setAccounts([]))
-        .finally(() => {
-          setLoading(false);
-          setIsFirstLoad(false);
-        });
-    }, 400),
-    [status, keyword, page, sort]
-  );
+    // fetchData
+    const fetchData = useFetchData({
+      status,
+      keyword,
+      page,
+      sort,
+      limit,
+      accessToken,
+      ADMIN_PREFIX,
+      onSuccess: ({ items, total }) => {
+        setAccounts(items);
+        setTotal(total);
+      },
+      setTotal,
+      setLoading,
+      setIsFirstLoad,
+      source: "accounts",
+    });
 
   useEffect(() => {
     fetchData();

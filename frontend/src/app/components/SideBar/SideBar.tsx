@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ToastContainer } from "react-toastify";
-import Logout from "../Logout/Logout";
+import Logout from "../Auth/Logout/Logout";
 
 const menu = [
   { label: "📊 Dashboard", key: "dashboard", href: "/admin/dashboard" },

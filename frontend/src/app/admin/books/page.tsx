@@ -1,25 +1,25 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
-import BookTable from "@/app/components/BookTable/BookTable";
 import StatusFilter from "@/app/components/StatusFilter/StatusFilter";
 import Search from "@/app/components/Search/Search";
 import { Book } from "@/app/interfaces/book.interface";
-import debounce from "lodash.debounce";
 import Pagination from "@/app/components/Pagination/Pagination";
 import ChangeMulti from "@/app/components/ChangeMulti/ChangeMulti";
-import useChangeStatus from "@/app/utils/useChangeStatus";
 import { useBulkSelect } from "@/app/utils/useBulkSelect";
 import ConfirmModal from "@/app/components/ConfirmModal/ConfirmModal";
 import { toast, ToastContainer } from "react-toastify";
 import { AnimatePresence, motion } from "framer-motion";
-import NewAddButton from "@/app/components/NewAddButton/NewAddButton";
-import { useParams, useRouter, useSearchParams } from "next/navigation";
+import NewAddButton from "@/app/components/Button/NewAddButton/NewAddButton";
+import { useSearchParams } from "next/navigation";
 import SortSelect from "@/app/components/SortSelect/SortSelect";
 import { usePageChange } from "@/app/utils/usePageChange";
 import { useSortChange } from "@/app/utils/useSortChange";
 import { useSyncParams } from "@/app/utils/useSyncParams";
+import { useFetchData } from "@/app/utils/useFetchData";
+import BookTable from "@/app/components/Table/BookTable/BookTable";
+import useChangeStatus from "@/app/utils/useChangeStatus";
 
 const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;
 
@@ -45,41 +45,29 @@ export default function Books() {
     { value: "title_desc", label: "Tên Z-A" },
     { value: "priceBuy_asc", label: "Giá mua tăng" },
     { value: "priceBuy_desc", label: "Giá mua giảm" },
-    { value: "createdAt_asc", label: "Mới nhất" },
-    { value: "createdAt_desc", label: "Cũ nhất" },
+    { value: "createdAt_desc", label: "Mới nhất" },
+    { value: "createdAt_asc", label: "Cũ nhất" },
   ];
   const [sortValue, setSortValue] = useState("");
 
-  // xử lí load data cùng với lọc và tìm kiếm
-  const fetchData = useCallback(
-    debounce(() => {
-      setLoading(true);
-      axios
-        .get(`http://localhost:3001/api/v1/${ADMIN_PREFIX}/books`, {
-          params: {
-            ...(status && { status }),
-            ...(keyword && { keyWord: keyword }),
-            ...(sort && { sortKey: sort.key, sortValue: sort.value }),
-            page,
-            limit,
-          },
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-          withCredentials: true,
-        })
-        .then((res) => {
-          setBooks(res.data.books || []);
-          setTotal(res.data.total || 0);
-        })
-        .catch((errors) => setBooks([]))
-        .finally(() => {
-          setLoading(false);
-          setIsFirstLoad(false);
-        });
-    }, 400),
-    [status, keyword, page, sort]
-  );
+  // fetchData
+  const fetchData = useFetchData({
+    status,
+    keyword,
+    page,
+    sort,
+    limit,
+    accessToken,
+    ADMIN_PREFIX,
+    onSuccess: ({ items, total }) => {
+      setBooks(items);
+      setTotal(total);
+    },
+    setTotal,
+    setLoading,
+    setIsFirstLoad,
+    source: "books",
+  });
 
   useEffect(() => {
     fetchData();

@@ -3,9 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
-import { BackButton } from "@/app/components/BackButton/BackButton";
+import { BackButton } from "@/app/components/Button/BackButton/BackButton";
 import { motion } from "framer-motion";
-import AccountForm from "@/app/components/AccountForm/AccountForm";
+import AccountForm from "@/app/components/Form/AccountForm/AccountForm";
 import { Role } from "@/app/interfaces/role.interface";
 
 const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;

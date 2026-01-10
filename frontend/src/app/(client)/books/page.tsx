@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import axios from "axios";
 import { Book } from "@/app/interfaces/book.interface";
-import { BookCard } from "@/app/components/BookCard/BookCard";
+import { BookCard } from "@/app/components/Card/BookCard/BookCard";
 import debounce from "lodash.debounce";
 import Pagination from "@/app/components/Pagination/Pagination";
 import { div } from "framer-motion/client";
