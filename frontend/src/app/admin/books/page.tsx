@@ -17,9 +17,9 @@ import SortSelect from "@/app/components/SortSelect/SortSelect";
 import { usePageChange } from "@/app/utils/usePageChange";
 import { useSortChange } from "@/app/utils/useSortChange";
 import { useSyncParams } from "@/app/utils/useSyncParams";
-import { useFetchData } from "@/app/utils/useFetchData";
 import BookTable from "@/app/components/Table/BookTable/BookTable";
 import useChangeStatus from "@/app/utils/useChangeStatus";
+import { useFetchDataAdmin } from "@/app/utils/useFetchDataAdmin";
 
 const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;
 
@@ -51,7 +51,7 @@ export default function Books() {
   const [sortValue, setSortValue] = useState("");
 
   // fetchData
-  const fetchData = useFetchData({
+  const fetchData = useFetchDataAdmin({
     status,
     keyword,
     page,
@@ -148,10 +148,10 @@ export default function Books() {
   };
 
   // hàm thay đổi trang
-  const handlePageChange = usePageChange("books", setPage);
+  const handlePageChange = usePageChange("books", setPage, "admin");
 
   //  Xử lý thay đổi sort từ dropdown
-  const handleSortChange = useSortChange("books");
+  const handleSortChange = useSortChange("books", "admin");
 
   return (
     <>

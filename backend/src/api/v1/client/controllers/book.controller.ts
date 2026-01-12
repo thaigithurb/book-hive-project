@@ -120,8 +120,6 @@ module.exports.featured = async (req, res) => {
 // [GET] /api/v1/books/rent-only
 module.exports.booksRent = async (req, res) => {
   try {
-    console.log(req.query.sortKey);
-    console.log(req.query.sortValue);
     const keyword = req.query.keyWord;
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 12;
@@ -139,11 +137,8 @@ module.exports.booksRent = async (req, res) => {
     }
 
     let books = [];
-    if (
-      req.query.sortKey === "priceRentDay" ||
-      req.query.sortKey === "priceRentWeek"
-    ) {
-      const type = req.query.sortKey === "priceRentDay" ? "day" : "week";
+    if (req.query.sortKey === "priceRentDay") {
+      const type = "day";
       books = await Book.aggregate([
         { $match: find },
         {

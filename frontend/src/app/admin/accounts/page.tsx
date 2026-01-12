@@ -16,7 +16,7 @@ import { usePageChange } from "@/app/utils/usePageChange";
 import { useSortChange } from "@/app/utils/useSortChange";
 import SortSelect from "@/app/components/SortSelect/SortSelect";
 import { useSyncParams } from "@/app/utils/useSyncParams";
-import { useFetchData } from "@/app/utils/useFetchData";
+import { useFetchDataAdmin } from "@/app/utils/useFetchDataAdmin";
 import AccountTable from "@/app/components/Table/AccountTable/AccountTable";
 import useChangeStatus from "@/app/utils/useChangeStatus";
 
@@ -45,7 +45,7 @@ export default function Accounts() {
   ];
 
     // fetchData
-    const fetchData = useFetchData({
+    const fetchData = useFetchDataAdmin({
       status,
       keyword,
       page,
@@ -139,10 +139,10 @@ export default function Accounts() {
   };
 
   // hàm thay đổi trang
-  const handlePageChange = usePageChange("accounts", setPage);
+  const handlePageChange = usePageChange("accounts", setPage, "admin");
 
   //  Xử lý thay đổi sort từ dropdown
-  const handleSortChange = useSortChange("accounts");
+  const handleSortChange = useSortChange("accounts", "admin");
 
   return (
     <>

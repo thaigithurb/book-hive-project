@@ -20,6 +20,8 @@ export function useSyncParams(setPage: (p: number) => void, setSortValue: (v: st
           ? `priceBuy_${urlSortValue === "asc" ? "asc" : "desc"}`
           : urlSortKey === "createdAt"
           ? `createdAt_${urlSortValue === "asc" ? "asc" : "desc"}`
+          : urlSortKey === "priceRentDay"
+          ? `priceRentDay_${urlSortValue === "asc" ? "asc" : "desc"}`
           : "";
       setSortValue(sortVal);
       setSort({

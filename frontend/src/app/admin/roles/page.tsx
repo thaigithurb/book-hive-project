@@ -16,7 +16,7 @@ import { usePageChange } from "@/app/utils/usePageChange";
 import { useSortChange } from "@/app/utils/useSortChange";
 import SortSelect from "@/app/components/SortSelect/SortSelect";
 import { useSyncParams } from "@/app/utils/useSyncParams";
-import { useFetchData } from "@/app/utils/useFetchData";
+import { useFetchDataAdmin } from "@/app/utils/useFetchDataAdmin";
 import RoleTable from "@/app/components/Table/RoleTable/RoleTable";
 
 const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;
@@ -44,7 +44,7 @@ export default function Roles() {
   ];
 
   // fetchData
-  const fetchData = useFetchData({
+  const fetchData = useFetchDataAdmin({
     status,
     keyword,
     page,
@@ -132,10 +132,10 @@ export default function Roles() {
   };
 
   // hàm thay đổi trang
-  const handlePageChange = usePageChange("roles", setPage);
+  const handlePageChange = usePageChange("roles", setPage, "admin");
 
   //  Xử lý thay đổi sort từ dropdown
-  const handleSortChange = useSortChange("roles");
+  const handleSortChange = useSortChange("roles", "admin");
 
   // ĐỒNG BỘ page với URL mỗi khi searchParams thay đổi
   useSyncParams(setPage, setSortValue, setSort);

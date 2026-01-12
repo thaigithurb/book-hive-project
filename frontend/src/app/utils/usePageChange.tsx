@@ -1,6 +1,10 @@
 import { useRouter, useSearchParams } from "next/navigation";
 
-export function usePageChange(source: string, setPage: (page: number) => void) {
+export function usePageChange(
+  source: string,
+  setPage: (page: number) => void,
+  side: string
+) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -12,6 +16,10 @@ export function usePageChange(source: string, setPage: (page: number) => void) {
     } else {
       params.delete("page");
     }
-    router.push(`/admin/${source}?${params.toString()}`);
+    if (side === "admin") {
+      router.push(`/admin/${source}?${params.toString()}`);
+    } else {
+      router.push(`/${source}?${params.toString()}`);
+    }
   };
 }

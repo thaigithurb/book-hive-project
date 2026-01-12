@@ -1,11 +1,12 @@
 import { useRouter, useSearchParams } from "next/navigation";
 
-export function useSortChange(source: string) {
+export function useSortChange(source: string, side: string) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  return (e: any, setSort: (val: any) => void )=> {
+  return (e: any, setSort: (val: any) => void) => {
     const val = e.target.value;
+    console.log(val);
     let sortKey = "";
     let sortValue = "";
     switch (val) {
@@ -27,6 +28,16 @@ export function useSortChange(source: string) {
       case "priceBuy_desc":
         setSort({ key: "priceBuy", value: -1 });
         sortKey = "priceBuy";
+        sortValue = "desc";
+        break;
+      case "priceRentDay_asc":
+        setSort({ key: "priceRentDay", value: 1 });
+        sortKey = "priceRentDay";
+        sortValue = "asc";
+        break;
+      case "priceRentDay_desc":
+        setSort({ key: "priceRentDay", value: -1 });
+        sortKey = "priceRentDay";
         sortValue = "desc";
         break;
       case "createdAt_asc":
@@ -55,6 +66,11 @@ export function useSortChange(source: string) {
       params.delete("sortValue");
       params.delete("page");
     }
-    router.push(`/admin/${source}?${params.toString()}`);
+
+    if (side === "admin") {
+      router.push(`/admin/${source}?${params.toString()}`);
+    } else {
+      router.push(`/${source}?${params.toString()}`);
+    }
   };
 }

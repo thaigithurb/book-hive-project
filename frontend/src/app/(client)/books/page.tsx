@@ -10,6 +10,9 @@ import Pagination from "@/app/components/Pagination/Pagination";
 import { div } from "framer-motion/client";
 import SortSelect from "@/app/components/SortSelect/SortSelect";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useSyncParams } from "@/app/utils/useSyncParams";
+import { usePageChange } from "@/app/utils/usePageChange";
+import { useSortChange } from "@/app/utils/useSortChange";
 
 export default function Books() {
   const [books, setBooks] = useState<Book[]>([]);
@@ -29,8 +32,6 @@ export default function Books() {
     { value: "createdAt_desc", label: "Mới nhất" },
     { value: "createdAt_asc", label: "Cũ nhất" },
   ];
-  const router = useRouter();
-  const searchParams = useSearchParams();
 
   // xử lí load data cùng với lọc và tìm kiếm
   const fetchData = useCallback(
@@ -62,50 +63,14 @@ export default function Books() {
     return fetchData.cancel;
   }, [fetchData]);
 
-  const handlePageChange = (newPage: number) => {
-    setPage(newPage);
-    const params = new URLSearchParams(searchParams.toString());
-    if (newPage > 1) {
-      params.set("page", newPage.toString());
-    } else {
-      params.delete("page");
-    }
-    router.push(`/books?${params.toString()}`);
-  };
+  // ĐỒNG BỘ page với URL mỗi khi searchParams thay đổi
+  useSyncParams(setPage, setSortValue, setSort);
+
+  // hàm thay đổi trang
+  const handlePageChange = usePageChange("books", setPage, "client");
 
   //  Xử lý thay đổi sort từ dropdown
-  const handleSortChange = (e: any) => {
-    const val = e.target.value;
-    switch (val) {
-      case "title_asc":
-        setSort({ key: "title", value: 1 });
-        break;
-      case "title_desc":
-        setSort({ key: "title", value: -1 });
-        break;
-      case "priceBuy_asc":
-        setSort({ key: "priceBuy", value: 1 });
-        break;
-      case "priceBuy_desc":
-        setSort({ key: "priceBuy", value: -1 });
-        break;
-      case "createdAt_asc":
-        setSort({ key: "createdAt", value: 1 });
-        break;
-      case "createdAt_desc":
-        setSort({ key: "createdAt", value: -1 });
-        break;
-      default:
-        setSort(null);
-    }
-    const params = new URLSearchParams(searchParams.toString());
-    if (val) {
-      params.set("sort", val);
-    } else {
-      params.delete("sort");
-    }
-    router.push(`/books?${params.toString()}`);
-  };
+  const handleSortChange = useSortChange("books", "client");
 
   return (
     <>
@@ -116,7 +81,10 @@ export default function Books() {
               Tất cả sách
             </h2>
             <SortSelect
-              onChange={handleSortChange}
+              onChange={(e) => {
+                setSortValue(e.target.value);
+                handleSortChange(e, setSort);
+              }}
               options={sortOptions}
               sortValue={sortValue}
             />

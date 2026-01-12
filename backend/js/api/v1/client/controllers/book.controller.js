@@ -113,8 +113,6 @@ module.exports.featured = (req, res) => __awaiter(void 0, void 0, void 0, functi
 });
 module.exports.booksRent = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        console.log(req.query.sortKey);
-        console.log(req.query.sortValue);
         const keyword = req.query.keyWord;
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 12;
@@ -129,9 +127,8 @@ module.exports.booksRent = (req, res) => __awaiter(void 0, void 0, void 0, funct
             find.$or = [{ title: regex }, { author: regex }];
         }
         let books = [];
-        if (req.query.sortKey === "priceRentDay" ||
-            req.query.sortKey === "priceRentWeek") {
-            const type = req.query.sortKey === "priceRentDay" ? "day" : "week";
+        if (req.query.sortKey === "priceRentDay") {
+            const type = "day";
             books = yield Book.aggregate([
                 { $match: find },
                 {

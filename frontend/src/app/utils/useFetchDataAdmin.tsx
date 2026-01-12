@@ -2,7 +2,7 @@ import { useCallback } from "react";
 import debounce from "lodash.debounce";
 import axios from "axios";
 
-type UseFetchDataParams = {
+type UseFetchDataAdminParams = {
     status?: string;
     keyword?: string;
     page: number;
@@ -17,7 +17,7 @@ type UseFetchDataParams = {
     source: string;
 };
 
-export function useFetchData({
+export function useFetchDataAdmin({
     status,
     keyword,
     page,
@@ -30,7 +30,7 @@ export function useFetchData({
     setLoading,
     setIsFirstLoad,
     source,
-}: UseFetchDataParams) {
+}: UseFetchDataAdminParams) {
     return useCallback(
         debounce(() => {
             setLoading(true);

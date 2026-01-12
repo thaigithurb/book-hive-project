@@ -18,7 +18,7 @@ import { usePageChange } from "@/app/utils/usePageChange";
 import { useSortChange } from "@/app/utils/useSortChange";
 import SortSelect from "@/app/components/SortSelect/SortSelect";
 import { useSyncParams } from "@/app/utils/useSyncParams";
-import { useFetchData } from "@/app/utils/useFetchData";
+import { useFetchDataAdmin } from "@/app/utils/useFetchDataAdmin";
 import CategoryTable from "@/app/components/Table/CategoryTable/CategoryTable";
 
 const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;
@@ -46,7 +46,7 @@ export default function Categories() {
   ];
 
     // fetchData
-    const fetchData = useFetchData({
+    const fetchData = useFetchDataAdmin({
       status,
       keyword,
       page,
@@ -138,10 +138,10 @@ export default function Categories() {
   };
 
   // hàm thay đổi trang
-  const handlePageChange = usePageChange("categories", setPage);
+  const handlePageChange = usePageChange("categories", setPage, "admin");
 
   //  Xử lý thay đổi sort từ dropdown
-  const handleSortChange = useSortChange("categories");
+  const handleSortChange = useSortChange("categories", "admin");
 
   return (
     <>
