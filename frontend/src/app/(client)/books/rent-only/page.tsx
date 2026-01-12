@@ -24,8 +24,8 @@ export default function BooksRent() {
     { value: "", label: "Sắp xếp" },
     { value: "title_asc", label: "Tên A-Z" },
     { value: "title_desc", label: "Tên Z-A" },
-    { value: "priceBuy_asc", label: "Giá mua tăng" },
-    { value: "priceBuy_desc", label: "Giá mua giảm" },
+    { value: "priceRentDay_asc", label: "Giá thuê tăng" },
+    { value: "priceRentDay_desc", label: "Giá thuê giảm" },
     { value: "createdAt_desc", label: "Mới nhất" },
     { value: "createdAt_asc", label: "Cũ nhất" },
   ];
@@ -83,11 +83,11 @@ export default function BooksRent() {
       case "title_desc":
         setSort({ key: "title", value: -1 });
         break;
-      case "priceBuy_asc":
-        setSort({ key: "priceBuy", value: 1 });
+      case "priceRentDay_asc":
+        setSort({ key: "priceRentDay", value: 1 });
         break;
-      case "priceBuy_desc":
-        setSort({ key: "priceBuy", value: -1 });
+      case "priceRentDay_desc":
+        setSort({ key: "priceRentDay", value: -1 });
         break;
       case "createdAt_asc":
         setSort({ key: "createdAt", value: 1 });

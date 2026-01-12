@@ -19,7 +19,7 @@ module.exports.index = (req, res) => __awaiter(void 0, void 0, void 0, function*
         const skip = (page - 1) * limit;
         const find = {
             deleted: false,
-            status: "active"
+            status: "active",
         };
         if (keyword) {
             const regex = new RegExp(keyword, "i");
@@ -32,10 +32,7 @@ module.exports.index = (req, res) => __awaiter(void 0, void 0, void 0, function*
         else {
             sort.position = "desc";
         }
-        const books = yield Book.find(find)
-            .skip(skip)
-            .limit(limit)
-            .sort(sort);
+        const books = yield Book.find(find).skip(skip).limit(limit).sort(sort);
         const total = yield Book.countDocuments(find);
         if (books && books.length > 0) {
             const booksWithCategory = [];
@@ -82,7 +79,6 @@ module.exports.detail = (req, res) => __awaiter(void 0, void 0, void 0, function
             }).select("title");
             bookObj.category_name = category.title;
         }
-        ;
         return res.status(200).json({
             message: "Lấy thông tin sách thành công!",
             book: bookObj,
@@ -99,7 +95,7 @@ module.exports.featured = (req, res) => __awaiter(void 0, void 0, void 0, functi
         const books = yield Book.find({
             deleted: false,
             status: "active",
-            featured: true
+            featured: true,
         }).sort({ position: -1 });
         if (books) {
             return res.status(200).json({
@@ -117,6 +113,8 @@ module.exports.featured = (req, res) => __awaiter(void 0, void 0, void 0, functi
 });
 module.exports.booksRent = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        console.log(req.query.sortKey);
+        console.log(req.query.sortValue);
         const keyword = req.query.keyWord;
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 12;
@@ -124,28 +122,57 @@ module.exports.booksRent = (req, res) => __awaiter(void 0, void 0, void 0, funct
         const find = {
             deleted: false,
             status: "active",
-            priceBuy: 0
+            priceBuy: 0,
         };
         if (keyword) {
             const regex = new RegExp(keyword, "i");
             find.$or = [{ title: regex }, { author: regex }];
         }
-        let sort = {};
-        if (req.query.sortKey && req.query.sortValue) {
-            sort[req.query.sortKey] = Number(req.query.sortValue);
+        let books = [];
+        if (req.query.sortKey === "priceRentDay" ||
+            req.query.sortKey === "priceRentWeek") {
+            const type = req.query.sortKey === "priceRentDay" ? "day" : "week";
+            books = yield Book.aggregate([
+                { $match: find },
+                {
+                    $addFields: {
+                        priceRentSort: {
+                            $first: {
+                                $map: {
+                                    input: {
+                                        $filter: {
+                                            input: "$priceRentOptions",
+                                            as: "opt",
+                                            cond: { $eq: ["$$opt.type", type] },
+                                        },
+                                    },
+                                    as: "opt",
+                                    in: "$$opt.price",
+                                },
+                            },
+                        },
+                    },
+                },
+                { $sort: { priceRentSort: Number(req.query.sortValue) } },
+                { $skip: skip },
+                { $limit: limit },
+            ]);
         }
         else {
-            sort.position = "desc";
+            let sort = {};
+            if (req.query.sortKey && req.query.sortValue) {
+                sort[req.query.sortKey] = Number(req.query.sortValue);
+            }
+            else {
+                sort.position = "desc";
+            }
+            books = yield Book.find(find).skip(skip).limit(limit).sort(sort);
         }
-        const books = yield Book.find(find)
-            .skip(skip)
-            .limit(limit)
-            .sort(sort);
         const total = yield Book.countDocuments(find);
         if (books && books.length > 0) {
             const booksWithCategory = [];
             for (const book of books) {
-                const bookObj = book.toObject();
+                const bookObj = book;
                 if (book.category_id) {
                     const category = yield Category.findOne({
                         _id: book.category_id,
@@ -178,7 +205,7 @@ module.exports.booksBuy = (req, res) => __awaiter(void 0, void 0, void 0, functi
         const find = {
             deleted: false,
             status: "active",
-            priceRentOptions: []
+            priceRentOptions: [],
         };
         if (keyword) {
             const regex = new RegExp(keyword, "i");
@@ -191,10 +218,7 @@ module.exports.booksBuy = (req, res) => __awaiter(void 0, void 0, void 0, functi
         else {
             sort.position = "desc";
         }
-        const books = yield Book.find(find)
-            .skip(skip)
-            .limit(limit)
-            .sort(sort);
+        const books = yield Book.find(find).skip(skip).limit(limit).sort(sort);
         const total = yield Book.countDocuments(find);
         if (books && books.length > 0) {
             const booksWithCategory = [];

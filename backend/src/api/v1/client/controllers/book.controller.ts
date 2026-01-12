@@ -1,5 +1,3 @@
-
-
 const Book = require("../../models/book.model");
 const Category = require("../../models/category.model");
 
@@ -13,7 +11,7 @@ module.exports.index = async (req, res) => {
 
     const find: any = {
       deleted: false,
-      status: "active"
+      status: "active",
     };
 
     if (keyword) {
@@ -29,10 +27,7 @@ module.exports.index = async (req, res) => {
       sort.position = "desc";
     }
 
-    const books = await Book.find(find)
-      .skip(skip)
-      .limit(limit)
-      .sort(sort);
+    const books = await Book.find(find).skip(skip).limit(limit).sort(sort);
     const total = await Book.countDocuments(find);
 
     if (books && books.length > 0) {
@@ -85,7 +80,7 @@ module.exports.detail = async (req, res) => {
         _id: book.category_id,
       }).select("title");
       bookObj.category_name = category.title;
-    };
+    }
 
     return res.status(200).json({
       message: "Lấy thông tin sách thành công!",
@@ -104,7 +99,7 @@ module.exports.featured = async (req, res) => {
     const books = await Book.find({
       deleted: false,
       status: "active",
-      featured: true
+      featured: true,
     }).sort({ position: -1 });
 
     if (books) {
@@ -125,6 +120,8 @@ module.exports.featured = async (req, res) => {
 // [GET] /api/v1/books/rent-only
 module.exports.booksRent = async (req, res) => {
   try {
+    console.log(req.query.sortKey);
+    console.log(req.query.sortValue);
     const keyword = req.query.keyWord;
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 12;
@@ -133,7 +130,7 @@ module.exports.booksRent = async (req, res) => {
     const find: any = {
       deleted: false,
       status: "active",
-      priceBuy: 0
+      priceBuy: 0,
     };
 
     if (keyword) {
@@ -141,25 +138,54 @@ module.exports.booksRent = async (req, res) => {
       find.$or = [{ title: regex }, { author: regex }];
     }
 
-    // sort
-    let sort: any = {};
-    if (req.query.sortKey && req.query.sortValue) {
-      sort[req.query.sortKey] = Number(req.query.sortValue);
+    let books = [];
+    if (
+      req.query.sortKey === "priceRentDay" ||
+      req.query.sortKey === "priceRentWeek"
+    ) {
+      const type = req.query.sortKey === "priceRentDay" ? "day" : "week";
+      books = await Book.aggregate([
+        { $match: find },
+        {
+          $addFields: {
+            priceRentSort: {
+              $first: {
+                $map: {
+                  input: {
+                    $filter: {
+                      input: "$priceRentOptions",
+                      as: "opt",
+                      cond: { $eq: ["$$opt.type", type] },
+                    },
+                  },
+                  as: "opt",
+                  in: "$$opt.price",
+                },
+              },
+            },
+          },
+        },
+        { $sort: { priceRentSort: Number(req.query.sortValue) } },
+        { $skip: skip },
+        { $limit: limit },
+      ]);
     } else {
-      sort.position = "desc";
+      let sort: any = {};
+      if (req.query.sortKey && req.query.sortValue) {
+        sort[req.query.sortKey] = Number(req.query.sortValue);
+      } else {
+        sort.position = "desc";
+      }
+      books = await Book.find(find).skip(skip).limit(limit).sort(sort);
     }
 
-    const books = await Book.find(find)
-      .skip(skip)
-      .limit(limit)
-      .sort(sort);
     const total = await Book.countDocuments(find);
 
     if (books && books.length > 0) {
       const booksWithCategory = [];
 
       for (const book of books) {
-        const bookObj = book.toObject();
+        const bookObj = book;
         if (book.category_id) {
           const category = await Category.findOne({
             _id: book.category_id,
@@ -196,7 +222,7 @@ module.exports.booksBuy = async (req, res) => {
     const find: any = {
       deleted: false,
       status: "active",
-      priceRentOptions: []
+      priceRentOptions: [],
     };
 
     if (keyword) {
@@ -212,10 +238,7 @@ module.exports.booksBuy = async (req, res) => {
       sort.position = "desc";
     }
 
-    const books = await Book.find(find)
-      .skip(skip)
-      .limit(limit)
-      .sort(sort);
+    const books = await Book.find(find).skip(skip).limit(limit).sort(sort);
     const total = await Book.countDocuments(find);
 
     if (books && books.length > 0) {
