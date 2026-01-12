@@ -103,7 +103,7 @@ export default function BookTable({
                     alt={book.title}
                     className="w-16 h-16 object-cover rounded bg-gray-100"
                   />
-                  <span className="lg:text-[16px] font-semibold text-primary">
+                  <span className="text-[16px] max-w-[400px] font-semibold text-primary">
                     {book.title}
                   </span>
                 </div>

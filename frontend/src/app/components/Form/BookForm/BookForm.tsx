@@ -56,7 +56,6 @@ export default function BookForm({
   categories,
 }: BookFormProps) {
   const editorHtmlRef = useRef(form.description || "");
-  console.log(form);
   return (
     <form onSubmit={handleSubmit}>
       <div className="mb-4">

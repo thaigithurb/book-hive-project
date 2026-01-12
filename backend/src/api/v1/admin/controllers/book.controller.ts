@@ -400,6 +400,23 @@ module.exports.edit = async (req, res) => {
 
     updateData.updatedBy = req.user.id;
 
+    const priceRentOptions = [];
+    if (req.body.priceRentDay) {
+      priceRentOptions.push({
+        type: "day",
+        days: 1,
+        price: Number(req.body.priceRentDay),
+      });
+    }
+    if (req.body.priceRentWeek) {
+      priceRentOptions.push({
+        type: "week",
+        days: 7,
+        price: Number(req.body.priceRentWeek),
+      });
+    }
+    updateData.priceRentOptions = priceRentOptions;
+
     // Cập nhật sách
     await Book.updateOne({ _id: book._id }, updateData);
 

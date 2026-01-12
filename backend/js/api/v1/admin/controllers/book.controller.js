@@ -322,6 +322,22 @@ module.exports.edit = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             });
         }
         updateData.updatedBy = req.user.id;
+        const priceRentOptions = [];
+        if (req.body.priceRentDay) {
+            priceRentOptions.push({
+                type: "day",
+                days: 1,
+                price: Number(req.body.priceRentDay),
+            });
+        }
+        if (req.body.priceRentWeek) {
+            priceRentOptions.push({
+                type: "week",
+                days: 7,
+                price: Number(req.body.priceRentWeek),
+            });
+        }
+        updateData.priceRentOptions = priceRentOptions;
         yield Book.updateOne({ _id: book._id }, updateData);
         return res.status(200).json({
             message: "Cập nhật thông tin thành công!",
