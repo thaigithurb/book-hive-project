@@ -40,13 +40,13 @@ export const Header = () => {
               </Link>
               <div className="absolute left-0 mt-2 w-[140px] dropdown-content bg-white shadow-lg rounded hidden">
                 <Link
-                  href="/rent"
+                  href="/books/rent-only"
                   className="block px-4 py-2 text-primary hover:bg-gray-100"
                 >
                   Sách thuê
                 </Link>
                 <Link
-                  href="/buy"
+                  href="/books/buy-only"
                   className="block px-4 py-2 text-primary hover:bg-gray-100"
                 >
                   Sách mua
