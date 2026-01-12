@@ -266,12 +266,28 @@ module.exports.delete = async (req, res) => {
 // [POST] /api/v1/admin/books/create
 module.exports.create = async (req, res) => {
   try {
-    let { position, title, ...newBookData } = req.body;
+    let { position, title, priceRentDay, priceRentWeek, ...newBookData } =
+      req.body;
 
     const slug = slugify(title, { lower: true, strict: true, locale: "vi" });
 
     const priceBuy = req.body.priceBuy ? Number(req.body.priceBuy) : 0;
-    const priceRent = req.body.priceRent ? Number(req.body.priceRent) : 0;
+
+    const priceRentOptions = [];
+    if (priceRentDay) {
+      priceRentOptions.push({
+        type: "day",
+        days: 1,
+        price: Number(priceRentDay),
+      });
+    }
+    if (priceRentWeek) {
+      priceRentOptions.push({
+        type: "week",
+        days: 7,
+        price: Number(priceRentWeek),
+      });
+    }
 
     // Lấy link ảnh từ file upload
     let image = "";
@@ -301,7 +317,7 @@ module.exports.create = async (req, res) => {
       position,
       image,
       priceBuy,
-      priceRent,
+      priceRentOptions,
       slug,
       title,
       createdBy: req.user.id,

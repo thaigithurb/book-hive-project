@@ -79,24 +79,27 @@ export default function BookDetail() {
               initial={{ opacity: 0, x: -50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
+              style={{ maxHeight: 600 }}
               className="bg-white rounded-2xl p-10 text-center shadow-md flex flex-col items-center justify-center"
             >
               <img
                 src={book.image}
                 alt={book.title}
                 className="w-full h-full object-cover rounded-lg"
+                style={{ objectFit: "cover", maxHeight: 400, width: "auto" }}
               />
             </motion.div>
             <motion.div
               initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
+              style={{ maxHeight: 500 }}
             >
               <motion.h1
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.4 }}
-                className="text-3xl font-bold mb-3 text-primary"
+                className="text-2xl font-bold mb-3 text-primary"
               >
                 {book.title}
               </motion.h1>
@@ -121,6 +124,7 @@ export default function BookDetail() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.7 }}
                 className="text-base text-slate-800 mb-8 leading-relaxed"
+                style={{ maxHeight: 120, overflowY: "auto" }}
                 dangerouslySetInnerHTML={{
                   __html: DOMPurify.sanitize(book.description),
                 }}
@@ -134,14 +138,33 @@ export default function BookDetail() {
                 <div className="flex justify-between items-center mb-4">
                   <span className="text-base text-slate-800">Giá mua:</span>
                   <span className="text-2xl font-bold text-secondary1">
-                    {book.priceBuy.toLocaleString("vi-VN")}đ
+                    {book.priceBuy
+                      ? book.priceBuy.toLocaleString("vi-VN") + "đ"
+                      : "N/A"}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-base text-slate-800">Giá thuê:</span>
-                  <span className="text-2xl font-bold text-secondary1">
-                    {book.priceRent.toLocaleString("vi-VN")}đ
-                  </span>
+                  <div className="flex flex-col items-end">
+                    <span className="text-[17px] text-secondary1 font-semibold">
+                      {book.priceRentOptions?.find(
+                        (opt: any) => opt.type === "day"
+                      )
+                        ? `${book.priceRentOptions
+                            .find((opt: any) => opt.type === "day")
+                            .price.toLocaleString("vi-VN")}đ/ngày`
+                        : "Không có giá thuê/ngày"}
+                    </span>
+                    <span className="text-[17px] text-secondary1 font-semibold">
+                      {book.priceRentOptions?.find(
+                        (opt: any) => opt.type === "week"
+                      )
+                        ? `${book.priceRentOptions
+                            .find((opt: any) => opt.type === "week")
+                            .price.toLocaleString("vi-VN")}đ/tuần`
+                        : "Không có giá thuê/tuần"}
+                    </span>
+                  </div>
                 </div>
               </motion.div>
               <motion.div

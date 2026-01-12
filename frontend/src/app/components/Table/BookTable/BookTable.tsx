@@ -115,7 +115,7 @@ export default function BookTable({
                 {book.category_name}
               </td>
               <td className="py-4 px-4 text-[14.4px] text-primary">
-                {book.priceBuy.toLocaleString("vi-VN")}đ
+                {book.priceBuy ? book.priceBuy.toLocaleString("vi-VN") + "đ" : "N/A"}
               </td>
               <td className="py-4 px-4">
                 {book._id && (

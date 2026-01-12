@@ -64,7 +64,7 @@ module.exports.refresh = (req, res) => __awaiter(void 0, void 0, void 0, functio
             user.refreshTokenExpiresAt < new Date()) {
             return res
                 .status(401)
-                .json({ message: "RefreshToken không hợp lệ hoặc đã hết hạn" });
+                .json({ message: "Phiên đăng nhập hết hạn!" });
         }
         const accessToken = jwt.sign({ id: user._id, email: user.email, role_id: user.role_id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });
         return res.status(200).json({

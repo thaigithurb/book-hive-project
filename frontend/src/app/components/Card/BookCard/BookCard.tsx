@@ -35,10 +35,16 @@ export const BookCard = ({ book, featured }: BookCardProps) => {
         <div className="flex justify-between items-center mt-4">
           <div>
             <p className="text-[17.6px] font-bold text-secondary1 m-0">
-              {book.priceBuy.toLocaleString("vi-VN")}đ
+              {book.priceBuy ? book.priceBuy.toLocaleString("vi-VN") + "đ" : "N/A"}
             </p>
             <p className="text-[13.6px] text-secondary2 mt-1 mb-0">
-              Thuê: {book.priceRent.toLocaleString("vi-VN")}đ
+              Thuê:{" "}
+              {book.priceRentOptions?.find((option) => option.type === "day")
+                ?.price
+                ? book.priceRentOptions
+                    .find((option) => option.type === "day")!
+                    .price.toLocaleString("vi-VN") + "đ"
+                : "N/A"}
             </p>
           </div>
           <span className="text-[24px]">→</span>

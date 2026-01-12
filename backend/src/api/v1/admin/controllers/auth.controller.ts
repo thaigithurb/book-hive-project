@@ -77,7 +77,7 @@ module.exports.refresh = async (req, res) => {
     ) {
       return res
         .status(401)
-        .json({ message: "RefreshToken không hợp lệ hoặc đã hết hạn" });
+        .json({ message: "Phiên đăng nhập hết hạn!" });
     }
 
     // Tạo accessToken mới

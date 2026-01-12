@@ -16,8 +16,9 @@ export default function Create() {
     category_id: "",
     description: "",
     priceBuy: "",
-    priceRent: "",
     position: "",
+    priceRentDay:"",
+    priceRentWeek:"",
     status: "active",
     featured: false,
   });
@@ -122,10 +123,11 @@ export default function Create() {
           category_id: "",
           description: "",
           priceBuy: "",
-          priceRent: "",
           position: "",
           status: "active",
           featured: false,
+          priceRentDay: "",
+          priceRentWeek: "",
         });
         setPreview(null);
         setImageFile(null);

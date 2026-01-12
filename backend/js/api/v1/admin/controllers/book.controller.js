@@ -222,10 +222,24 @@ module.exports.delete = (req, res) => __awaiter(void 0, void 0, void 0, function
 });
 module.exports.create = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        let _a = req.body, { position, title } = _a, newBookData = __rest(_a, ["position", "title"]);
+        let _a = req.body, { position, title, priceRentDay, priceRentWeek } = _a, newBookData = __rest(_a, ["position", "title", "priceRentDay", "priceRentWeek"]);
         const slug = slugify(title, { lower: true, strict: true, locale: "vi" });
         const priceBuy = req.body.priceBuy ? Number(req.body.priceBuy) : 0;
-        const priceRent = req.body.priceRent ? Number(req.body.priceRent) : 0;
+        const priceRentOptions = [];
+        if (priceRentDay) {
+            priceRentOptions.push({
+                type: "day",
+                days: 1,
+                price: Number(priceRentDay),
+            });
+        }
+        if (priceRentWeek) {
+            priceRentOptions.push({
+                type: "week",
+                days: 7,
+                price: Number(priceRentWeek),
+            });
+        }
         let image = "";
         if (req.file) {
             image = req.file.path;
@@ -243,7 +257,7 @@ module.exports.create = (req, res) => __awaiter(void 0, void 0, void 0, function
         const newBook = new Book(Object.assign(Object.assign({}, newBookData), { position,
             image,
             priceBuy,
-            priceRent,
+            priceRentOptions,
             slug,
             title, createdBy: req.user.id }));
         yield newBook.save();

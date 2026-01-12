@@ -1,4 +1,5 @@
 import { Editor } from "@tinymce/tinymce-react";
+import { input } from "framer-motion/client";
 import { useRef } from "react";
 
 type BookFormData = {
@@ -7,10 +8,11 @@ type BookFormData = {
   author: string;
   description: string;
   priceBuy: number | string;
-  priceRent: number | string;
   position?: number | string;
   status: string;
   featured: boolean;
+  priceRentDay: string;
+  priceRentWeek: string;
 };
 
 type BookFormProps = {
@@ -54,6 +56,7 @@ export default function BookForm({
   categories,
 }: BookFormProps) {
   const editorHtmlRef = useRef(form.description || "");
+  console.log(form);
   return (
     <form onSubmit={handleSubmit}>
       <div className="mb-4">
@@ -158,17 +161,29 @@ export default function BookForm({
           />
         </div>
         <div className="flex-1">
-          <label className="mb-1 font-medium text-primary">
-            Giá thuê (VND)
+          <label className="block mb-1 font-medium text-gray-700">
+            Giá thuê (ngày)
           </label>
           <input
             type="text"
-            name="priceRent"
-            className={inputClass}
-            value={formatVN(form.priceRent)}
+            name="priceRentDay"
+            value={formatVN(form.priceRentDay || "")}
             onChange={handleMoneyChange}
-            placeholder="Nhập giá thuê"
-            min={0}
+            className={inputClass}
+            placeholder="Nhập giá ngày"
+          />
+        </div>
+        <div className="flex-1">
+          <label className="block mb-1 font-medium text-gray-700">
+            Giá thuê (tuần)
+          </label>
+          <input
+            type="text"
+            name="priceRentWeek"
+            value={formatVN(form.priceRentWeek || "")}
+            onChange={handleMoneyChange}
+            className={inputClass}
+            placeholder="Nhập giá tuần"
           />
         </div>
       </div>

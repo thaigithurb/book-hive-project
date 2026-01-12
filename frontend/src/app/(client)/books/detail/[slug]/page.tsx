@@ -12,6 +12,8 @@ export default function Detail() {
   const params = useParams();
   const [book, setBook] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [rentType, setRentType] = useState("day");
+  const [rentQuantity, setRentQuantity] = useState<number | string>(1);
 
   useEffect(() => {
     const fetchBook = async () => {
@@ -29,6 +31,16 @@ export default function Detail() {
     };
     fetchBook();
   }, [params.slug]);
+
+  // Tính giá thuê dựa trên loại và số lượng
+  const getRentPrice = () => {
+    if (!book?.priceRentOptions) return null;
+    const option = book.priceRentOptions.find(
+      (opt: any) => opt.type === rentType
+    );
+    if (!option) return null;
+    return option.price * Number(rentQuantity);
+  };
 
   if (loading) {
     return (
@@ -101,12 +113,48 @@ export default function Detail() {
                       : "Liên hệ"}
                   </span>
                 </div>
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center mb-2">
                   <span className="text-base text-slate-800">Giá thuê:</span>
                   <span className="text-2xl font-bold text-secondary1">
-                    {book.priceRent
-                      ? `${book.priceRent.toLocaleString("vi-VN")}đ`
+                    {getRentPrice() !== null && getRentPrice() !== undefined
+                      ? `${getRentPrice()!.toLocaleString("vi-VN")}đ`
                       : "Liên hệ"}
+                  </span>
+                </div>
+                <div className="flex gap-2 items-center">
+                  <select
+                    className="border rounded-lg px-2 py-1 text-base"
+                    value={rentType}
+                    onChange={(e) => setRentType(e.target.value)}
+                  >
+                    <option value="day">Ngày</option>
+                    <option value="week">Tuần</option>
+                  </select>
+                  <input
+                    type="number"
+                    min={1}
+                    max={rentType === "ngày" ? 6 : 4}
+                    className="border rounded-lg px-2 py-1 w-20 text-base"
+                    value={rentQuantity}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val === "") {
+                        setRentQuantity("");
+                      } else {
+                        const num = Number(val);
+                        const max = rentType === "day" ? 6 : 4;
+                        if (num < 1) setRentQuantity(1);
+                        else if (num > max) setRentQuantity(max);
+                        else setRentQuantity(num);
+                      }
+                    }}
+                  />
+                  <span className="text-base text-slate-600">
+                    {rentType === "day"
+                      ? "ngày"
+                      : rentType === "week"
+                      ? "tuần"
+                      : ""}
                   </span>
                 </div>
               </div>
