@@ -117,7 +117,7 @@ export default function Categories() {
     "thể loại"
   );
 
-  const handleDelete = async () => {
+  const handleDelete = async () => { 
     if (!deleteId) return;
     try {
       await axios.patch(

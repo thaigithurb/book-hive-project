@@ -79,21 +79,19 @@ export default function BookDetail() {
               initial={{ opacity: 0, x: -50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              style={{ maxHeight: 600 }}
               className="bg-white rounded-2xl p-10 text-center shadow-md flex flex-col items-center justify-center"
             >
               <img
                 src={book.image}
                 alt={book.title}
                 className="w-full h-full object-cover rounded-lg"
-                style={{ objectFit: "cover", maxHeight: 400, width: "auto" }}
+                style={{ maxHeight: 400, width: "auto" }}
               />
             </motion.div>
             <motion.div
               initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              style={{ maxHeight: 500 }}
             >
               <motion.h1
                 initial={{ opacity: 0, y: 20 }}

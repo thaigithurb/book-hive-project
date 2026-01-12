@@ -66,14 +66,14 @@ export default function Detail() {
     <>
       <div className="min-h-screen py-12 relative">
         <BackButton className="absolute -top-4 left-20 flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 transition cursor-pointer" />
-        <div className="max-w-4xl mx-auto">
+        <div className=" max-w-4xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-12">
-            <div className="bg-white rounded-2xl p-10 text-center shadow flex flex-col items-center justify-center">
+            <div className="bg-white rounded-2xl  p-10 text-center shadow flex flex-col items-center justify-center">
               {book.image ? (
                 <img
                   src={book.image}
                   alt={book.title}
-                  className="w-full h-full object-cover rounded-lg mb-6"
+                  className="w-full h-full max-h-[400px] object-cover rounded-lg mb-6"
                 />
               ) : (
                 <div className="text-[128px] mb-6">📚</div>
@@ -88,7 +88,7 @@ export default function Detail() {
                 </span>
               </div>
             </div>
-            <div>
+            <div className="">
               <h1 className="text-3xl font-bold mb-3 text-slate-800">
                 {book.title}
               </h1>
@@ -100,6 +100,7 @@ export default function Detail() {
               </p>
               <p
                 className="text-base text-slate-800 mb-8 leading-relaxed"
+                style={{ maxHeight: 120, overflowY: "auto" }}
                 dangerouslySetInnerHTML={{
                   __html: DOMPurify.sanitize(book.description),
                 }}
