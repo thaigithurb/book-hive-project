@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import AccountForm from "@/app/components/Form/AccountForm/AccountForm";
 import { Role } from "@/app/interfaces/role.interface";
 import { useRouter } from "next/navigation";
+import PrivateRoute from "@/app/components/Auth/PrivateRoute/PrivateRoute";
 
 const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX ?? "admin";
 
@@ -146,78 +147,82 @@ export default function EditBook() {
   };
 
   return (
-    <AnimatePresence mode="wait">
-      {isPageLoading ? (
-        <motion.div
-          key="loading"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
-          className="min-h-screen flex items-center justify-center"
-        >
-          <div className="text-xl text-gray-500">Đang tải...</div>
-        </motion.div>
-      ) : (
-        <motion.div
-          key="content"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          transition={{ duration: 0.5 }}
-          className="max-w-2xl mx-auto mt-8 bg-white p-8 rounded-xl shadow relative"
-        >
-          <BackButton className="absolute -top-10 -left-60 flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 transition cursor-pointer" />
-
-          <motion.h1
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-2xl font-bold mb-6 text-primary"
-          >
-            Chỉnh sửa sách
-          </motion.h1>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-          >
-            <AccountForm
-              form={form}
-              loading={loading}
-              preview={preview}
-              setPreview={setPreview}
-              imageFile={imageFile}
-              setImageFile={setImageFile}
-              fileInputRef={fileInputRef}
-              handleSubmit={handleSubmit}
-              handleChange={handleChange}
-              handleImageChange={handleImageChange}
-              handleRemoveImage={handleRemoveImage}
-              buttonLabel="Cập nhật"
-              roles={roles}
-              showPasswordField={false}
-            />
-
-            <button
-              type="button"
-              className=" transition-colors duration-200 bg-[#979797] cursor-pointer hover:bg-[#676767] text-white px-2 py-2 rounded font-semibold mt-4"
-              onClick={() =>
-                router.push(`/admin/accounts/reset-password/${slug}`)
-              }
+    <>
+      <PrivateRoute permission="edit_account">
+        <AnimatePresence mode="wait">
+          {isPageLoading ? (
+            <motion.div
+              key="loading"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="min-h-screen flex items-center justify-center"
             >
-              Reset mật khẩu
-            </button>
-          </motion.div>
+              <div className="text-xl text-gray-500">Đang tải...</div>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="content"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.5 }}
+              className="max-w-2xl mx-auto mt-8 bg-white p-8 rounded-xl shadow relative"
+            >
+              <BackButton className="absolute -top-10 -left-60 flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 transition cursor-pointer" />
 
-          <ToastContainer
-            autoClose={1500}
-            hideProgressBar={true}
-            pauseOnHover={false}
-          />
-        </motion.div>
-      )}
-    </AnimatePresence>
+              <motion.h1
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="text-2xl font-bold mb-6 text-primary"
+              >
+                Chỉnh sửa sách
+              </motion.h1>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+              >
+                <AccountForm
+                  form={form}
+                  loading={loading}
+                  preview={preview}
+                  setPreview={setPreview}
+                  imageFile={imageFile}
+                  setImageFile={setImageFile}
+                  fileInputRef={fileInputRef}
+                  handleSubmit={handleSubmit}
+                  handleChange={handleChange}
+                  handleImageChange={handleImageChange}
+                  handleRemoveImage={handleRemoveImage}
+                  buttonLabel="Cập nhật"
+                  roles={roles}
+                  showPasswordField={false}
+                />
+
+                <button
+                  type="button"
+                  className=" transition-colors duration-200 bg-[#979797] cursor-pointer hover:bg-[#676767] text-white px-2 py-2 rounded font-semibold mt-4"
+                  onClick={() =>
+                    router.push(`/admin/accounts/reset-password/${slug}`)
+                  }
+                >
+                  Reset mật khẩu
+                </button>
+              </motion.div>
+
+              <ToastContainer
+                autoClose={1500}
+                hideProgressBar={true}
+                pauseOnHover={false}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </PrivateRoute>
+    </>
   );
 }

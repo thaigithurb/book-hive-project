@@ -6,6 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { ToastContainer, toast } from "react-toastify";
 import { BackButton } from "@/app/components/Button/BackButton/BackButton";
+import PrivateRoute from "@/app/components/Auth/PrivateRoute/PrivateRoute";
 
 const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;
 
@@ -53,68 +54,72 @@ export default function AccountDetail() {
   if (!account) return null;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      exit={{ opacity: 0, y: -20 }}
-      className="max-w-xl mx-auto mt-8 bg-white p-8 rounded-xl shadow relative"
-    >
-      <BackButton className="absolute -top-10 -left-80 flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 transition cursor-pointer" />
-      <h1 className="text-2xl font-bold mb-6 text-primary">
-        Chi tiết tài khoản
-      </h1>
-      <div className="flex flex-col items-center gap-4">
-        {account.avatar && (
-          <motion.img
-            src={account.avatar}
-            alt="Avatar"
-            className="w-45 h-45 rounded-full object-cover mb-4"
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.4, ease: "easeOut" }}
-          />
-        )}
-        <div className="w-full">
-          <span className="text-slate-800 font-semibold">Họ tên: </span>
-          <span className="text-slate-500">{account.fullName}</span>
-        </div>
-        <div className="w-full">
-          <span className="text-slate-800 font-semibold">Email: </span>
-          <span className="text-slate-500">{account.email}</span>
-        </div>
-        <div className="w-full">
-          <span className="text-slate-800 font-semibold">Số điện thoại: </span>
-          <span className="text-slate-500">{account.phone}</span>
-        </div>
-        <div className="w-full">
-          <span className="text-slate-800 font-semibold">Trạng thái: </span>
-          <span className="text-slate-500">
-            {account.status === "active" ? "Hoạt động" : "Dừng hoạt động"}
-          </span>
-        </div>
-        <div className="w-full">
-          <span className="text-slate-800 font-semibold">Vai trò: </span>
-          <span className="text-slate-500">
-            {account.role_id.title}
-          </span>
-        </div>
-      </div>
-      <div className="flex gap-4 mt-8">
-        <button
-          className="flex-1 py-4 font-semibold bg-yellow-100 text-yellow-700 hover:bg-yellow-200 transition-colors duration-200 cursor-pointer rounded-xl"
-          onClick={() =>
-            router.push(`/${ADMIN_PREFIX}/accounts/edit/${account.slug}`)
-          }
+    <>
+      <PrivateRoute permission="view_detail_account">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          exit={{ opacity: 0, y: -20 }}
+          className="max-w-xl mx-auto mt-8 bg-white p-8 rounded-xl shadow relative"
         >
-          Chỉnh sửa
-        </button>
-      </div>
-      <ToastContainer
-        autoClose={1500}
-        hideProgressBar={true}
-        pauseOnHover={false}
-      />
-    </motion.div>
+          <BackButton className="absolute -top-10 -left-80 flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 transition cursor-pointer" />
+          <h1 className="text-2xl font-bold mb-6 text-primary">
+            Chi tiết tài khoản
+          </h1>
+          <div className="flex flex-col items-center gap-4">
+            {account.avatar && (
+              <motion.img
+                src={account.avatar}
+                alt="Avatar"
+                className="w-45 h-45 rounded-full object-cover mb-4"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.4, ease: "easeOut" }}
+              />
+            )}
+            <div className="w-full">
+              <span className="text-slate-800 font-semibold">Họ tên: </span>
+              <span className="text-slate-500">{account.fullName}</span>
+            </div>
+            <div className="w-full">
+              <span className="text-slate-800 font-semibold">Email: </span>
+              <span className="text-slate-500">{account.email}</span>
+            </div>
+            <div className="w-full">
+              <span className="text-slate-800 font-semibold">
+                Số điện thoại:{" "}
+              </span>
+              <span className="text-slate-500">{account.phone}</span>
+            </div>
+            <div className="w-full">
+              <span className="text-slate-800 font-semibold">Trạng thái: </span>
+              <span className="text-slate-500">
+                {account.status === "active" ? "Hoạt động" : "Dừng hoạt động"}
+              </span>
+            </div>
+            <div className="w-full">
+              <span className="text-slate-800 font-semibold">Vai trò: </span>
+              <span className="text-slate-500">{account.role_id.title}</span>
+            </div>
+          </div>
+          <div className="flex gap-4 mt-8">
+            <button
+              className="flex-1 py-4 font-semibold bg-yellow-100 text-yellow-700 hover:bg-yellow-200 transition-colors duration-200 cursor-pointer rounded-xl"
+              onClick={() =>
+                router.push(`/${ADMIN_PREFIX}/accounts/edit/${account.slug}`)
+              }
+            >
+              Chỉnh sửa
+            </button>
+          </div>
+          <ToastContainer
+            autoClose={1500}
+            hideProgressBar={true}
+            pauseOnHover={false}
+          />
+        </motion.div>
+      </PrivateRoute>
+    </>
   );
 }

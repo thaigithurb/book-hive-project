@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const Account = require("../api/v1/models/account.model"); 
+const Account = require("../api/v1/models/account.model");
 
 module.exports.auth = async (req, res, next) => {
   const authHeader = req.headers.authorization;
@@ -15,27 +15,23 @@ module.exports.auth = async (req, res, next) => {
       _id: decoded.id,
       status: "active",
       deleted: false,
-    });
+    }).populate("role_id");
 
     if (!account) {
       return res
         .status(403)
         .json({ message: "Tài khoản không hợp lệ hoặc đã bị khóa" });
     }
-    req.user = decoded;
+    const permissions = account.role_id?.permissions || [];
+    req.user = {
+      ...decoded,
+      role: account.role_id?.slug,
+      permissions,
+    };
     next();
   } catch (err) {
     return res
       .status(400)
       .json({ message: "Token không hợp lệ hoặc đã hết hạn" });
   }
-};
-
-module.exports.role = (...allowedRoles) => {
-  return (req, res, next) => {
-    if (!req.user || !allowedRoles.includes(req.user.role)) {
-      return res.status(403).json({ message: "Không có quyền truy cập" });
-    }
-    next();
-  };
 };

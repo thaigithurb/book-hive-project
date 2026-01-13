@@ -14,9 +14,10 @@ const jwt = require("jsonwebtoken");
 const Account = require("../../models/account.model");
 const generate = require("../../../../helpers/generate");
 module.exports.login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a, _b;
     try {
         const { email, password } = req.body;
-        const user = yield Account.findOne({ email });
+        const user = yield Account.findOne({ email }).populate("role_id");
         if (!user) {
             return res.status(400).json({ message: "Email không tồn tại" });
         }
@@ -40,10 +41,16 @@ module.exports.login = (req, res) => __awaiter(void 0, void 0, void 0, function*
             sameSite: "strict",
             expires: user.refreshTokenExpiresAt,
         });
-        const accessToken = jwt.sign({ id: user._id, email: user.email, role_id: user.role_id, role: user.role_id.title }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });
+        const accessToken = jwt.sign({ id: user._id, email: user.email, role_id: user.role_id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });
         return res.status(200).json({
             message: "Đăng nhập thành công!",
             accessToken,
+            user: {
+                id: user._id,
+                email: user.email,
+                role: (_a = user.role_id) === null || _a === void 0 ? void 0 : _a.slug,
+                permissions: ((_b = user.role_id) === null || _b === void 0 ? void 0 : _b.permissions) || [],
+            },
         });
     }
     catch (error) {
@@ -62,9 +69,7 @@ module.exports.refresh = (req, res) => __awaiter(void 0, void 0, void 0, functio
         if (!user ||
             !user.refreshTokenExpiresAt ||
             user.refreshTokenExpiresAt < new Date()) {
-            return res
-                .status(401)
-                .json({ message: "Phiên đăng nhập hết hạn!" });
+            return res.status(401).json({ message: "Phiên đăng nhập hết hạn!" });
         }
         const accessToken = jwt.sign({ id: user._id, email: user.email, role_id: user.role_id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });
         return res.status(200).json({

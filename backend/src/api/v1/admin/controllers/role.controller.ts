@@ -123,7 +123,7 @@ module.exports.edit = async (req, res) => {
         strict: true,
         locale: "vi",
       });
-    };
+    }
 
     updateData.updatedBy = req.user.id;
 
@@ -161,7 +161,10 @@ module.exports.permissionsEdit = async (req, res) => {
   try {
     const { roles } = req.body;
     for (const role of roles) {
-      await Role.findByIdAndUpdate(role._id, { permissions: role.permissions, updatedBy: req.user.id, });
+      await Role.findByIdAndUpdate(role._id, {
+        permissions: role.permissions,
+        updatedBy: req.user.id,
+      });
     }
     res.status(200).json({ message: "Cập nhật thành công" });
   } catch (err) {
@@ -175,7 +178,10 @@ module.exports.delete = async (req, res) => {
     const id = req.params.id;
     const role = await Role.findOne({ _id: id });
     if (role) {
-      await Role.updateOne({ _id: id }, { deleted: true, deletedBy: req.user.id, deletedAt: new Date() });
+      await Role.updateOne(
+        { _id: id },
+        { deleted: true, deletedBy: req.user.id, deletedAt: new Date() }
+      );
       res.status(200).json({ message: "Đã xóa vai trò!" });
     } else {
       res.status(400).json({ message: "Không tìm thấy vai trò!" });
@@ -197,7 +203,7 @@ module.exports.changeMulti = async (req, res) => {
       case "delete_all":
         await Role.updateMany(
           { _id: { $in: ids } },
-          { deleted: true, deletedAt: new Date(), deletedBy: req.user.id, }
+          { deleted: true, deletedAt: new Date(), deletedBy: req.user.id }
         );
 
         return res.status(200).json({
@@ -215,10 +221,10 @@ module.exports.changeMulti = async (req, res) => {
   }
 };
 
-// [GET] /api/v1/admin/roles/permissions/create
+// [POST] /api/v1/admin/roles/permissions/create
 module.exports.createPerm = async (req, res) => {
   try {
-    const { key, label, ...permissionData } = req.body;
+    const { key, label, group } = req.body;
 
     const checkKey = await Permission.findOne({
       key: { $regex: key, $options: "i" },
@@ -234,12 +240,19 @@ module.exports.createPerm = async (req, res) => {
       return res.status(400).json({ message: "Quyền đã tồn tại!" });
     }
 
-    permissionData.createdBy = req.user.id;
+    const slug = slugify(label, { lower: true, strict: true, locale: "vi" });
 
-    const newPerm = new Permission({ key, label, ...permissionData });
+    const newPerm = new Permission({
+      key,
+      label,
+      group,
+      slug, 
+      createdBy: req.user.id,
+    });
     await newPerm.save();
     return res.status(200).json({ message: "Tạo quyền mới thành công!" });
   } catch (err) {
+    console.error("Lỗi tạo permission:", err);
     return res.status(500).json({ message: "Lỗi server" });
   }
 };

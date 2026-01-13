@@ -5,21 +5,21 @@ const controller = require("../controllers/account.controller");
 const uploadImageHelper = require("../../../../helpers/uploadImage");
 const { role } = require("../../../../middleware/auth.middleware");
 
-router.get("/", role("admin"), controller.index);
+router.get("/", controller.index);
 
-router.patch("/change-status/:status/:id", role("admin"), controller.changeStatus);
+router.patch("/change-status/:status/:id", controller.changeStatus);
 
-router.patch("/change-multi", role("admin"), controller.changeMulti);
+router.patch("/change-multi", controller.changeMulti);
 
-router.post("/create", role("admin"), uploadImageHelper.single("image"), controller.create);
+router.post("/create", uploadImageHelper.single("image"), controller.create);
 
-router.get("/detail/:slug", role("admin"), controller.detail);
+router.get("/detail/:slug", controller.detail);
 
-router.patch("/edit/:slug", role("admin"), uploadImageHelper.single("image"), controller.edit);
+router.patch("/edit/:slug", uploadImageHelper.single("image"), controller.edit);
 
-router.patch("/delete/:id", role("admin"), controller.delete);
+router.patch("/delete/:id", controller.delete);
 
-router.patch("/reset-password/:slug", role("admin"), controller.resetPassword);
+router.patch("/reset-password/:slug", controller.resetPassword);
 
 router.get("/profile", controller.profile);
 

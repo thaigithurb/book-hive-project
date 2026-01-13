@@ -36,6 +36,7 @@ export default function Login() {
           success: {
             render({ data }) {
               localStorage.setItem("accessToken", data?.data?.accessToken);
+              localStorage.setItem("user", JSON.stringify(data?.data?.user));
               setEmail("");
               setPassword("");
               router.push("/admin/dashboard");

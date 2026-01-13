@@ -7,7 +7,7 @@ const generate = require("../../../../helpers/generate");
 module.exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const user = await Account.findOne({ email });
+    const user = await Account.findOne({ email }).populate("role_id");
 
     if (!user) {
       return res.status(400).json({ message: "Email không tồn tại" });
@@ -45,7 +45,7 @@ module.exports.login = async (req, res) => {
 
     // tạo mới accessToken
     const accessToken = jwt.sign(
-      { id: user._id, email: user.email, role_id: user.role_id, role: user.role_id.title },
+      { id: user._id, email: user.email, role_id: user.role_id },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN }
     );
@@ -53,6 +53,12 @@ module.exports.login = async (req, res) => {
     return res.status(200).json({
       message: "Đăng nhập thành công!",
       accessToken,
+      user: {
+        id: user._id,
+        email: user.email,
+        role: user.role_id?.slug,
+        permissions: user.role_id?.permissions || [],
+      },
     });
   } catch (error) {
     return res.status(400).json({
@@ -75,9 +81,7 @@ module.exports.refresh = async (req, res) => {
       !user.refreshTokenExpiresAt ||
       user.refreshTokenExpiresAt < new Date()
     ) {
-      return res
-        .status(401)
-        .json({ message: "Phiên đăng nhập hết hạn!" });
+      return res.status(401).json({ message: "Phiên đăng nhập hết hạn!" });
     }
 
     // Tạo accessToken mới
@@ -148,5 +152,6 @@ module.exports.logout = async (req, res) => {
     });
   }
 };
+
 
 export {};

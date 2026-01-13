@@ -123,7 +123,6 @@ module.exports.edit = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                 locale: "vi",
             });
         }
-        ;
         updateData.updatedBy = req.user.id;
         yield Role.updateOne({ slug: slug }, updateData);
         res.status(200).json({
@@ -157,7 +156,10 @@ module.exports.permissionsEdit = (req, res) => __awaiter(void 0, void 0, void 0,
     try {
         const { roles } = req.body;
         for (const role of roles) {
-            yield Role.findByIdAndUpdate(role._id, { permissions: role.permissions, updatedBy: req.user.id, });
+            yield Role.findByIdAndUpdate(role._id, {
+                permissions: role.permissions,
+                updatedBy: req.user.id,
+            });
         }
         res.status(200).json({ message: "Cập nhật thành công" });
     }
@@ -189,7 +191,7 @@ module.exports.changeMulti = (req, res) => __awaiter(void 0, void 0, void 0, fun
             : req.body.ids.split(", ");
         switch (type) {
             case "delete_all":
-                yield Role.updateMany({ _id: { $in: ids } }, { deleted: true, deletedAt: new Date(), deletedBy: req.user.id, });
+                yield Role.updateMany({ _id: { $in: ids } }, { deleted: true, deletedAt: new Date(), deletedBy: req.user.id });
                 return res.status(200).json({
                     message: `Đã xóa ${ids.length} vai trò!`,
                 });
@@ -207,7 +209,7 @@ module.exports.changeMulti = (req, res) => __awaiter(void 0, void 0, void 0, fun
 });
 module.exports.createPerm = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const _a = req.body, { key, label } = _a, permissionData = __rest(_a, ["key", "label"]);
+        const { key, label, group } = req.body;
         const checkKey = yield Permission.findOne({
             key: { $regex: key, $options: "i" },
         });
@@ -220,12 +222,19 @@ module.exports.createPerm = (req, res) => __awaiter(void 0, void 0, void 0, func
         if (checkLabel) {
             return res.status(400).json({ message: "Quyền đã tồn tại!" });
         }
-        permissionData.createdBy = req.user.id;
-        const newPerm = new Permission(Object.assign({ key, label }, permissionData));
+        const slug = slugify(label, { lower: true, strict: true, locale: "vi" });
+        const newPerm = new Permission({
+            key,
+            label,
+            group,
+            slug,
+            createdBy: req.user.id,
+        });
         yield newPerm.save();
         return res.status(200).json({ message: "Tạo quyền mới thành công!" });
     }
     catch (err) {
+        console.error("Lỗi tạo permission:", err);
         return res.status(500).json({ message: "Lỗi server" });
     }
 });

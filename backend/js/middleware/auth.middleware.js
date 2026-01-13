@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 const jwt = require("jsonwebtoken");
 const Account = require("../api/v1/models/account.model");
 module.exports.auth = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+    var _a, _b;
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
         return res.status(401).json({ message: "Không có accessToken" });
@@ -21,13 +22,14 @@ module.exports.auth = (req, res, next) => __awaiter(this, void 0, void 0, functi
             _id: decoded.id,
             status: "active",
             deleted: false,
-        });
+        }).populate("role_id");
         if (!account) {
             return res
                 .status(403)
                 .json({ message: "Tài khoản không hợp lệ hoặc đã bị khóa" });
         }
-        req.user = decoded;
+        const permissions = ((_a = account.role_id) === null || _a === void 0 ? void 0 : _a.permissions) || [];
+        req.user = Object.assign(Object.assign({}, decoded), { role: (_b = account.role_id) === null || _b === void 0 ? void 0 : _b.slug, permissions });
         next();
     }
     catch (err) {
@@ -36,11 +38,3 @@ module.exports.auth = (req, res, next) => __awaiter(this, void 0, void 0, functi
             .json({ message: "Token không hợp lệ hoặc đã hết hạn" });
     }
 });
-module.exports.role = (...allowedRoles) => {
-    return (req, res, next) => {
-        if (!req.user || !allowedRoles.includes(req.user.role)) {
-            return res.status(403).json({ message: "Không có quyền truy cập" });
-        }
-        next();
-    };
-};

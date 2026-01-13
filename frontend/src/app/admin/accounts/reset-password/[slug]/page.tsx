@@ -6,6 +6,7 @@ import { BackButton } from "@/app/components/Button/BackButton/BackButton";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import { useParams } from "next/navigation";
+import PrivateRoute from "@/app/components/Auth/PrivateRoute/PrivateRoute";
 
 const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;
 
@@ -74,86 +75,90 @@ export default function AccountResetPassword() {
   };
 
   return (
-    <AnimatePresence mode="wait">
-      <motion.div
-        key="content"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -20 }}
-        transition={{ duration: 0.5 }}
-        className="max-w-md mx-auto mt-16 bg-white p-8 rounded-xl shadow relative"
-      >
-        <BackButton className="absolute -top-10 -left-80 flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 transition cursor-pointer" />
-
-        <motion.h1
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="text-2xl font-bold mb-6 text-primary"
-        >
-          Đặt lại mật khẩu tài khoản
-        </motion.h1>
-
-        <form className="space-y-5">
-          <div>
-            <label className="block mb-1 font-medium text-primary">
-              Mật khẩu mới <span className="text-red-500">*</span>
-            </label>
-            <input
-              type={showPassword ? "text" : "password"}
-              className="border bg-[#fff] border-gray-300 rounded-lg px-4 py-2 text-[15px] outline-none focus:ring-2 focus:ring-secondary1 hover:border-secondary1 focus:border-secondary1 transition duration-200 w-full"
-              placeholder="Nhập mật khẩu mới"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              autoComplete="new-password"
-            />
-          </div>
-          <div className="mb-3">
-            <label className="block mb-1 font-medium text-primary">
-              Xác nhận mật khẩu <span className="text-red-500">*</span>
-            </label>
-            <input
-              type={showPassword ? "text" : "password"}
-              className="border bg-[#fff] border-gray-300 rounded-lg px-4 py-2 text-[15px] outline-none focus:ring-2 focus:ring-secondary1 hover:border-secondary1 focus:border-secondary1 transition duration-200 w-full"
-              placeholder="Nhập lại mật khẩu mới"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              autoComplete="new-password"
-            />
-            {!checkedMatch && (
-              <span className="text-red-500 text-[12px] italic">
-                Mật khẩu không khớp
-              </span>
-            )}
-          </div>
-          <div className="flex items-center gap-2">
-            <input
-              id="showPassword"
-              type="checkbox"
-              checked={showPassword}
-              onChange={() => setShowPassword((v) => !v)}
-            />
-            <label
-              htmlFor="showPassword"
-              className="text-sm text-gray-600 cursor-pointer"
-            >
-              Hiện mật khẩu
-            </label>
-          </div>
-          <button
-            type="submit"
-            className="w-full transition-colors duration-200 bg-secondary1 cursor-pointer hover:bg-blue-600 text-white py-2 rounded font-semibold mt-1"
-            onClick={handleSubmit}
+    <>
+      <PrivateRoute permission="reset_password">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key="content"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.5 }}
+            className="max-w-md mx-auto mt-16 bg-white p-8 rounded-xl shadow relative"
           >
-            {loading ? "Đang xử lý..." : "Đặt lại mật khẩu"}
-          </button>
-        </form>
-        <ToastContainer
-          autoClose={1500}
-          hideProgressBar={true}
-          pauseOnHover={false}
-        />
-      </motion.div>
-    </AnimatePresence>
+            <BackButton className="absolute -top-10 -left-80 flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 transition cursor-pointer" />
+
+            <motion.h1
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="text-2xl font-bold mb-6 text-primary"
+            >
+              Đặt lại mật khẩu tài khoản
+            </motion.h1>
+
+            <form className="space-y-5">
+              <div>
+                <label className="block mb-1 font-medium text-primary">
+                  Mật khẩu mới <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  className="border bg-[#fff] border-gray-300 rounded-lg px-4 py-2 text-[15px] outline-none focus:ring-2 focus:ring-secondary1 hover:border-secondary1 focus:border-secondary1 transition duration-200 w-full"
+                  placeholder="Nhập mật khẩu mới"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  autoComplete="new-password"
+                />
+              </div>
+              <div className="mb-3">
+                <label className="block mb-1 font-medium text-primary">
+                  Xác nhận mật khẩu <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  className="border bg-[#fff] border-gray-300 rounded-lg px-4 py-2 text-[15px] outline-none focus:ring-2 focus:ring-secondary1 hover:border-secondary1 focus:border-secondary1 transition duration-200 w-full"
+                  placeholder="Nhập lại mật khẩu mới"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  autoComplete="new-password"
+                />
+                {!checkedMatch && (
+                  <span className="text-red-500 text-[12px] italic">
+                    Mật khẩu không khớp
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  id="showPassword"
+                  type="checkbox"
+                  checked={showPassword}
+                  onChange={() => setShowPassword((v) => !v)}
+                />
+                <label
+                  htmlFor="showPassword"
+                  className="text-sm text-gray-600 cursor-pointer"
+                >
+                  Hiện mật khẩu
+                </label>
+              </div>
+              <button
+                type="submit"
+                className="w-full transition-colors duration-200 bg-secondary1 cursor-pointer hover:bg-blue-600 text-white py-2 rounded font-semibold mt-1"
+                onClick={handleSubmit}
+              >
+                {loading ? "Đang xử lý..." : "Đặt lại mật khẩu"}
+              </button>
+            </form>
+            <ToastContainer
+              autoClose={1500}
+              hideProgressBar={true}
+              pauseOnHover={false}
+            />
+          </motion.div>
+        </AnimatePresence>
+      </PrivateRoute>
+    </>
   );
 }

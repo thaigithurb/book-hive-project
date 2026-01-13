@@ -23,7 +23,15 @@ export default function CreatePermission() {
 
   useEffect(() => {
     axios
-      .get(`http://localhost:3001/api/v1/${ADMIN_PREFIX}/roles/permissions`)
+      .get(
+        `http://localhost:3001/api/v1/${ADMIN_PREFIX}/roles/permissions`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+          withCredentials: true,
+        }
+      )
       .then((res) => {
         setAllPermissions(res.data.permissionGroups);
       });

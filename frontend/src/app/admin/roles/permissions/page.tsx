@@ -11,10 +11,13 @@ import { AnimatePresence, motion } from "framer-motion";
 import NewAddButton from "@/app/components/Button/NewAddButton/NewAddButton";
 import ConfirmModal from "@/app/components/ConfirmModal/ConfirmModal";
 import { useRouter } from "next/navigation";
+import { useUser } from "@/contexts/UserContext";
 
 const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;
 
 export default function Permission() {
+  const { setUser } = useUser();
+
   const router = useRouter();
   const [roles, setRoles] = useState<Role[]>([]);
   const [originalRoles, setOriginalRoles] = useState<Role[]>([]);
@@ -96,14 +99,15 @@ export default function Permission() {
     try {
       await axios.patch(
         `http://localhost:3001/api/v1/${ADMIN_PREFIX}/roles/permissions/edit`,
+        { roles },
         {
-          roles,
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },
           withCredentials: true,
         }
       );
+      
       setOriginalRoles(
         roles.map((role) => ({
           ...role,

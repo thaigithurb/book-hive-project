@@ -15,8 +15,18 @@ export default function AdminAuthGuard({
 
   const setUserFromToken = (token: string) => {
     try {
+      const userStr = localStorage.getItem("user");
+      if (userStr) {
+        setUser(JSON.parse(userStr));
+        return;
+      }
       const payload = JSON.parse(atob(token.split(".")[1]));
-      setUser({ role: payload.role, email: payload.email });
+      setUser({
+        id: payload.id,
+        email: payload.email,
+        role: payload.role,
+        permissions: payload.permissions || [],
+      });
     } catch {
       setUser(null);
     }
@@ -33,7 +43,7 @@ export default function AdminAuthGuard({
             { withCredentials: true }
           );
           localStorage.setItem("accessToken", res.data.accessToken);
-          setUserFromToken( res.data.accessToken);
+          setUserFromToken(res.data.accessToken);
           setCheckedAuth(true);
         } catch {
           window.location.href = "/auth/login";
