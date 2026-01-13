@@ -17,8 +17,6 @@ export default function Login() {
   const inputClass =
     "border bg-[#ffff] border-gray-300 rounded-lg px-4 py-2 text-[15px] outline-none focus:ring-2 focus:ring-secondary1 hover:border-secondary1 focus:border-secondary1 transition duration-200 w-full";
 
-
-
   const handleSubmit = (e: any) => {
     e.preventDefault();
     setLoading(true);

@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { useUser } from "@/contexts/UserContext";
 
 const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;
 
@@ -10,10 +11,20 @@ export default function AdminAuthGuard({
   children: React.ReactNode;
 }) {
   const [checkedAuth, setCheckedAuth] = useState(false);
+  const { setUser } = useUser();
+
+  const setUserFromToken = (token: string) => {
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      setUser({ role: payload.role, email: payload.email });
+    } catch {
+      setUser(null);
+    }
+  };
 
   useEffect(() => {
     const checkAuth = async () => {
-      const accessToken = localStorage.getItem("accessToken");
+      let accessToken = localStorage.getItem("accessToken");
       if (!accessToken) {
         try {
           const res = await axios.post(
@@ -21,8 +32,8 @@ export default function AdminAuthGuard({
             {},
             { withCredentials: true }
           );
-          const newAccessToken = res.data.accessToken;
-          localStorage.setItem("accessToken", newAccessToken);
+          localStorage.setItem("accessToken", res.data.accessToken);
+          setUserFromToken( res.data.accessToken);
           setCheckedAuth(true);
         } catch {
           window.location.href = "/auth/login";
@@ -38,6 +49,7 @@ export default function AdminAuthGuard({
               },
             }
           );
+          setUserFromToken(accessToken);
           setCheckedAuth(true);
         } catch {
           try {
@@ -46,8 +58,8 @@ export default function AdminAuthGuard({
               {},
               { withCredentials: true }
             );
-            const newAccessToken = res.data.accessToken;
-            localStorage.setItem("accessToken", newAccessToken);
+            localStorage.setItem("accessToken", res.data.accessToken);
+            setUserFromToken(res.data.accessToken);
             setCheckedAuth(true);
           } catch {
             window.location.href = "/auth/login";

@@ -45,7 +45,7 @@ module.exports.login = async (req, res) => {
 
     // tạo mới accessToken
     const accessToken = jwt.sign(
-      { id: user._id, email: user.email, role_id: user.role_id },
+      { id: user._id, email: user.email, role_id: user.role_id, role: user.role_id.title },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN }
     );

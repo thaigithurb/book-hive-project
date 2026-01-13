@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 const jwt = require("jsonwebtoken");
 const Account = require("../api/v1/models/account.model");
-module.exports = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+module.exports.auth = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
         return res.status(401).json({ message: "Không có accessToken" });
@@ -36,3 +36,11 @@ module.exports = (req, res, next) => __awaiter(this, void 0, void 0, function* (
             .json({ message: "Token không hợp lệ hoặc đã hết hạn" });
     }
 });
+module.exports.role = (...allowedRoles) => {
+    return (req, res, next) => {
+        if (!req.user || !allowedRoles.includes(req.user.role)) {
+            return res.status(403).json({ message: "Không có quyền truy cập" });
+        }
+        next();
+    };
+};

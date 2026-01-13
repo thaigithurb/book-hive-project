@@ -40,7 +40,7 @@ module.exports.login = (req, res) => __awaiter(void 0, void 0, void 0, function*
             sameSite: "strict",
             expires: user.refreshTokenExpiresAt,
         });
-        const accessToken = jwt.sign({ id: user._id, email: user.email, role_id: user.role_id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });
+        const accessToken = jwt.sign({ id: user._id, email: user.email, role_id: user.role_id, role: user.role_id.title }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });
         return res.status(200).json({
             message: "Đăng nhập thành công!",
             accessToken,
