@@ -16,6 +16,7 @@ export default function Logout({ url, href }: LogoutProps) {
     try {
       await axios.post(url, {}, { withCredentials: true });
       localStorage.removeItem("accessToken");
+      localStorage.removeItem("user");
       setShowLogoutModal(false);
       toast.success("Đăng xuất thành công!");
       setTimeout(() => {
