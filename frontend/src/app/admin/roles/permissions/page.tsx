@@ -107,7 +107,7 @@ export default function Permission() {
           withCredentials: true,
         }
       );
-      
+
       setOriginalRoles(
         roles.map((role) => ({
           ...role,
@@ -115,6 +115,21 @@ export default function Permission() {
         }))
       );
       setHidden(true);
+
+      const userStr = localStorage.getItem("user");
+      if (userStr) {
+        const user = JSON.parse(userStr);
+        const currentRole = roles.find((r) => r.slug === user.role);
+        if (currentRole) {
+          const updatedUser = {
+            ...user,
+            permissions: currentRole.permissions,
+          };
+          localStorage.setItem("user", JSON.stringify(updatedUser));
+          setUser(updatedUser);
+        }
+      }
+
       toast.success("Cập nhật quyền thành công!");
     } catch (err) {
       toast.error("Cập nhật quyền không thành công!");
