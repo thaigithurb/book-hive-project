@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { ToastContainer, toast } from "react-toastify";
 import { BackButton } from "@/app/components/Button/BackButton/BackButton";
 import PrivateRoute from "@/app/components/Auth/PrivateRoute/PrivateRoute";
+import ConditionalRender from "@/app/components/Auth/ConditionalRender/ConditionalRender";
 
 const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;
 
@@ -55,7 +56,7 @@ export default function AccountDetail() {
 
   return (
     <>
-      <PrivateRoute permission="view_detail_account">
+      <PrivateRoute permission="view_accounts">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -103,16 +104,18 @@ export default function AccountDetail() {
               <span className="text-slate-500">{account.role_id.title}</span>
             </div>
           </div>
-          <div className="flex gap-4 mt-8">
-            <button
-              className="flex-1 py-4 font-semibold bg-yellow-100 text-yellow-700 hover:bg-yellow-200 transition-colors duration-200 cursor-pointer rounded-xl"
-              onClick={() =>
-                router.push(`/${ADMIN_PREFIX}/accounts/edit/${account.slug}`)
-              }
-            >
-              Chỉnh sửa
-            </button>
-          </div>
+          <ConditionalRender permission="edit_account">
+            <div className="flex gap-4 mt-8">
+              <button
+                className="flex-1 py-4 font-semibold bg-yellow-100 text-yellow-700 hover:bg-yellow-200 transition-colors duration-200 cursor-pointer rounded-xl"
+                onClick={() =>
+                  router.push(`/${ADMIN_PREFIX}/accounts/edit/${account.slug}`)
+                }
+              >
+                Chỉnh sửa
+              </button>
+            </div>
+          </ConditionalRender>
           <ToastContainer
             autoClose={1500}
             hideProgressBar={true}

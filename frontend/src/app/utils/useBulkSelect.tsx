@@ -88,14 +88,19 @@ export function useBulkSelect(
     if (pendingDeleteIds.length === 0) return;
 
     const bulkPromise = axios
-      .patch(`http://localhost:3001/api/v1/admin/${resource}/change-multi`, {
-        ids: pendingDeleteIds,
-        type: "delete_all",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
+      .patch(
+        `http://localhost:3001/api/v1/admin/${resource}/change-multi`,
+        {
+          ids: pendingDeleteIds,
+          type: "delete_all",
         },
-        withCredentials: true,
-      })
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+          withCredentials: true,
+        }
+      )
       .then(async () => {
         const allItems = await fetchAllItems();
         setEditedItems(allItems);

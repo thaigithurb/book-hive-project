@@ -10,6 +10,7 @@ import AccountForm from "@/app/components/Form/AccountForm/AccountForm";
 import { Role } from "@/app/interfaces/role.interface";
 import { useRouter } from "next/navigation";
 import PrivateRoute from "@/app/components/Auth/PrivateRoute/PrivateRoute";
+import ConditionalRender from "@/app/components/Auth/ConditionalRender/ConditionalRender";
 
 const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX ?? "admin";
 
@@ -202,16 +203,17 @@ export default function EditBook() {
                   roles={roles}
                   showPasswordField={false}
                 />
-
-                <button
-                  type="button"
-                  className=" transition-colors duration-200 bg-[#979797] cursor-pointer hover:bg-[#676767] text-white px-2 py-2 rounded font-semibold mt-4"
-                  onClick={() =>
-                    router.push(`/admin/accounts/reset-password/${slug}`)
-                  }
-                >
-                  Reset mật khẩu
-                </button>
+                <ConditionalRender permission="reset_password">
+                  <button
+                    type="button"
+                    className=" transition-colors duration-200 bg-[#979797] cursor-pointer hover:bg-[#676767] text-white px-2 py-2 rounded font-semibold mt-4"
+                    onClick={() =>
+                      router.push(`/admin/accounts/reset-password/${slug}`)
+                    }
+                  >
+                    Reset mật khẩu
+                  </button>
+                </ConditionalRender>
               </motion.div>
 
               <ToastContainer

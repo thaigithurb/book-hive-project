@@ -3,6 +3,8 @@ import { useRouter } from "next/navigation";
 import DOMPurify from "dompurify";
 import TableActions from "../TableActions/TableActions";
 import ActivityLog from "../ActivityLog/ActivityLog";
+import ConditionalRender from "../../Auth/ConditionalRender/ConditionalRender";
+import { permission } from "process";
 
 interface RoleTableProps {
   roles: Role[];
@@ -50,9 +52,11 @@ export default function RoleTable({
             <th className="py-4 px-4 text-left text-[14.4px] font-semibold text-primary">
               Log activity
             </th>
-            <th className="py-4 px-4 text-left text-[14.4px] font-semibold text-primary">
-              Thao tác
-            </th>
+            <ConditionalRender permission="edit_role">
+              <th className="py-4 px-4 text-left text-[14.4px] font-semibold text-primary">
+                Thao tác
+              </th>
+            </ConditionalRender>
           </tr>
         </thead>
         <tbody>
@@ -97,10 +101,12 @@ export default function RoleTable({
                     {
                       label: "Sửa",
                       title: "edit",
+                      permission: "edit_role",
                       class:
                         "py-1 px-3 rounded-[6px] text-[13.6px] font-semibold bg-yellow-100 text-yellow-700 hover:bg-yellow-200 transition-colors duration-200 cursor-pointer",
                     },
                   ]}
+                  permissionDelete="delete_role"
                   source="roles"
                   slug={role.slug}
                   id={role._id}

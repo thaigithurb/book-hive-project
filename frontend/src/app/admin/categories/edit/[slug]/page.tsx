@@ -8,6 +8,7 @@ import { BackButton } from "@/app/components/Button/BackButton/BackButton";
 import BookForm from "@/app/components/Form/BookForm/BookForm";
 import { motion, AnimatePresence } from "framer-motion";
 import CategoryForm from "@/app/components/Form/CategoryForm/CategoryForm";
+import PrivateRoute from "@/app/components/Auth/PrivateRoute/PrivateRoute";
 
 const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;
 
@@ -107,59 +108,61 @@ export default function EditCategory() {
   };
 
   return (
-    <AnimatePresence mode="wait">
-      {isPageLoading ? (
-        <motion.div
-          key="loading"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
-          className="min-h-screen flex items-center justify-center"
-        >
-          <div className="text-xl text-gray-500">Đang tải...</div>
-        </motion.div>
-      ) : (
-        <motion.div
-          key="content"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          transition={{ duration: 0.5 }}
-          className="max-w-2xl mx-auto mt-8 bg-white p-8 rounded-xl shadow relative"
-        >
-          <BackButton className="absolute -top-10 -left-60 flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 transition cursor-pointer" />
-
-          <motion.h1
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-2xl font-bold mb-6 text-primary"
-          >
-            Chỉnh sửa thể loại
-          </motion.h1>
-
+    <PrivateRoute permission="edit_role">
+      <AnimatePresence mode="wait">
+        {isPageLoading ? (
           <motion.div
+            key="loading"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="min-h-screen flex items-center justify-center"
+          >
+            <div className="text-xl text-gray-500">Đang tải...</div>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="content"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.5 }}
+            className="max-w-2xl mx-auto mt-8 bg-white p-8 rounded-xl shadow relative"
           >
-            <CategoryForm
-              form={form}
-              loading={loading}
-              handleSubmit={handleSubmit}
-              handleChange={handleChange}
-              buttonLabel="Cập nhật"
+            <BackButton className="absolute -top-10 -left-60 flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 transition cursor-pointer" />
+
+            <motion.h1
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="text-2xl font-bold mb-6 text-primary"
+            >
+              Chỉnh sửa thể loại
+            </motion.h1>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+            >
+              <CategoryForm
+                form={form}
+                loading={loading}
+                handleSubmit={handleSubmit}
+                handleChange={handleChange}
+                buttonLabel="Cập nhật"
+              />
+            </motion.div>
+
+            <ToastContainer
+              autoClose={1500}
+              hideProgressBar={true}
+              pauseOnHover={false}
             />
           </motion.div>
-
-          <ToastContainer
-            autoClose={1500}
-            hideProgressBar={true}
-            pauseOnHover={false}
-          />
-        </motion.div>
-      )}
-    </AnimatePresence>
+        )}
+      </AnimatePresence>
+    </PrivateRoute>
   );
 }

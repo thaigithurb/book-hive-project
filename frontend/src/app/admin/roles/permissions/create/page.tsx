@@ -6,6 +6,7 @@ import { ToastContainer, toast } from "react-toastify";
 import { BackButton } from "@/app/components/Button/BackButton/BackButton";
 import { motion } from "framer-motion";
 import PermissionForm from "@/app/components/Form/PermissionForm/PermissionForm";
+import PrivateRoute from "@/app/components/Auth/PrivateRoute/PrivateRoute";
 
 const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;
 
@@ -23,15 +24,12 @@ export default function CreatePermission() {
 
   useEffect(() => {
     axios
-      .get(
-        `http://localhost:3001/api/v1/${ADMIN_PREFIX}/roles/permissions`,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-          withCredentials: true,
-        }
-      )
+      .get(`http://localhost:3001/api/v1/${ADMIN_PREFIX}/roles/permissions`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+        withCredentials: true,
+      })
       .then((res) => {
         setAllPermissions(res.data.permissionGroups);
       });
@@ -99,41 +97,43 @@ export default function CreatePermission() {
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-    >
-      <div className="max-w-xl mx-auto mt-8 bg-white p-8 rounded-xl shadow relative">
-        <BackButton className="absolute -top-10 -left-70 flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 transition cursor-pointer" />
-        <motion.h1
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="text-2xl font-bold mb-6 text-primary"
-        >
-          Tạo mới quyền
-        </motion.h1>
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-        >
-          <PermissionForm
-            form={form}
-            loading={loading}
-            handleSubmit={handleSubmit}
-            handleChange={handleChange}
-            buttonLabel="Tạo mới"
-            groupOptions={groupNames}
+    <PrivateRoute permission="create_permission">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <div className="max-w-xl mx-auto mt-8 bg-white p-8 rounded-xl shadow relative">
+          <BackButton className="absolute -top-10 -left-70 flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 transition cursor-pointer" />
+          <motion.h1
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="text-2xl font-bold mb-6 text-primary"
+          >
+            Tạo mới quyền
+          </motion.h1>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+          >
+            <PermissionForm
+              form={form}
+              loading={loading}
+              handleSubmit={handleSubmit}
+              handleChange={handleChange}
+              buttonLabel="Tạo mới"
+              groupOptions={groupNames}
+            />
+          </motion.div>
+          <ToastContainer
+            autoClose={1500}
+            hideProgressBar={true}
+            pauseOnHover={false}
           />
-        </motion.div>
-        <ToastContainer
-          autoClose={1500}
-          hideProgressBar={true}
-          pauseOnHover={false}
-        />
-      </div>
-    </motion.div>
+        </div>
+      </motion.div>
+    </PrivateRoute>
   );
 }

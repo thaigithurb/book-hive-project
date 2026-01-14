@@ -21,6 +21,7 @@ import BookTable from "@/app/components/Table/BookTable/BookTable";
 import useChangeStatus from "@/app/utils/useChangeStatus";
 import { useFetchDataAdmin } from "@/app/utils/useFetchDataAdmin";
 import PrivateRoute from "@/app/components/Auth/PrivateRoute/PrivateRoute";
+import ConditionalRender from "@/app/components/Auth/ConditionalRender/ConditionalRender";
 
 const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;
 
@@ -166,7 +167,9 @@ export default function Books() {
           <h1 className="text-[32px] font-bold m-0 text-primary">
             📚 Quản lý sách
           </h1>
-          <NewAddButton label="Thêm sách mới" source="books" />
+          <ConditionalRender permission="create_book">
+            <NewAddButton label="Thêm sách mới" source="books" />
+          </ConditionalRender>
         </motion.div>
         <motion.div
           initial={isFirstLoad ? { opacity: 0, y: -20 } : false}
@@ -183,18 +186,20 @@ export default function Books() {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="flex justify-between items-center"
         >
-          <ChangeMulti
-            options={[
-              { label: "Hoạt động", value: "active" },
-              { label: "Dừng hoạt động", value: "inactive" },
-              { label: "Đổi vị trí", value: "position-change" },
-              { label: "Xóa tất cả", value: "delete_all" },
-            ]}
-            bulkValue={bulkValue}
-            setBulkValue={setBulkValue}
-            onBulkChange={handleBulkChange}
-            disabled={!bulkValue || selectedIds.length === 0}
-          />
+          <ConditionalRender permission="edit_book">
+            <ChangeMulti
+              options={[
+                { label: "Hoạt động", value: "active" },
+                { label: "Dừng hoạt động", value: "inactive" },
+                { label: "Đổi vị trí", value: "position-change" },
+                { label: "Xóa tất cả", value: "delete_all" },
+              ]}
+              bulkValue={bulkValue}
+              setBulkValue={setBulkValue}
+              onBulkChange={handleBulkChange}
+              disabled={!bulkValue || selectedIds.length === 0}
+            />
+          </ConditionalRender>
           <div className="mb-6">
             <SortSelect
               sortValue={sortValue}

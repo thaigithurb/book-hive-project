@@ -6,6 +6,7 @@ import { ToastContainer, toast } from "react-toastify";
 import { BackButton } from "@/app/components/Button/BackButton/BackButton";
 import BookForm from "@/app/components/Form/BookForm/BookForm";
 import { motion } from "framer-motion";
+import PrivateRoute from "@/app/components/Auth/PrivateRoute/PrivateRoute";
 
 const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;
 
@@ -17,8 +18,8 @@ export default function Create() {
     description: "",
     priceBuy: "",
     position: "",
-    priceRentDay:"",
-    priceRentWeek:"",
+    priceRentDay: "",
+    priceRentWeek: "",
     status: "active",
     featured: false,
   });
@@ -137,49 +138,53 @@ export default function Create() {
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-    >
-      <div className="max-w-xl mx-auto mt-8 bg-white p-8 rounded-xl shadow relative">
-        <BackButton className="absolute -top-10 -left-70 flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 transition cursor-pointer" />
-        <motion.h1
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="text-2xl font-bold mb-6 text-primary"
-        >
-          Tạo mới sách
-        </motion.h1>
+    <>
+      <PrivateRoute permission="create_book">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
+          transition={{ duration: 0.5 }}
         >
-          <BookForm
-            form={form}
-            loading={loading}
-            preview={preview}
-            setPreview={setPreview}
-            imageFile={imageFile}
-            setImageFile={setImageFile}
-            fileInputRef={fileInputRef}
-            handleSubmit={handleSubmit}
-            handleChange={handleChange}
-            handleMoneyChange={handleMoneyChange}
-            handleImageChange={handleImageChange}
-            handleRemoveImage={handleRemoveImage}
-            buttonLabel="Tạo mới"
-            categories={categories}
-          />
+          <div className="max-w-xl mx-auto mt-8 bg-white p-8 rounded-xl shadow relative">
+            <BackButton className="absolute -top-10 -left-70 flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 transition cursor-pointer" />
+            <motion.h1
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="text-2xl font-bold mb-6 text-primary"
+            >
+              Tạo mới sách
+            </motion.h1>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+            >
+              <BookForm
+                form={form}
+                loading={loading}
+                preview={preview}
+                setPreview={setPreview}
+                imageFile={imageFile}
+                setImageFile={setImageFile}
+                fileInputRef={fileInputRef}
+                handleSubmit={handleSubmit}
+                handleChange={handleChange}
+                handleMoneyChange={handleMoneyChange}
+                handleImageChange={handleImageChange}
+                handleRemoveImage={handleRemoveImage}
+                buttonLabel="Tạo mới"
+                categories={categories}
+              />
+            </motion.div>
+            <ToastContainer
+              autoClose={1500}
+              hideProgressBar={true}
+              pauseOnHover={false}
+            />
+          </div>
         </motion.div>
-        <ToastContainer
-          autoClose={1500}
-          hideProgressBar={true}
-          pauseOnHover={false}
-        />
-      </div>
-    </motion.div>
+      </PrivateRoute>
+    </>
   );
 }

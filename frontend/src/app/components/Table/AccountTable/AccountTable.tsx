@@ -3,6 +3,9 @@ import { Account } from "@/app/interfaces/account.interface";
 import TableActions from "../TableActions/TableActions";
 import ActivityLog from "../ActivityLog/ActivityLog";
 import ChangeStatusBadge from "../../ChangeStatusBadge/ChangeStatusBadge";
+import PrivateRoute from "../../Auth/PrivateRoute/PrivateRoute";
+import ConditionalRender from "../../Auth/ConditionalRender/ConditionalRender";
+import { permission } from "process";
 
 interface AccountTableProps {
   accounts: Account[];
@@ -52,9 +55,11 @@ export default function AccountTable({
             <th className="py-4 px-4 text-left text-[14.4px]    font-semibold text-primary">
               Số điện thoại
             </th>
-            <th className="py-4 px-4 text-left lg:w-[150px] text-[14.4px] font-semibold text-primary">
-              Trạng thái
-            </th>
+            <ConditionalRender permission="edit_account">
+              <th className="py-4 px-4 text-left lg:w-[180px] text-[14.4px] font-semibold text-primary">
+                Trạng thái
+              </th>
+            </ConditionalRender>
             <th className="py-4 px-4 text-left text-[14.4px] font-semibold text-primary">
               Ngày tạo
             </th>
@@ -100,17 +105,19 @@ export default function AccountTable({
               <td className="py-4 px-4 text-[14.4px] text-primary">
                 {account.phone}
               </td>
-              <td className="py-4 px-4 text-[14.4px] text-primary">
-                {account._id && (
-                  <ChangeStatusBadge
-                    status={account.status}
-                    onClick={() => {
-                      if (account._id)
-                        onChangeStatus(account._id, account.status);
-                    }}
-                  />
-                )}
-              </td>
+              <ConditionalRender permission="edit_account">
+                <td className="py-4 px-4 text-[14.4px] text-primary">
+                  {account._id && (
+                    <ChangeStatusBadge
+                      status={account.status}
+                      onClick={() => {
+                        if (account._id)
+                          onChangeStatus(account._id, account.status);
+                      }}
+                    />
+                  )}
+                </td>
+              </ConditionalRender>
               <td className="py-4 px-4 text-[14.4px] text-primary">
                 {account.createdAt
                   ? new Date(account.createdAt).toLocaleDateString()
@@ -125,16 +132,19 @@ export default function AccountTable({
                     {
                       label: "Chi tiết",
                       title: "detail",
+                      permission: "view_accounts",
                       class:
                         "py-1 px-3 rounded-[6px] text-[13.6px] font-semibold bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors duration-200 cursor-pointer",
                     },
                     {
                       label: "Sửa",
                       title: "edit",
+                      permission: "edit_account",
                       class:
                         "py-1 px-3 rounded-[6px] text-[13.6px] font-semibold bg-yellow-100 text-yellow-700 hover:bg-yellow-200 transition-colors duration-200 cursor-pointer",
                     },
                   ]}
+                  permissionDelete="delete_account"
                   source="accounts"
                   slug={account.slug}
                   id={account._id}

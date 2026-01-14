@@ -35,7 +35,7 @@ const menu = [
     label: "🧑‍💼 Quản lý tài khoản",
     key: "accounts",
     href: "/admin/accounts",
-    permission: "edit_user",
+    permission: "view_accounts",
   },
   { label: "👤 Thông tin cá nhân", key: "profile", href: "/admin/profile" }, 
 ];
@@ -92,11 +92,7 @@ export const SideBar = () => {
           href={"/auth/login"}
         />
       </aside>
-      <ToastContainer
-        autoClose={1500}
-        hideProgressBar={true}
-        pauseOnHover={false}
-      />
+    
     </>
   );
 };

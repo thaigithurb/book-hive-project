@@ -5,6 +5,8 @@ import ChangeStatusBadge from "../../ChangeStatusBadge/ChangeStatusBadge";
 import ActivityLog from "../ActivityLog/ActivityLog";
 import DOMPurify from "dompurify";
 import TableActions from "../TableActions/TableActions";
+import { permission } from "process";
+import ConditionalRender from "../../Auth/ConditionalRender/ConditionalRender";
 
 interface CategoryTableProps {
   categories: Category[];
@@ -52,18 +54,22 @@ export default function CategoryTable({
             <th className="py-4 px-4 text-left text-[14.4px] font-semibold text-primary">
               Mô tả
             </th>
-            <th className="py-4 px-4  lg:w-[150px] text-left text-[14.4px] font-semibold text-primary">
-              Trạng thái
-            </th>
+            <ConditionalRender permission="edit_category">
+              <th className="py-4 px-4  lg:w-[150px] text-left text-[14.4px] font-semibold text-primary">
+                Trạng thái
+              </th>
+            </ConditionalRender>
             <th className="py-4 px-4 text-left text-[14.4px] font-semibold text-primary">
               Vị trí
             </th>
             <th className="py-4 px-4 text-left text-[14.4px] font-semibold text-primary">
               Log activity
             </th>
-            <th className="py-4 px-4 text-left text-[14.4px] font-semibold text-primary">
-              Thao tác
-            </th>
+            <ConditionalRender permission="edit_category">
+              <th className="py-4 px-4 text-left text-[14.4px] font-semibold text-primary">
+                Thao tác
+              </th>
+            </ConditionalRender>
           </tr>
         </thead>
         <tbody>
@@ -102,19 +108,20 @@ export default function CategoryTable({
                   }}
                 />
               </td>
-
-              <td className="py-4 px-4">
-                {category._id && (
-                  <ChangeStatusBadge
-                    status={category.status}
-                    onClick={() => {
-                      if (category._id) {
-                        onChangeStatus(category._id, category.status);
-                      }
-                    }}
-                  />
-                )}
-              </td>
+              <ConditionalRender permission="edit_category">
+                <td className="py-4 px-4">
+                  {category._id && (
+                    <ChangeStatusBadge
+                      status={category.status}
+                      onClick={() => {
+                        if (category._id) {
+                          onChangeStatus(category._id, category.status);
+                        }
+                      }}
+                    />
+                  )}
+                </td>
+              </ConditionalRender>
               <td className="py-4 px-4 text-[14.4px] text-primary">
                 <input
                   type="number"
@@ -147,10 +154,12 @@ export default function CategoryTable({
                     {
                       label: "Sửa",
                       title: "edit",
+                      permission: "edit_category",
                       class:
                         "py-1 px-3 rounded-[6px] text-[13.6px] font-semibold bg-yellow-100 text-yellow-700 hover:bg-yellow-200 transition-colors duration-200 cursor-pointer",
                     },
                   ]}
+                  permissionDelete="delete_category"
                   source="categories"
                   slug={category.slug}
                   id={category._id}

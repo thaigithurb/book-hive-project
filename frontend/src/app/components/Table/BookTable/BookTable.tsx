@@ -3,6 +3,8 @@ import { useRouter } from "next/navigation";
 import ActivityLog from "../ActivityLog/ActivityLog";
 import ChangeStatusBadge from "../../ChangeStatusBadge/ChangeStatusBadge";
 import TableActions from "../TableActions/TableActions";
+import { permission } from "process";
+import ConditionalRender from "../../Auth/ConditionalRender/ConditionalRender";
 
 interface BookTableProps {
   books: Book[];
@@ -58,9 +60,11 @@ export default function BookTable({
             <th className="py-4 px-4 text-left text-[14.4px] font-semibold text-primary">
               Giá
             </th>
-            <th className="py-4 px-4 text-left xl:w-[150px] text-[14.4px] font-semibold text-primary">
-              Trạng thái
-            </th>
+            <ConditionalRender permission="edit_book">
+              <th className="py-4 px-4 text-left lg:w-[180px] text-[14.4px] font-semibold text-primary">
+                Trạng thái
+              </th>
+            </ConditionalRender>
             <th className="py-4 px-4 text-left text-[14.4px] font-semibold text-primary">
               Vị trí
             </th>
@@ -115,20 +119,24 @@ export default function BookTable({
                 {book.category_name}
               </td>
               <td className="py-4 px-4 text-[14.4px] text-primary">
-                {book.priceBuy ? book.priceBuy.toLocaleString("vi-VN") + "đ" : "N/A"}
+                {book.priceBuy
+                  ? book.priceBuy.toLocaleString("vi-VN") + "đ"
+                  : "N/A"}
               </td>
-              <td className="py-4 px-4">
-                {book._id && (
-                  <ChangeStatusBadge
-                    status={book.status}
-                    onClick={() => {
-                      if (book._id) {
-                        onChangeStatus(book._id, book.status);
-                      }
-                    }}
-                  />
-                )}
-              </td>
+              <ConditionalRender permission="edit_book">
+                <td className="py-4 px-4">
+                  {book._id && (
+                    <ChangeStatusBadge
+                      status={book.status}
+                      onClick={() => {
+                        if (book._id) {
+                          onChangeStatus(book._id, book.status);
+                        }
+                      }}
+                    />
+                  )}
+                </td>
+              </ConditionalRender>
               <td className="py-4 px-4 text-[14.4px] text-primary">
                 <input
                   type="number"
@@ -150,7 +158,7 @@ export default function BookTable({
                 />
               </td>
               <td className="py-4 px-4 text-[13px] text-gray-700 ">
-                <ActivityLog record={book}/>
+                <ActivityLog record={book} />
               </td>
               <td className="py-4 px-4">
                 <TableActions
@@ -158,16 +166,19 @@ export default function BookTable({
                     {
                       label: "Chi tiết",
                       title: "detail",
+                      permission: "view_books",
                       class:
                         "py-1 px-3 rounded-[6px] text-[13.6px] font-semibold bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors duration-200 cursor-pointer",
                     },
                     {
                       label: "Sửa",
                       title: "edit",
+                      permission: "edit_book",
                       class:
                         "xl:py-1 xl:px-3 lg:py-0.5 lg:px-2 rounded-[6px] lg:text-[12px] xl:text-[13.6px] font-semibold bg-yellow-100 text-yellow-700 hover:bg-yellow-200 transition-colors duration-200 cursor-pointer",
                     },
                   ]}
+                  permissionDelete="delete_book"
                   source="books"
                   slug={book.slug}
                   id={book._id}

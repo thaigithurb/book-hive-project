@@ -21,6 +21,7 @@ import AccountTable from "@/app/components/Table/AccountTable/AccountTable";
 import useChangeStatus from "@/app/utils/useChangeStatus";
 import { useUser } from "@/contexts/UserContext";
 import PrivateRoute from "@/app/components/Auth/PrivateRoute/PrivateRoute";
+import ConditionalRender from "@/app/components/Auth/ConditionalRender/ConditionalRender";
 
 const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;
 
@@ -158,9 +159,10 @@ export default function Accounts() {
           <h1 className="text-[32px] font-bold m-0 text-primary">
             🔑 Quản lý tài khoản
           </h1>
-          <NewAddButton label="Thêm tài khoản mới" source="accounts" />
+          <ConditionalRender permission="create_account">
+            <NewAddButton label="Thêm tài khoản mới" source="accounts" />
+          </ConditionalRender>
         </motion.div>
-
         <motion.div
           initial={isFirstLoad ? { opacity: 0, y: -20 } : false}
           animate={{ opacity: 1, y: 0 }}
@@ -177,17 +179,19 @@ export default function Accounts() {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="flex justify-between items-center"
         >
-          <ChangeMulti
-            options={[
-              { label: "Xóa tất cả", value: "delete_all" },
-              { label: "Hoạt động", value: "active" },
-              { label: "Dừng hoạt động", value: "inactive" },
-            ]}
-            bulkValue={bulkValue}
-            setBulkValue={setBulkValue}
-            onBulkChange={handleBulkChange}
-            disabled={!bulkValue || selectedIds.length === 0}
-          />
+          <ConditionalRender permission="edit_account">
+            <ChangeMulti
+              options={[
+                { label: "Xóa tất cả", value: "delete_all" },
+                { label: "Hoạt động", value: "active" },
+                { label: "Dừng hoạt động", value: "inactive" },
+              ]}
+              bulkValue={bulkValue}
+              setBulkValue={setBulkValue}
+              onBulkChange={handleBulkChange}
+              disabled={!bulkValue || selectedIds.length === 0}
+            />
+          </ConditionalRender>
           <div className="mb-6">
             <SortSelect
               sortValue={sortValue}
