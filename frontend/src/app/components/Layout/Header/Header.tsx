@@ -1,5 +1,6 @@
 "use client";
 
+import { useCart } from "@/contexts/CartContext";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -7,7 +8,9 @@ import { ToastContainer } from "react-toastify";
 
 export const Header = () => {
   const router = useRouter();
+  const { getTotalItems } = useCart();
   const [keyword, setKeyword] = useState("");
+  const cartCount = getTotalItems();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -98,6 +101,17 @@ export const Header = () => {
               </div>
             </div>
             <Link
+              href="/cart"
+              className="relative px-4 py-2 text-primary font-medium transition-all duration-300 hover:bg-blue-50 hover:text-blue-600 rounded-lg hover:shadow-[0_4px_12px_rgba(59,130,246,0.2)]"
+            >
+              🛒 Giỏ hàng
+              {cartCount > 0 && (
+                <span className="absolute top-1 right-1 bg-red-500 text-white text-xs font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                  {cartCount}
+                </span>
+              )}
+            </Link>
+            <Link
               href="/account"
               className="px-4 py-2 text-primary font-medium transition-all duration-300 hover:bg-blue-50 hover:text-blue-600 rounded-lg hover:shadow-[0_4px_12px_rgba(59,130,246,0.2)]"
             >
@@ -106,11 +120,6 @@ export const Header = () => {
           </div>
         </nav>
       </header>
-      <ToastContainer
-        autoClose={1500}
-        hideProgressBar={true}
-        pauseOnHover={false}
-      />
     </>
   );
 };

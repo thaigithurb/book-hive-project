@@ -7,6 +7,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import DOMPurify from "dompurify";
+import { useCart } from "@/contexts/CartContext";
 
 export default function Detail() {
   const router = useRouter();
@@ -15,6 +16,7 @@ export default function Detail() {
   const [loading, setLoading] = useState(true);
   const [rentType, setRentType] = useState("day");
   const [rentQuantity, setRentQuantity] = useState<number | string>(1);
+  const { addToCart } = useCart();
 
   useEffect(() => {
     const fetchBook = async () => {
@@ -41,6 +43,21 @@ export default function Detail() {
     );
     if (!option) return null;
     return option.price * Number(rentQuantity);
+  };
+
+  const handleBuyNow = () => {
+    if (!book) return;
+
+    addToCart({
+      id: book.id?.toString() || book._id?.toString() || String(Math.random()),
+      title: book.title,
+      price: book.priceBuy,
+      quantity: 1,
+      image: book.image,
+      slug: book.slug
+    });
+
+    toast.success("Đã thêm vào giỏ hàng!");
   };
 
   if (loading) {
@@ -157,7 +174,10 @@ export default function Detail() {
                 </div>
               </div>
               <div className="flex gap-4">
-                <button className="flex-1 py-4 font-semibold cursor-pointer bg-secondary1 text-white rounded-xl text-base hover:bg-blue-700 transition-colors duration-200">
+                <button
+                  onClick={handleBuyNow}
+                  className="flex-1 py-4 font-semibold cursor-pointer bg-secondary1 text-white rounded-xl text-base hover:bg-blue-700 transition-colors duration-200"
+                >
                   🛒 Mua ngay
                 </button>
                 <button className="flex-1 py-4 font-semibold bg-white text-secondary1 border-2 border-secondary1 rounded-xl cursor-pointer text-base hover:bg-blue-50 transition-colors duration-200">
