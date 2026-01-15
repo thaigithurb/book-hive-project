@@ -8,7 +8,7 @@ import { toast, ToastContainer } from "react-toastify";
 export default function OrderSuccessPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const [orderCode, setOrderCode] = useState<string>("");
+  const [orderCode, setOrderCode] = useState<number | null>(null); 
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
@@ -16,11 +16,11 @@ export default function OrderSuccessPage() {
     const code = searchParams.get("orderCode");
 
     if (code) {
-      setOrderCode(code);
+      setOrderCode(parseInt(code, 10));
       toast.success("✅ Đặt hàng thành công!");
     } else {
       toast.error("Không tìm thấy thông tin đơn hàng!");
-      setTimeout(() => router.push("/"), 2000);
+      setTimeout(() => router.push("/home"), 2000);
     }
   }, [searchParams, router]);
 
@@ -57,7 +57,7 @@ export default function OrderSuccessPage() {
                 </p>
                 <button
                   onClick={() => {
-                    navigator.clipboard.writeText(orderCode);
+                    navigator.clipboard.writeText(orderCode.toString()); // ✅ Chuyển thành string để copy
                     toast.success("Đã sao chép mã đơn hàng!");
                   }}
                   className="text-green-700 hover:text-green-900 text-2xl transition-colors"
@@ -102,13 +102,13 @@ export default function OrderSuccessPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Link
-              href="/"
+              href="/home"
               className="py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition-colors text-center"
             >
               🏠 Quay về trang chủ
             </Link>
             <Link
-              href="/products"
+              href="/books"
               className="py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-colors text-center"
             >
               📚 Tiếp tục mua sắm
