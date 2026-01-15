@@ -54,7 +54,7 @@ export default function CartPage() {
       toast.error("Giỏ hàng trống!");
       return;
     }
-    router.push("/checkout");
+    router.push("/cart/checkout");
   };
 
   return (
