@@ -1,14 +1,36 @@
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+    function adopt(value) {
+        return value instanceof P ? value : new P(function (resolve) {
+            resolve(value);
+        });
+    }
+    return new(P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) {
+            try {
+                step(generator.next(value));
+            } catch (e) {
+                reject(e);
+            }
+        }
+
+        function rejected(value) {
+            try {
+                step(generator["throw"](value));
+            } catch (e) {
+                reject(e);
+            }
+        }
+
+        function step(result) {
+            result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected);
+        }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-Object.defineProperty(exports, "__esModule", { value: true });
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
 const Order = require("../../models/order.model");
 const Transaction = require("../../models/transaction.model");
 const crypto = require("crypto");
@@ -17,13 +39,17 @@ const PAYOS_API_KEY = process.env.PAYOS_API_KEY;
 const PAYOS_CHECKSUM_KEY = process.env.PAYOS_CHECKSUM_KEY;
 module.exports.verifyPayment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { orderCode } = req.body;
+        const {
+            orderCode
+        } = req.body;
         if (!orderCode) {
             return res.status(400).json({
                 message: "Thiếu mã đơn hàng!",
             });
         }
-        const order = yield Order.findOne({ orderCode });
+        const order = yield Order.findOne({
+            orderCode
+        });
         if (!order) {
             return res.status(404).json({
                 message: "Không tìm thấy đơn hàng!",
@@ -40,18 +66,24 @@ module.exports.verifyPayment = (req, res) => __awaiter(void 0, void 0, void 0, f
                 message: "Đơn hàng này không ở trạng thái chờ thanh toán!",
             });
         }
-        console.log("🔄 Verify payment:", { orderCode });
+        console.log("🔄 Verify payment:", {
+            orderCode
+        });
         const transaction = yield Transaction.findOne({
             orderCode,
             status: "success",
         });
         if (transaction) {
             console.log("✅ Giao dịch đã xác nhận từ webhook PayOS");
-            const updatedOrder = yield Order.findOneAndUpdate({ orderCode }, {
+            const updatedOrder = yield Order.findOneAndUpdate({
+                orderCode
+            }, {
                 status: "paid",
                 paidAt: new Date(),
                 updatedAt: new Date(),
-            }, { new: true });
+            }, {
+                new: true
+            });
             return res.status(200).json({
                 message: "✅ Xác nhận thanh toán thành công!",
                 order: updatedOrder,
@@ -67,8 +99,7 @@ module.exports.verifyPayment = (req, res) => __awaiter(void 0, void 0, void 0, f
             message: "Chờ PayOS xác nhận giao dịch... Vui lòng thử lại trong vài giây.",
             tip: "Giao dịch có thể mất 10-30 giây để xác nhận",
         });
-    }
-    catch (error) {
+    } catch (error) {
         console.error("❌ Lỗi verify payment:", error);
         return res.status(500).json({
             message: "Lỗi xác nhận thanh toán!",
@@ -76,90 +107,166 @@ module.exports.verifyPayment = (req, res) => __awaiter(void 0, void 0, void 0, f
         });
     }
 });
-module.exports.webhookPayment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+
+module.exports.webhookPayment = async (req, res) => {
     try {
-        const { data, signature } = req.body;
-        console.log("🔔 Webhook từ PayOS:", JSON.stringify(data, null, 2));
+        const {
+            data,
+            signature
+        } = req.body;
+
+        console.log("🔔 Raw webhook từ PayOS:", data);
+        console.log("📝 Raw signature:", signature);
+
         if (!data || !signature) {
             console.error("❌ Thiếu data hoặc signature");
-            return res.status(400).json({ message: "Missing data or signature" });
+            return res.status(400).json({
+                message: "Missing data or signature"
+            });
         }
-        const dataStr = JSON.stringify(data);
+
+        // ✅ Chuẩn hóa data: chuyển số thành string
+        const normalizedData = {
+            orderCode: String(data.orderCode), // Convert to string
+            amount: data.amount,
+            description: data.description,
+            accountNumber: data.accountNumber,
+            reference: data.reference,
+            transactionDateTime: data.transactionDateTime,
+            paymentLinkId: data.paymentLinkId,
+            code: data.code,
+            desc: data.desc,
+            counterAccountBankId: data.counterAccountBankId,
+            counterAccountBankName: data.counterAccountBankName,
+            counterAccountName: data.counterAccountName,
+            counterAccountNumber: data.counterAccountNumber,
+            virtualAccountName: data.virtualAccountName,
+            virtualAccountNumber: data.virtualAccountNumber,
+            currency: data.currency,
+        };
+
+        // ✅ Stringify theo thứ tự đúng (như PayOS gửi)
+        const dataStr = JSON.stringify(normalizedData);
+
+        console.log("📋 Normalized data string:", dataStr);
+
         const expectedSignature = crypto
             .createHmac("sha256", PAYOS_CHECKSUM_KEY)
             .update(dataStr)
             .digest("hex");
+
         console.log("🔐 Verify signature:", {
             received: signature,
             expected: expectedSignature,
             match: signature === expectedSignature,
         });
+
         if (signature !== expectedSignature) {
             console.error("❌ Signature không hợp lệ");
-            return res.status(401).json({ message: "Unauthorized" });
+            return res.status(401).json({
+                message: "Unauthorized"
+            });
         }
-        const { id, orderCode, amount, amountPaid, description, transactionDateTime, referenceCode, status, } = data;
+
+        // ✅ Lấy orderCode từ data đã chuẩn hóa
+        const orderCode = normalizedData.orderCode;
+        const {
+            amount,
+            description,
+            transactionDateTime,
+            reference,
+            code,
+        } = normalizedData;
+
         console.log("📊 Dữ liệu webhook:", {
             orderCode,
             amount,
-            amountPaid,
-            status,
+            code,
             description,
         });
-        if (status !== "PAID" && status !== "00") {
-            console.log("⚠️ Giao dịch chưa PAID:", status);
-            return res.status(200).json({ message: "Payment not completed yet" });
+
+        // Kiểm tra status
+        if (code !== "00") {
+            console.log("⚠️ Giao dịch chưa thành công:", code);
+            return res.status(200).json({
+                message: "Payment not completed yet"
+            });
         }
-        const order = yield Order.findOne({ orderCode });
+
+        const order = await Order.findOne({
+            orderCode
+        });
+
         if (!order) {
             console.error("❌ Không tìm thấy đơn hàng:", orderCode);
-            return res.status(404).json({ message: "Order not found" });
+            return res.status(404).json({
+                message: "Order not found"
+            });
         }
+
+        // Kiểm tra số tiền
         const totalAmount = order.totalAmount;
-        if (amountPaid !== totalAmount && amount !== totalAmount) {
+        if (amount !== totalAmount) {
             console.error("❌ Số tiền không khớp", {
                 expected: totalAmount,
-                paid: amountPaid,
-                amount: amount,
+                received: amount,
             });
-            return res.status(400).json({ message: "Amount mismatch" });
+            return res.status(400).json({
+                message: "Amount mismatch"
+            });
         }
+
+        // Kiểm tra trạng thái
         if (order.status === "paid") {
             console.log("⚠️ Đơn hàng đã thanh toán");
-            return res.status(200).json({ message: "Already paid" });
+            return res.status(200).json({
+                message: "Already paid"
+            });
         }
-        let transaction = yield Transaction.findOne({ orderCode });
+
+        // Create/update transaction
+        let transaction = await Transaction.findOne({
+            orderCode
+        });
+
         if (transaction) {
-            console.log("📝 Update transaction pending -> success");
+            console.log("📝 Update transaction");
             transaction.status = "success";
-            transaction.amount = amountPaid || amount;
+            transaction.amount = amount;
             transaction.description = description;
             transaction.transactionDate = new Date(transactionDateTime);
-            transaction.referenceCode = referenceCode;
+            transaction.referenceCode = reference;
             transaction.verifiedAt = new Date();
-            yield transaction.save();
-        }
-        else {
-            console.log("📝 Tạo transaction mới từ webhook");
+            await transaction.save();
+        } else {
+            console.log("📝 Tạo transaction mới");
             transaction = new Transaction({
                 orderCode,
                 bankCode: process.env.PAYMENT_BANK_CODE || "970422",
                 accountNo: process.env.PAYMENT_ACCOUNT_NUMBER,
-                amount: amountPaid || amount,
+                amount,
                 description,
                 transactionDate: new Date(transactionDateTime),
-                referenceCode,
+                referenceCode: reference,
                 status: "success",
                 verifiedAt: new Date(),
             });
-            yield transaction.save();
+            await transaction.save();
         }
-        const updatedOrder = yield Order.findOneAndUpdate({ orderCode }, {
+
+        // Update order
+        const updatedOrder = await Order.findOneAndUpdate({
+            orderCode
+        }, {
             status: "paid",
             paidAt: new Date(),
             updatedAt: new Date(),
-        }, { new: true });
+        }, {
+            new: true
+        });
+
         console.log("✅ Webhook xác nhận thanh toán thành công");
+
         return res.status(200).json({
             message: "Webhook processed successfully",
             code: "00",
@@ -169,8 +276,7 @@ module.exports.webhookPayment = (req, res) => __awaiter(void 0, void 0, void 0, 
                 status: updatedOrder.status,
             },
         });
-    }
-    catch (error) {
+    } catch (error) {
         console.error("❌ Lỗi xử lý webhook:", error);
         return res.status(200).json({
             message: "Webhook processing error",
@@ -178,7 +284,8 @@ module.exports.webhookPayment = (req, res) => __awaiter(void 0, void 0, void 0, 
             desc: error.message,
         });
     }
-});
+};
+
 module.exports.getPaymentInfo = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const paymentInfo = {
@@ -190,11 +297,13 @@ module.exports.getPaymentInfo = (req, res) => __awaiter(void 0, void 0, void 0, 
             message: "Lấy thông tin thanh toán thành công!",
             data: paymentInfo,
         });
-    }
-    catch (error) {
+    } catch (error) {
         return res.status(500).json({
             message: "Lỗi lấy thông tin thanh toán!",
             error: error.message,
         });
     }
 });
+
+
+export {};
