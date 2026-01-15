@@ -10,8 +10,16 @@ database.connect();
 const app = express();
 const port = process.env.PORT;
 app.use(cors({
-    origin: "http://localhost:3000",
+    origin: [
+        "http://localhost:3000",
+        "http://localhost:3001",
+        /\.onrender\.com$/,
+        /\.payos\.vn$/,
+        "*",
+    ],
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
 }));
 app.use(cookieParser());
 app.use(bodyParser.json());

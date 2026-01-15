@@ -87,7 +87,6 @@ module.exports.verifyPayment = async (req, res) => {
 };
 
 // [POST] /api/v1/payments/webhook
-// Webhook từ PayOS
 module.exports.webhookPayment = async (req, res) => {
   try {
     const { data, signature } = req.body;
