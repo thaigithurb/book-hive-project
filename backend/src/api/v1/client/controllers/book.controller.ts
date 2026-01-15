@@ -266,4 +266,27 @@ module.exports.booksBuy = async (req, res) => {
   }
 };
 
+// [GET] /api/v1/books/newest
+module.exports.newest = async (req, res) => {
+  try {
+    const books = await Book.find({
+      deleted: false,
+      status: "active",
+    }).sort({ createdAt: -1 });
+
+    if (books) {
+      return res.status(200).json({
+        message: "Thành công!",
+        books: books,
+      });
+    }
+
+    return res.status(400).json({
+      message: "Không có sách nào",
+    });
+  } catch (error) {
+    res.json("Không tìm thấy!");
+  }
+};
+
 export {};

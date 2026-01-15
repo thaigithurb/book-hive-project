@@ -1,6 +1,7 @@
 "use client";
 
 import { BackButton } from "@/app/components/Button/BackButton/BackButton";
+import { Loading } from "@/app/components/Loading/Loading";
 import axios from "axios";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -25,6 +26,7 @@ export default function Detail() {
         setBook(res.data.book);
       } catch (err) {
         toast.error("Không tìm thấy sách!");
+        setBook(null);
       } finally {
         setLoading(false);
       }
@@ -32,7 +34,6 @@ export default function Detail() {
     fetchBook();
   }, [params.slug]);
 
-  // Tính giá thuê dựa trên loại và số lượng
   const getRentPrice = () => {
     if (!book?.priceRentOptions) return null;
     const option = book.priceRentOptions.find(
@@ -44,11 +45,7 @@ export default function Detail() {
 
   if (loading) {
     return (
-      <div className="bg-blue-50 min-h-screen flex items-center justify-center">
-        <div className="text-xl text-gray-500 font-semibold animate-pulse">
-          Đang tải dữ liệu sách...
-        </div>
-      </div>
+      <Loading fullScreen={true} size="lg" text="Đang tải thông tin sách..." />
     );
   }
 
@@ -66,9 +63,9 @@ export default function Detail() {
     <>
       <div className="min-h-screen py-12 relative">
         <BackButton className="absolute -top-4 left-20 flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 transition cursor-pointer" />
-        <div className=" max-w-4xl mx-auto">
+        <div className="max-w-4xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-12">
-            <div className="bg-white rounded-2xl  p-10 text-center shadow flex flex-col items-center justify-center">
+            <div className="bg-white rounded-2xl p-10 text-center shadow flex flex-col items-center justify-center">
               {book.image ? (
                 <img
                   src={book.image}
@@ -207,7 +204,6 @@ export default function Detail() {
                 Gửi đánh giá
               </button>
             </div>
-            {/* Reviews List */}
             <div>
               <p className="text-center text-slate-400 text-base">
                 Chưa có đánh giá nào. Hãy là người đầu tiên!

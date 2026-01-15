@@ -1,13 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-
 import axios from "axios";
 import { Book } from "@/app/interfaces/book.interface";
 import { BookCard } from "@/app/components/Card/BookCard/BookCard";
+import { Loading } from "@/app/components/Loading/Loading";
 import debounce from "lodash.debounce";
 import Pagination from "@/app/components/Pagination/Pagination";
-import { div } from "framer-motion/client";
 import SortSelect from "@/app/components/SortSelect/SortSelect";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSyncParams } from "@/app/utils/useSyncParams";
@@ -72,6 +71,11 @@ export default function Books() {
   //  Xử lý thay đổi sort từ dropdown
   const handleSortChange = useSortChange("books", "client");
 
+  // Full screen loading khi load lần đầu
+  if (loading && books.length === 0) {
+    return <Loading fullScreen={true} size="lg" text="Đang tải sách..." />;
+  }
+
   return (
     <>
       <div className="py-[32px] px-[24px]">
@@ -89,28 +93,30 @@ export default function Books() {
               sortValue={sortValue}
             />
           </div>
-          {loading ? (
-            <div className="flex items-center justify-center min-h-screen text-gray-500 text-center col-span-3">
-              Đang tải...
-            </div>
-          ) : (
-            <>
-              <div className="grid grid-cols-4 gap-[24px] mb-8">
-                {books.map((book, index) => (
-                  <BookCard
-                    key={index}
-                    book={book}
-                    featured={book.featured ? true : false}
-                  />
-                ))}
+
+          <div className="grid grid-cols-4 gap-[24px] mb-8">
+            {books.length > 0 ? (
+              books.map((book, index) => (
+                <BookCard
+                  key={index}
+                  book={book}
+                  featured={book.featured ? true : false}
+                />
+              ))
+            ) : (
+              <div className="col-span-4 flex items-center justify-center min-h-[400px] text-gray-500 text-center">
+                <p className="text-xl">Không tìm thấy sách nào</p>
               </div>
-              <Pagination
-                page={page}
-                total={total}
-                limit={limit}
-                onPageChange={handlePageChange}
-              />
-            </>
+            )}
+          </div>
+
+          {books.length > 0 && (
+            <Pagination
+              page={page}
+              total={total}
+              limit={limit}
+              onPageChange={handlePageChange}
+            />
           )}
         </div>
       </div>

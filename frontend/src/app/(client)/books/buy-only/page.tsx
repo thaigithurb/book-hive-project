@@ -1,13 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-
 import axios from "axios";
 import { Book } from "@/app/interfaces/book.interface";
 import { BookCard } from "@/app/components/Card/BookCard/BookCard";
+import { Loading } from "@/app/components/Loading/Loading";
 import debounce from "lodash.debounce";
 import Pagination from "@/app/components/Pagination/Pagination";
-import { div } from "framer-motion/client";
 import SortSelect from "@/app/components/SortSelect/SortSelect";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSyncParams } from "@/app/utils/useSyncParams";
@@ -35,7 +34,6 @@ export default function BooksBuy() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // xử lí load data cùng với lọc và tìm kiếm
   const fetchData = useCallback(
     debounce(() => {
       setLoading(true);
@@ -65,14 +63,14 @@ export default function BooksBuy() {
     return fetchData.cancel;
   }, [fetchData]);
 
-  // ĐỒNG BỘ page với URL mỗi khi searchParams thay đổi
   useSyncParams(setPage, setSortValue, setSort);
-
-  // hàm thay đổi trang
   const handlePageChange = usePageChange("books/buy-only", setPage, "client");
-
-  //  Xử lý thay đổi sort từ dropdown
   const handleSortChange = useSortChange("books/buy-only", "client");
+
+  if (loading) {
+    return <Loading fullScreen={true} size="lg" text="Đang tải sách mua..." />;
+  }
+
   return (
     <>
       <div className="py-[32px] px-[24px]">
@@ -88,29 +86,21 @@ export default function BooksBuy() {
               sortValue={sortValue}
             />
           </div>
-          {loading ? (
-            <div className="flex items-center justify-center min-h-screen text-gray-500 text-center col-span-3">
-              Đang tải...
-            </div>
-          ) : (
-            <>
-              <div className="grid grid-cols-4 gap-[24px] mb-8">
-                {books.map((book, index) => (
-                  <BookCard
-                    key={index}
-                    book={book}
-                    featured={book.featured ? true : false}
-                  />
-                ))}
-              </div>
-              <Pagination
-                page={page}
-                total={total}
-                limit={limit}
-                onPageChange={handlePageChange}
+          <div className="grid grid-cols-4 gap-[24px] mb-8">
+            {books.map((book, index) => (
+              <BookCard
+                key={index}
+                book={book}
+                featured={book.featured ? true : false}
               />
-            </>
-          )}
+            ))}
+          </div>
+          <Pagination
+            page={page}
+            total={total}
+            limit={limit}
+            onPageChange={handlePageChange}
+          />
         </div>
       </div>
     </>

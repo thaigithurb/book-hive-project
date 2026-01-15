@@ -4,20 +4,25 @@ import Link from "next/link";
 interface BookCardProps {
   book: Book;
   featured?: boolean;
+  newest?: boolean;
 }
 
-export const BookCard = ({ book, featured }: BookCardProps) => {
+export const BookCard = ({ book, featured, newest }: BookCardProps) => {
   return (
     <Link href={`/books/detail/${book.slug}`}>
       <div
-        className={`bg-[#ffff] rounded-[16px] p-[20px] shadow-[0_2px_8px_rgba(0,0,0,0.05)] cursor-pointer transition-transform duration-300 hover:-translate-y-2 relative`}
+        className={`bg-[#ffff] rounded-2xl p-5 shadow-[0_2px_8px_rgba(0,0,0,0.05)] cursor-pointer transition-transform duration-300 hover:-translate-y-2 relative`}
       >
-        {featured && (
+        {featured ? (
           <span className="absolute top-4 right-4 bg-yellow-400 text-white text-xs font-bold px-3 py-1 rounded shadow-lg z-10">
             Nổi bật
           </span>
-        )}
-        <div className="mb-[8px] h-[190px] object-cover ">
+        ) : newest ? (
+          <span className="absolute top-4 right-4 bg-blue-500 text-white text-xs font-bold px-3 py-1 rounded shadow-lg z-10">
+            Mới nhất
+          </span>
+        ) : null}
+        <div className="mb-2 h-[190px] object-cover ">
           <img
             src={book.image}
             className="w-full h-full object-cover rounded-[10px]"

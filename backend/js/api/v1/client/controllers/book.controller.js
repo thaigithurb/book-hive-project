@@ -244,3 +244,23 @@ module.exports.booksBuy = (req, res) => __awaiter(void 0, void 0, void 0, functi
         res.json("Không tìm thấy!");
     }
 });
+module.exports.newest = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const books = yield Book.find({
+            deleted: false,
+            status: "active",
+        }).sort({ createdAt: -1 });
+        if (books) {
+            return res.status(200).json({
+                message: "Thành công!",
+                books: books,
+            });
+        }
+        return res.status(400).json({
+            message: "Không có sách nào",
+        });
+    }
+    catch (error) {
+        res.json("Không tìm thấy!");
+    }
+});

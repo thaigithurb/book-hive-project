@@ -13,6 +13,8 @@ router.get("/rent-only", controller.booksRent);
 
 router.get("/buy-only", controller.booksBuy);
 
+router.get("/newest", controller.newest);
+
 module.exports = router;
 
 export {};
