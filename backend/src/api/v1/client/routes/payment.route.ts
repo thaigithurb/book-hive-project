@@ -1,13 +1,14 @@
 const express = require("express");
 const router = express.Router();
-const paymentController = require("../controllers/payment.controller");
+const controller  = require("../controllers/payment.controller");
 
-router.get("/info", paymentController.getPaymentInfo);
+router.post('/create', controller.createPaymentLink);
 
-router.post("/verify", paymentController.verifyPayment);
+router.post('/webhook', controller.receiveWebhook);
 
-// Webhook endpoint (từ PayOS)
-router.post("/webhook", paymentController.webhookPayment);
+router.post("/verify", controller.verifyPayment);
+
+router.get("/info", controller.getPaymentInfo);
 
 module.exports = router;
 

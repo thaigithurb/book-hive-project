@@ -1,234 +1,227 @@
+const payos = require("../../../../config/payos");
 const Order = require("../../models/order.model");
 const Transaction = require("../../models/transaction.model");
-const crypto = require("crypto");
 
-const PAYOS_CLIENT_ID = process.env.PAYOS_CLIENT_ID;
-const PAYOS_API_KEY = process.env.PAYOS_API_KEY;
-const PAYOS_CHECKSUM_KEY = process.env.PAYOS_CHECKSUM_KEY;
+// 1. Hàm tạo link thanh toán
+module.exports.createPaymentLink = async (req, res) => {
+  try {
+    const { orderCode, amount, description, items, returnUrl, cancelUrl } =
+      req.body;
 
-// [POST] /api/v1/payments/verify
+    if (!orderCode || !amount || !description) {
+      return res.status(400).json({
+        error: -1,
+        message: "Thiếu thông tin bắt buộc!",
+      });
+    }
+
+    const APP_URL = process.env.APP_URL || "http://localhost:3000";
+
+    const body = {
+      orderCode: Number(orderCode),
+      amount: Number(amount),
+      description: description,
+      items: items || [
+        {
+          name: description,
+          quantity: 1,
+          price: Number(amount),
+        },
+      ],
+      cancelUrl: cancelUrl || `${APP_URL}/cart`,
+      returnUrl: returnUrl || `${APP_URL}/order-success`,
+    };
+
+    console.log("🔗 Creating payment link:", body);
+
+    const paymentLinkResponse = await payos.createPaymentLink(body);
+
+    console.log("✅ Payment link created:", paymentLinkResponse.checkoutUrl);
+
+    // Lưu order vào database
+    const order = await Order.create({
+      orderCode: Number(orderCode),
+      amount: Number(amount),
+      description: description,
+      items: items || [],
+      status: "pending",
+      paymentLinkId: paymentLinkResponse.id,
+    });
+
+    console.log("💾 Order saved:", order._id);
+
+    return res.status(200).json({
+      error: 0,
+      message: "Tạo link thanh toán thành công",
+      data: {
+        orderCode: paymentLinkResponse.orderCode,
+        checkoutUrl: paymentLinkResponse.checkoutUrl,
+        paymentLinkId: paymentLinkResponse.id,
+        amount: paymentLinkResponse.amount,
+      },
+    });
+  } catch (error) {
+    console.error("❌ Lỗi tạo link thanh toán:", error);
+    return res.status(500).json({
+      error: -1,
+      message: "Lỗi tạo link thanh toán!",
+    });
+  }
+};
+
+// 2. Hàm nhận Webhook từ PayOS
+module.exports.receiveWebhook = async (req, res) => {
+  try {
+    const webhookBody = req.body;
+    console.log("🔔 Webhook received:", JSON.stringify(webhookBody, null, 2));
+
+    // ✅ Verify webhook signature
+    let webhookData;
+    try {
+      webhookData = payos.verifyPaymentWebhookData(webhookBody);
+      console.log("✅ Webhook signature verified!");
+      console.log("📊 Verified data:", webhookData);
+    } catch (verifyError) {
+      console.error("❌ Signature verification failed:", verifyError.message);
+      return res.status(200).json({
+        error: -1,
+        message: "Signature verification failed",
+      });
+    }
+
+    // Kiểm tra code giao dịch
+    if (webhookData.desc !== "success" && webhookData.code !== "00") {
+      console.log("⚠️ Giao dịch thất bại:", webhookData.desc);
+      return res.status(200).json({
+        error: 0,
+        message: "Webhook xác nhận thành công",
+        data: {
+          orderCode: webhookData.orderCode,
+          status: "failed",
+          desc: webhookData.desc,
+        },
+      });
+    }
+
+    console.log("💰 Processing successful transaction:", {
+      orderCode: webhookData.orderCode,
+      amount: webhookData.amount,
+    });
+
+    // Kiểm tra transaction đã tồn tại chưa (tránh duplicate)
+    const existingTransaction = await Transaction.findOne({
+      orderCode: webhookData.orderCode,
+    });
+
+    if (existingTransaction) {
+      console.log("⚠️ Transaction already exists");
+      return res.status(200).json({
+        error: 0,
+        message: "Webhook xác nhận thành công",
+        data: {
+          orderCode: webhookData.orderCode,
+          status: "duplicated",
+        },
+      });
+    }
+
+    // ✅ Lưu transaction vào DB
+    const transaction = await Transaction.create({
+      orderCode: webhookData.orderCode,
+      amount: webhookData.amount,
+      description: webhookData.description,
+      reference: webhookData.reference,
+      transactionDateTime: webhookData.transactionDateTime,
+      paymentLinkId: webhookData.paymentLinkId,
+      accountNumber: webhookData.accountNumber,
+      status: "success",
+      metadata: webhookData,
+    });
+
+    console.log("💾 Transaction saved:", transaction._id);
+
+    // ✅ Update order status to "paid"
+    const updatedOrder = await Order.findOneAndUpdate(
+      { orderCode: webhookData.orderCode },
+      {
+        status: "paid",
+        paidAt: new Date(),
+      },
+      { new: true }
+    );
+
+    if (updatedOrder) {
+      console.log("✅ Order updated to paid:", updatedOrder._id);
+    }
+
+    return res.status(200).json({
+      error: 0,
+      message: "Webhook xác nhận thành công",
+      data: {
+        orderCode: webhookData.orderCode,
+        status: "success",
+      },
+    });
+  } catch (error) {
+    console.error("❌ Webhook error:", error.message);
+    return res.status(200).json({
+      error: -1,
+      message: "Lỗi xử lý webhook",
+    });
+  }
+};
+
 module.exports.verifyPayment = async (req, res) => {
   try {
     const { orderCode } = req.body;
 
     if (!orderCode) {
       return res.status(400).json({
+        error: -1,
         message: "Thiếu mã đơn hàng!",
       });
     }
 
-    const order = await Order.findOne({ orderCode });
+    console.log("🔍 Verifying payment for orderCode:", orderCode);
 
-    if (!order) {
-      return res.status(404).json({
-        message: "Không tìm thấy đơn hàng!",
-      });
-    }
-
-    if (order.status === "paid") {
-      return res.status(200).json({
-        message: "✅ Đơn hàng đã thanh toán!",
-        order,
-      });
-    }
-
-    if (order.status !== "pending") {
-      return res.status(400).json({
-        message: "Đơn hàng này không ở trạng thái chờ thanh toán!",
-      });
-    }
-
-    console.log("🔄 Verify payment:", { orderCode });
-
-    // Kiểm tra transaction đã được webhook xác nhận chưa
+    // ✅ Tìm transaction thành công (được lưu bởi webhook)
     const transaction = await Transaction.findOne({
-      orderCode,
+      orderCode: Number(orderCode),
       status: "success",
     });
 
     if (transaction) {
-      console.log("✅ Giao dịch đã xác nhận từ webhook PayOS");
-
-      const updatedOrder = await Order.findOneAndUpdate(
-        { orderCode },
-        {
-          status: "paid",
-          paidAt: new Date(),
-          updatedAt: new Date(),
-        },
-        { new: true }
-      );
+      console.log("✅ Transaction found:", transaction._id);
 
       return res.status(200).json({
-        message: "✅ Xác nhận thanh toán thành công!",
-        order: updatedOrder,
-        transaction: {
-          id: transaction._id,
+        error: 0,
+        message: "Thanh toán thành công",
+        data: {
+          orderCode,
           amount: transaction.amount,
-          description: transaction.description,
+          reference: transaction.reference,
+          transactionDateTime: transaction.transactionDateTime,
         },
       });
     }
 
-    // Chưa có webhook, chờ...
-    console.log("⏳ Chờ webhook từ PayOS");
-    return res.status(400).json({
-      message:
-        "Chờ PayOS xác nhận giao dịch... Vui lòng thử lại trong vài giây.",
-      tip: "Giao dịch có thể mất 10-30 giây để xác nhận",
+    // ❌ Chưa có transaction - webhook chưa tới
+    console.log("⏳ Webhook not received yet:", orderCode);
+
+    return res.status(200).json({
+      error: -1,
+      message: "Không tìm thấy giao dịch...",
+      orderCode,
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error("❌ Lỗi verify payment:", error);
     return res.status(500).json({
+      error: -1,
       message: "Lỗi xác nhận thanh toán!",
-      error: error.message,
     });
   }
 };
 
-// [POST] /api/v1/payments/webhook
-module.exports.webhookPayment = async (req, res) => {
-  try {
-    const { data, signature } = req.body;
-
-    console.log("🔔 Webhook từ PayOS:", JSON.stringify(data, null, 2));
-
-    if (!data || !signature) {
-      console.error("❌ Thiếu data hoặc signature");
-      return res.status(400).json({ message: "Missing data or signature" });
-    }
-
-    // ✅ Verify signature
-    const dataStr = JSON.stringify(data);
-    const expectedSignature = crypto
-      .createHmac("sha256", PAYOS_CHECKSUM_KEY)
-      .update(dataStr)
-      .digest("hex");
-
-    console.log("🔐 Verify signature:", {
-      received: signature,
-      expected: expectedSignature,
-      match: signature === expectedSignature,
-    });
-
-    if (signature !== expectedSignature) {
-      console.error("❌ Signature không hợp lệ");
-      return res.status(401).json({ message: "Unauthorized" });
-    }
-
-    // Parse dữ liệu
-    const {
-      id,
-      orderCode,
-      amount,
-      amountPaid,
-      description,
-      transactionDateTime,
-      referenceCode,
-      status,
-    } = data;
-
-    console.log("📊 Dữ liệu webhook:", {
-      orderCode,
-      amount,
-      amountPaid,
-      status,
-      description,
-    });
-
-    // Kiểm tra status (PayOS dùng status code)
-    // "PAID" hoặc "00" = thành công
-    if (status !== "PAID" && status !== "00") {
-      console.log("⚠️ Giao dịch chưa PAID:", status);
-      return res.status(200).json({ message: "Payment not completed yet" });
-    }
-
-    const order = await Order.findOne({ orderCode });
-
-    if (!order) {
-      console.error("❌ Không tìm thấy đơn hàng:", orderCode);
-      return res.status(404).json({ message: "Order not found" });
-    }
-
-    // Kiểm tra số tiền
-    const totalAmount = order.totalAmount;
-    if (amountPaid !== totalAmount && amount !== totalAmount) {
-      console.error("❌ Số tiền không khớp", {
-        expected: totalAmount,
-        paid: amountPaid,
-        amount: amount,
-      });
-      return res.status(400).json({ message: "Amount mismatch" });
-    }
-
-    // Kiểm tra trạng thái đơn hàng
-    if (order.status === "paid") {
-      console.log("⚠️ Đơn hàng đã thanh toán");
-      return res.status(200).json({ message: "Already paid" });
-    }
-
-    // Cập nhật/Tạo transaction
-    let transaction = await Transaction.findOne({ orderCode });
-
-    if (transaction) {
-      console.log("📝 Update transaction pending -> success");
-      transaction.status = "success";
-      transaction.amount = amountPaid || amount;
-      transaction.description = description;
-      transaction.transactionDate = new Date(transactionDateTime);
-      transaction.referenceCode = referenceCode;
-      transaction.verifiedAt = new Date();
-      await transaction.save();
-    } else {
-      console.log("📝 Tạo transaction mới từ webhook");
-      transaction = new Transaction({
-        orderCode,
-        bankCode: process.env.PAYMENT_BANK_CODE || "970422",
-        accountNo: process.env.PAYMENT_ACCOUNT_NUMBER,
-        amount: amountPaid || amount,
-        description,
-        transactionDate: new Date(transactionDateTime),
-        referenceCode,
-        status: "success",
-        verifiedAt: new Date(),
-      });
-      await transaction.save();
-    }
-
-    // Cập nhật order
-    const updatedOrder = await Order.findOneAndUpdate(
-      { orderCode },
-      {
-        status: "paid",
-        paidAt: new Date(),
-        updatedAt: new Date(),
-      },
-      { new: true }
-    );
-
-    console.log("✅ Webhook xác nhận thanh toán thành công");
-
-    // ⚠️ PHẢI return 200 để PayOS biết webhook đã xử lý
-    return res.status(200).json({
-      message: "Webhook processed successfully",
-      code: "00",
-      desc: "Success",
-      data: {
-        orderCode: updatedOrder.orderCode,
-        status: updatedOrder.status,
-      },
-    });
-  } catch (error: any) {
-    console.error("❌ Lỗi xử lý webhook:", error);
-    return res.status(200).json({
-      message: "Webhook processing error",
-      code: "01",
-      desc: error.message,
-    });
-  }
-};
-
-// [GET] /api/v1/payments/info
 module.exports.getPaymentInfo = async (req, res) => {
   try {
     const paymentInfo = {
@@ -237,16 +230,21 @@ module.exports.getPaymentInfo = async (req, res) => {
       accountHolder: process.env.PAYMENT_ACCOUNT_HOLDER,
     };
 
+    console.log("📋 Payment info requested");
+
     return res.status(200).json({
-      message: "Lấy thông tin thanh toán thành công!",
+      error: 0,
+      message: "Lấy thông tin thanh toán thành công",
       data: paymentInfo,
     });
-  } catch (error: any) {
+  } catch (error) {
+    console.error("❌ Lỗi lấy thông tin thanh toán:", error);
     return res.status(500).json({
+      error: -1,
       message: "Lỗi lấy thông tin thanh toán!",
-      error: error.message,
     });
   }
 };
+
 
 export {};

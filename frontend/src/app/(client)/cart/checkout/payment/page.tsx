@@ -25,7 +25,6 @@ export default function PaymentPage() {
     "transfer"
   );
   const [isVerifying, setIsVerifying] = useState(false);
-  const [verifyAttempts, setVerifyAttempts] = useState(0);
   const [timeRemaining, setTimeRemaining] = useState(300);
 
   useEffect(() => {
@@ -46,21 +45,13 @@ export default function PaymentPage() {
     setOrderCode(savedOrderCode);
     if (savedPaymentMethod) setPaymentMethod(savedPaymentMethod);
 
-    // ✅ FIX: Xử lý timestamp an toàn
+    // ✅ Khôi phục thời gian từ lần trước (không reset)
     if (savedTimestamp) {
       const elapsedTime = Math.floor(
         (Date.now() - parseInt(savedTimestamp)) / 1000
       );
       const remaining = Math.max(0, 300 - elapsedTime);
-
-      // Nếu còn thời gian, khôi phục; nếu hết, reset
-      if (remaining > 0) {
-        setTimeRemaining(remaining);
-      } else {
-        // Hết giờ từ lần trước, reset timestamp
-        sessionStorage.setItem("paymentTimestamp", Date.now().toString());
-        setTimeRemaining(300);
-      }
+      setTimeRemaining(remaining);
     } else {
       // Lần đầu, tạo timestamp mới
       sessionStorage.setItem("paymentTimestamp", Date.now().toString());
@@ -70,7 +61,7 @@ export default function PaymentPage() {
     fetchPaymentInfo(savedOrderCode);
   }, [router]);
 
-  // ✅ Timer countdown - KHÔNG auto-verify
+  // ✅ Timer countdown - tự động back về giỏ hàng khi hết giờ
   useEffect(() => {
     if (paymentMethod !== "transfer") return;
 
@@ -130,7 +121,7 @@ export default function PaymentPage() {
     setQrCode(qrUrl);
   };
 
-  // ✅ CHỈ verify khi user bấm nút
+  // ✅ Verify khi user bấm nút - không giới hạn số lần
   const handleVerifyPayment = async () => {
     if (!orderCode) {
       toast.error("Không tìm thấy mã đơn hàng!");
@@ -138,7 +129,6 @@ export default function PaymentPage() {
     }
 
     setIsVerifying(true);
-    setVerifyAttempts((prev) => prev + 1);
 
     try {
       const response = await axios.post(
@@ -146,7 +136,11 @@ export default function PaymentPage() {
         { orderCode }
       );
 
-      if (response.status === 200 && response.data.order?.status === "paid") {
+      console.log("📊 Verify response:", response.data);
+
+      // ✅ Check error code từ response
+      if (response.data.error === 0) {
+        // ✅ Thanh toán thành công - webhook đã lưu transaction
         toast.success("✅ Xác nhận thanh toán thành công!");
         clearCart();
 
@@ -157,11 +151,16 @@ export default function PaymentPage() {
         setTimeout(() => {
           router.push(`/order-success?orderCode=${orderCode}`);
         }, 1500);
+      } else if (response.data.error === -1) {
+        // ❌ Chưa nhận webhook từ PayOS - thử lại
+        toast.warning(
+          response.data.message || "Chờ PayOS xác nhận giao dịch..."
+        );
       }
     } catch (err: any) {
       const message = err.response?.data?.message || "Lỗi xác nhận thanh toán!";
       toast.error(message);
-      console.error(err);
+      console.error("❌ Verify error:", err);
     } finally {
       setIsVerifying(false);
     }
@@ -352,7 +351,7 @@ export default function PaymentPage() {
                   {timeRemaining <= 0
                     ? "❌ Hết thời gian thanh toán"
                     : isVerifying
-                    ? `⏳ Đang kiểm tra... (lần ${verifyAttempts})`
+                    ? "⏳ Đang kiểm tra..."
                     : "✅ Tôi đã chuyển khoản"}
                 </button>
 
