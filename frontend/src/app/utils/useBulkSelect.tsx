@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
 const accessToken = localStorage.getItem("accessToken");
 
 export function useBulkSelect(
@@ -58,7 +60,7 @@ export function useBulkSelect(
 
     const bulkPromise = axios
       .patch(
-        `http://localhost:3001/api/v1/admin/${resource}/change-multi`,
+        `${API_URL}/api/v1/admin/${resource}/change-multi`,
         payload,
         {
           headers: {
@@ -89,7 +91,7 @@ export function useBulkSelect(
 
     const bulkPromise = axios
       .patch(
-        `http://localhost:3001/api/v1/admin/${resource}/change-multi`,
+        `${API_URL}/api/v1/admin/${resource}/change-multi`,
         {
           ids: pendingDeleteIds,
           type: "delete_all",

@@ -6,6 +6,7 @@ import { toast, ToastContainer } from "react-toastify";
 import { useRouter } from "next/navigation";
 
 const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
@@ -24,7 +25,7 @@ export default function Login() {
     toast
       .promise(
         axios.post(
-          `http://localhost:3001/api/v1/${ADMIN_PREFIX}/auth/login`,
+          `${API_URL}/api/v1/${ADMIN_PREFIX}/auth/login`,
           {
             email,
             password,

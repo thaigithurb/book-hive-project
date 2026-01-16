@@ -2,6 +2,8 @@ import { useCallback } from "react";
 import debounce from "lodash.debounce";
 import axios from "axios";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
 type UseFetchDataAdminParams = {
     status?: string;
     keyword?: string;
@@ -35,7 +37,7 @@ export function useFetchDataAdmin({
         debounce(() => {
             setLoading(true);
             axios
-                .get(`http://localhost:3001/api/v1/${ADMIN_PREFIX}/${source}`, {
+                .get(`${API_URL}/api/v1/${ADMIN_PREFIX}/${source}`, {
                     params: {
                         ...(status && { status }),
                         ...(keyword && { keyWord: keyword }),

@@ -21,7 +21,7 @@ export const Header = () => {
       page: "1",
       limit: "12",
     });
-    router.push(`/books/search?${params.toString()}`);
+    router.push(`/search?${params.toString()}`);
     setKeyword("");
   };
 

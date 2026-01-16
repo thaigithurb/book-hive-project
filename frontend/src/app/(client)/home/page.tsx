@@ -8,6 +8,8 @@ import { BookCard } from "@/app/components/Card/BookCard/BookCard";
 import { Loading } from "@/app/components/Loading/Loading";
 import { ToastContainer } from "react-toastify";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
 export default function Home() {
   const [featuredBooks, setFeaturedBooks] = useState<Book[]>([]);
   const [newestBooks, setNewestBooks] = useState<Book[]>([]);
@@ -17,8 +19,8 @@ export default function Home() {
     const fetchData = async () => {
       try {
         const [featuredRes, newestRes] = await Promise.all([
-          axios.get("http://localhost:3001/api/v1/books/featured"),
-          axios.get("http://localhost:3001/api/v1/books/newest"),
+          axios.get(`${API_URL}/api/v1/books/featured`),
+          axios.get(`${API_URL}/api/v1/books/newest`),
         ]);
 
         setFeaturedBooks(featuredRes.data.books);

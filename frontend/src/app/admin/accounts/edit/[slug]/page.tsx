@@ -12,7 +12,8 @@ import { useRouter } from "next/navigation";
 import PrivateRoute from "@/app/components/Auth/PrivateRoute/PrivateRoute";
 import ConditionalRender from "@/app/components/Auth/ConditionalRender/ConditionalRender";
 
-const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX ?? "admin";
+const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function EditBook() {
   const params = useParams();
@@ -38,7 +39,7 @@ export default function EditBook() {
 
   useEffect(() => {
     axios
-      .get(`http://localhost:3001/api/v1/${ADMIN_PREFIX}/roles`, {
+      .get(`${API_URL}/api/v1/${ADMIN_PREFIX}/roles`, {
         headers: {
           Authorization: accessToken ? `Bearer ${accessToken}` : "",
         },
@@ -77,7 +78,7 @@ export default function EditBook() {
     const fetchAccount = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:3001/api/v1/${ADMIN_PREFIX}/accounts/detail/${params.slug}`,
+          `${API_URL}/api/v1/${ADMIN_PREFIX}/accounts/detail/${params.slug}`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,
@@ -118,7 +119,7 @@ export default function EditBook() {
     toast
       .promise(
         axios.patch(
-          `http://localhost:3001/api/v1/${ADMIN_PREFIX}/accounts/edit/${slug}`,
+          `${API_URL}/api/v1/${ADMIN_PREFIX}/accounts/edit/${slug}`,
           formData,
           {
             headers: {

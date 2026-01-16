@@ -8,6 +8,8 @@ import { useCart } from "@/contexts/CartContext";
 import { Loading } from "@/app/components/Loading/Loading";
 import axios from "axios";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
 export default function CheckoutPage() {
   const router = useRouter();
   const { items } = useCart();
@@ -78,7 +80,7 @@ export default function CheckoutPage() {
       };
 
       const response = await axios.post(
-        "http://localhost:3001/api/v1/orders/create",
+        `${API_URL}/api/v1/orders/create`,
         orderData
       );
 

@@ -4,6 +4,7 @@ import axios from "axios";
 import { useUser } from "@/contexts/UserContext";
 
 const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function AdminAuthGuard({
   children,
@@ -38,7 +39,7 @@ export default function AdminAuthGuard({
       if (!accessToken) {
         try {
           const res = await axios.post(
-            `http://localhost:3001/api/v1/${ADMIN_PREFIX}/auth/refresh`,
+            `${API_URL}/api/v1/${ADMIN_PREFIX}/auth/refresh`,
             {},
             { withCredentials: true }
           );
@@ -51,7 +52,7 @@ export default function AdminAuthGuard({
       } else {
         try {
           await axios.post(
-            `http://localhost:3001/api/v1/${ADMIN_PREFIX}/auth/verify`,
+            `${API_URL}/api/v1/${ADMIN_PREFIX}/auth/verify`,
             {},
             {
               headers: {
@@ -64,7 +65,7 @@ export default function AdminAuthGuard({
         } catch {
           try {
             const res = await axios.post(
-              `http://localhost:3001/api/v1/${ADMIN_PREFIX}/auth/refresh`,
+              `${API_URL}/api/v1/${ADMIN_PREFIX}/auth/refresh`,
               {},
               { withCredentials: true }
             );

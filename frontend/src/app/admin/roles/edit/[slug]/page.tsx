@@ -10,6 +10,7 @@ import RoleForm from "@/app/components/Form/RoleForm/RoleForm";
 import PrivateRoute from "@/app/components/Auth/PrivateRoute/PrivateRoute";
 
 const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function EditRole() {
   const params = useParams();
@@ -36,7 +37,7 @@ export default function EditRole() {
     const fetchRole = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:3001/api/v1/${ADMIN_PREFIX}/roles/detail/${slug}`,
+          `${API_URL}/api/v1/${ADMIN_PREFIX}/roles/detail/${slug}`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,
@@ -71,7 +72,7 @@ export default function EditRole() {
     toast
       .promise(
         axios.patch(
-          `http://localhost:3001/api/v1/${ADMIN_PREFIX}/roles/edit/${slug}`,
+          `${API_URL}/api/v1/${ADMIN_PREFIX}/roles/edit/${slug}`,
           data,
           {
             headers: {

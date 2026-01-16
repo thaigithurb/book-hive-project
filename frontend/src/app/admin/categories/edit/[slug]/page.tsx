@@ -11,6 +11,7 @@ import CategoryForm from "@/app/components/Form/CategoryForm/CategoryForm";
 import PrivateRoute from "@/app/components/Auth/PrivateRoute/PrivateRoute";
 
 const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function EditCategory() {
   const params = useParams();
@@ -39,7 +40,7 @@ export default function EditCategory() {
     const fetchCategory = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:3001/api/v1/${ADMIN_PREFIX}/categories/${params.slug}`,
+          `${API_URL}/api/v1/${ADMIN_PREFIX}/categories/${params.slug}`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,
@@ -78,7 +79,7 @@ export default function EditCategory() {
     toast
       .promise(
         axios.patch(
-          `http://localhost:3001/api/v1/${ADMIN_PREFIX}/categories/edit/${slug}`,
+          `${API_URL}/api/v1/${ADMIN_PREFIX}/categories/edit/${slug}`,
           data,
           {
             headers: {

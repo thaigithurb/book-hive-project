@@ -7,10 +7,10 @@ import { BackButton } from "@/app/components/Button/BackButton/BackButton";
 import { motion } from "framer-motion";
 import AccountForm from "@/app/components/Form/AccountForm/AccountForm";
 import { Role } from "@/app/interfaces/role.interface";
-import { useUser } from "@/contexts/UserContext";
 import PrivateRoute from "@/app/components/Auth/PrivateRoute/PrivateRoute";
 
 const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function CreateAccount() {
   const [form, setForm] = useState({
@@ -31,7 +31,7 @@ export default function CreateAccount() {
 
   useEffect(() => {
     axios
-      .get(`http://localhost:3001/api/v1/${ADMIN_PREFIX}/roles`, {
+      .get(`${API_URL}/api/v1/${ADMIN_PREFIX}/roles`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
@@ -78,7 +78,7 @@ export default function CreateAccount() {
     toast
       .promise(
         axios.post(
-          `http://localhost:3001/api/v1/${ADMIN_PREFIX}/accounts/create`,
+          `${API_URL}/api/v1/${ADMIN_PREFIX}/accounts/create`,
           formData,
           {
             headers: {

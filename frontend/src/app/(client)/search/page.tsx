@@ -9,6 +9,8 @@ import { Loading } from "@/app/components/Loading/Loading";
 import Pagination from "@/app/components/Pagination/Pagination";
 import { usePageChange } from "@/app/utils/usePageChange";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
 export default function SearchPage() {
   const searchParams = useSearchParams();
   const initialPage = Number(searchParams.get("page")) || 1;
@@ -29,7 +31,7 @@ export default function SearchPage() {
 
       setIsLoading(true);
       try {
-        const res = await axios.get("http://localhost:3001/api/v1/books", {
+        const res = await axios.get(`${API_URL}/api/v1/books`, {
           params: {
             ...(keyword && { keyWord: keyword }),
             page,

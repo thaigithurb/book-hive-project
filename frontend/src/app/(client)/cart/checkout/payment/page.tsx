@@ -19,6 +19,57 @@ export default function PaymentPage() {
   const [totalAmount, setTotalAmount] = useState(0);
   const [timeLeft, setTimeLeft] = useState(300);
 
+  const cancelPaymentLink = useCallback(async () => {
+    try {
+      await axios.post(`${API_URL}/api/v1/payment/cancel/${orderCode}`);
+      toast.info("Đã hủy link thanh toán");
+    } catch (err: any) {
+      console.error("❌ Lỗi hủy link:", err);
+    }
+  }, [orderCode]);
+
+  const checkOrderStatus = useCallback(
+    async (code: string) => {
+      try {
+        const response = await axios.get(
+          `${API_URL}/api/v1/orders/detail/${code}`
+        );
+        const order = response.data.order;
+
+        if (new Date() > new Date(order.expiredAt)) {
+          toast.error("❌ Link thanh toán đã hết hạn!");
+          sessionStorage.removeItem("orderCode");
+          router.replace("/cart");
+          return;
+        }
+
+        if (order.status === "paid") {
+          toast.success("✅ Đơn hàng đã được thanh toán!");
+          sessionStorage.removeItem("orderCode");
+          router.replace("/order-success");
+          return;
+        }
+
+        if (order.status === "cancelled") {
+          toast.error("❌ Đơn hàng đã bị hủy!");
+          sessionStorage.removeItem("orderCode");
+          router.replace("/cart");
+          return;
+        }
+
+        const timeRemaining = Math.floor(
+          (new Date(order.expiredAt).getTime() - new Date().getTime()) / 1000
+        );
+        setTimeLeft(Math.max(0, timeRemaining));
+        console.log("⏱️ Time remaining:", timeRemaining, "seconds");
+      } catch (err: any) {
+        console.error("Lỗi kiểm tra trạng thái:", err);
+        setTimeLeft(300);
+      }
+    },
+    [router]
+  );
+
   useEffect(() => {
     const savedOrderCode = sessionStorage.getItem("orderCode");
 
@@ -30,65 +81,7 @@ export default function PaymentPage() {
     checkOrderStatus(savedOrderCode);
     setOrderCode(savedOrderCode);
     setIsLoaded(true);
-  }, [router]);
-
-  const checkOrderStatus = async (code: string) => {
-    try {
-      const response = await axios.get(
-        `${API_URL}/api/v1/orders/detail/${code}`
-      );
-      const order = response.data.order;
-
-      if (new Date() > new Date(order.expiredAt)) {
-        toast.error("❌ Link thanh toán đã hết hạn!");
-        sessionStorage.removeItem("orderCode");
-        router.replace("/cart");
-        return;
-      }
-
-      if (order.status === "paid") {
-        toast.success("✅ Đơn hàng đã được thanh toán!");
-        sessionStorage.removeItem("orderCode");
-        router.replace("/order-success");
-        return;
-      }
-
-      if (order.status === "cancelled") {
-        toast.error("❌ Đơn hàng đã bị hủy!");
-        sessionStorage.removeItem("orderCode");
-        router.replace("/cart");
-        return;
-      }
-
-      const timeRemaining = Math.floor(
-        (new Date(order.expiredAt).getTime() - new Date().getTime()) / 1000
-      );
-      setTimeLeft(Math.max(0, timeRemaining));
-    } catch (err: any) {
-      console.error("Lỗi kiểm tra trạng thái:", err);
-    }
-  };
-
-  useEffect(() => {
-    if (!isLoaded || !orderCode) return;
-
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          cancelPaymentLink();
-
-          toast.error("⏱️ Hết thời gian thanh toán!");
-          sessionStorage.removeItem("orderCode");
-          clearCart();
-          router.replace("/cart");
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [isLoaded, orderCode, router, clearCart]);
+  }, [router, checkOrderStatus]);
 
   useEffect(() => {
     if (!isLoaded || !orderCode) return;
@@ -110,7 +103,7 @@ export default function PaymentPage() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [isLoaded, orderCode, router, clearCart]);
+  }, [isLoaded, orderCode, router, clearCart, cancelPaymentLink]);
 
   useEffect(() => {
     if (!orderCode || items.length === 0 || isCreating) return;
@@ -121,7 +114,7 @@ export default function PaymentPage() {
     );
     setTotalAmount(amount);
     createPaymentLink(Number(orderCode), amount);
-  }, [orderCode]);
+  }, [orderCode, items, isCreating]);
 
   const createPaymentLink = async (code: number, amount: number) => {
     setIsCreating(true);
@@ -139,7 +132,7 @@ export default function PaymentPage() {
       };
 
       const response = await axios.post(
-        "http://localhost:3001/api/v1/payment/create",
+        `${API_URL}/api/v1/payment/create`,
         paymentPayload
       );
 
@@ -171,18 +164,6 @@ export default function PaymentPage() {
   if (!isLoaded) {
     return <Loading fullScreen={true} size="lg" text="Đang tải..." />;
   }
-
-  // hủy link thanh toán
-  const cancelPaymentLink = async () => {
-    try {
-      await axios.post(
-        `http://localhost:3001/api/v1/payment/cancel/${orderCode}`
-      );
-      toast.info("Đã hủy link thanh toán");
-    } catch (err: any) {
-      console.error("❌ Lỗi hủy link:", err);
-    }
-  };
 
   return (
     <div className="min-h-screen py-12 bg-gray-50">

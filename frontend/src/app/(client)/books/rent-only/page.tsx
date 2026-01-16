@@ -8,10 +8,11 @@ import { Loading } from "@/app/components/Loading/Loading";
 import debounce from "lodash.debounce";
 import Pagination from "@/app/components/Pagination/Pagination";
 import SortSelect from "@/app/components/SortSelect/SortSelect";
-import { useRouter, useSearchParams } from "next/navigation";
 import { useSyncParams } from "@/app/utils/useSyncParams";
 import { usePageChange } from "@/app/utils/usePageChange";
 import { useSortChange } from "@/app/utils/useSortChange";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function BooksRent() {
   const [books, setBooks] = useState<Book[]>([]);
@@ -36,7 +37,7 @@ export default function BooksRent() {
     debounce(() => {
       setLoading(true);
       axios
-        .get(`http://localhost:3001/api/v1/books/rent-only`, {
+        .get(`${API_URL}/api/v1/books/rent-only`, {
           params: {
             ...(keyword && { keyWord: keyword }),
             ...(sort && { sortKey: sort.key, sortValue: sort.value }),

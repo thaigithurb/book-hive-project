@@ -16,6 +16,7 @@ import PrivateRoute from "@/app/components/Auth/PrivateRoute/PrivateRoute";
 import ConditionalRender from "@/app/components/Auth/ConditionalRender/ConditionalRender";
 
 const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function Permission() {
   const { setUser } = useUser();
@@ -34,7 +35,7 @@ export default function Permission() {
   useEffect(() => {
     setLoading(true);
     axios
-      .get(`http://localhost:3001/api/v1/${ADMIN_PREFIX}/roles`, {
+      .get(`${API_URL}/api/v1/${ADMIN_PREFIX}/roles`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
@@ -53,7 +54,7 @@ export default function Permission() {
 
   const fetchPermissions = () => {
     axios
-      .get(`http://localhost:3001/api/v1/${ADMIN_PREFIX}/roles/permissions`, {
+      .get(`${API_URL}/api/v1/${ADMIN_PREFIX}/roles/permissions`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
@@ -100,7 +101,7 @@ export default function Permission() {
   const handleSave = async () => {
     try {
       await axios.patch(
-        `http://localhost:3001/api/v1/${ADMIN_PREFIX}/roles/permissions/edit`,
+        `${API_URL}/api/v1/${ADMIN_PREFIX}/roles/permissions/edit`,
         { roles },
         {
           headers: {
@@ -147,7 +148,7 @@ export default function Permission() {
     if (!selectedPerm) return;
     try {
       await axios.patch(
-        `http://localhost:3001/api/v1/${ADMIN_PREFIX}/roles/permissions/delete/${selectedPerm._id}`,
+        `${API_URL}/api/v1/${ADMIN_PREFIX}/roles/permissions/delete/${selectedPerm._id}`,
         {},
         {
           headers: {

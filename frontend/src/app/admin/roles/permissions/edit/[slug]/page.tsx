@@ -10,6 +10,7 @@ import PermissionForm from "@/app/components/Form/PermissionForm/PermissionForm"
 import PrivateRoute from "@/app/components/Auth/PrivateRoute/PrivateRoute";
 
 const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function EditPermission() {
   const [form, setForm] = useState({
@@ -29,7 +30,7 @@ export default function EditPermission() {
 
   useEffect(() => {
     axios
-      .get(`http://localhost:3001/api/v1/${ADMIN_PREFIX}/roles/permissions`, {
+      .get(`${API_URL}/api/v1/${ADMIN_PREFIX}/roles/permissions`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
@@ -48,7 +49,7 @@ export default function EditPermission() {
     if (!slug) return;
     axios
       .get(
-        `http://localhost:3001/api/v1/${ADMIN_PREFIX}/roles/permissions/detail/${slug}`,
+        `${API_URL}/api/v1/${ADMIN_PREFIX}/roles/permissions/detail/${slug}`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -94,7 +95,7 @@ export default function EditPermission() {
     toast
       .promise(
         axios.patch(
-          `http://localhost:3001/api/v1/${ADMIN_PREFIX}/roles/permissions/edit/${slug}`,
+          `${API_URL}/api/v1/${ADMIN_PREFIX}/roles/permissions/edit/${slug}`,
           data,
           {
             headers: {

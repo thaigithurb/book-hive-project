@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import axios from "axios";
 
 const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function Profile() {
   const [user, setUser] = useState<any>(null);
@@ -15,7 +16,7 @@ export default function Profile() {
       try {
         const accessToken = localStorage.getItem("accessToken");
         const res = await axios.get(
-          `http://localhost:3001/api/v1/${ADMIN_PREFIX}/accounts/profile`,
+          `${API_URL}/api/v1/${ADMIN_PREFIX}/accounts/profile`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,

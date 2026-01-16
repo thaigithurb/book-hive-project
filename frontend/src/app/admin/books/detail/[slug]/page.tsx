@@ -10,6 +10,7 @@ import PrivateRoute from "@/app/components/Auth/PrivateRoute/PrivateRoute";
 import ConditionalRender from "@/app/components/Auth/ConditionalRender/ConditionalRender";
 
 const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function BookDetail() {
   const { slug } = useParams();
@@ -22,7 +23,7 @@ export default function BookDetail() {
     const fetchBook = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:3001/api/v1/${ADMIN_PREFIX}/books/detail/${slug}`,
+          `${API_URL}/api/v1/${ADMIN_PREFIX}/books/detail/${slug}`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,

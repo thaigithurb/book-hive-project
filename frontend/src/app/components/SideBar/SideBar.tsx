@@ -5,6 +5,8 @@ import { ToastContainer } from "react-toastify";
 import Logout from "../Auth/Logout/Logout";
 import { useUser } from "@/contexts/UserContext";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
 const menu = [
   { label: "📊 Dashboard", key: "dashboard", href: "/admin/dashboard" },
   {
@@ -88,7 +90,7 @@ export const SideBar = () => {
             ))}
         </nav>
         <Logout
-          url={`http://localhost:3001/api/v1/${ADMIN_PREFIX}/auth/logout`}
+          url={`${API_URL}/api/v1/${ADMIN_PREFIX}/auth/logout`}
           href={"/auth/login"}
         />
       </aside>

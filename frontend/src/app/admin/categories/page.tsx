@@ -24,6 +24,7 @@ import PrivateRoute from "@/app/components/Auth/PrivateRoute/PrivateRoute";
 import ConditionalRender from "@/app/components/Auth/ConditionalRender/ConditionalRender";
 
 const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function Categories() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -81,7 +82,7 @@ export default function Categories() {
 
   const fetchAllCategories = async () => {
     const res = await axios.get(
-      `http://localhost:3001/api/v1/${ADMIN_PREFIX}/categories`,
+      `${API_URL}/api/v1/${ADMIN_PREFIX}/categories`,
       {
         params: { page: 1, limit: 10000 },
         headers: {
@@ -123,7 +124,7 @@ export default function Categories() {
     if (!deleteId) return;
     try {
       await axios.patch(
-        `http://localhost:3001/api/v1/${ADMIN_PREFIX}/categories/delete/${deleteId}`,
+        `${API_URL}/api/v1/${ADMIN_PREFIX}/categories/delete/${deleteId}`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,

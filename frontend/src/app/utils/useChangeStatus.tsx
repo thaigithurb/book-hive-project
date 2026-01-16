@@ -1,6 +1,8 @@
 import axios from "axios";
 import { toast } from "react-toastify";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
 const accessToken = localStorage.getItem("accessToken");
 
 export default function useChangeStatus(
@@ -18,7 +20,7 @@ export default function useChangeStatus(
     }
     try {
       await axios.patch(
-        `http://localhost:3001/api/v1/admin/${resource}/change-status/${newStatus}/${id}`,
+        `${API_URL}/api/v1/admin/${resource}/change-status/${newStatus}/${id}`,
         {},
         {
           headers: {

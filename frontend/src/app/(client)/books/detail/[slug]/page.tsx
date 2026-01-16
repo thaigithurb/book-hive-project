@@ -9,8 +9,9 @@ import { toast, ToastContainer } from "react-toastify";
 import DOMPurify from "dompurify";
 import { useCart } from "@/contexts/CartContext";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
 export default function Detail() {
-  const router = useRouter();
   const params = useParams();
   const [book, setBook] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -23,7 +24,7 @@ export default function Detail() {
       try {
         setLoading(true);
         const res = await axios.get(
-          `http://localhost:3001/api/v1/books/detail/${params.slug}`
+          `${API_URL}/api/v1/books/detail/${params.slug}`
         );
         setBook(res.data.book);
       } catch (err) {
@@ -54,7 +55,7 @@ export default function Detail() {
       price: book.priceBuy,
       quantity: 1,
       image: book.image,
-      slug: book.slug
+      slug: book.slug,
     });
 
     toast.success("Đã thêm vào giỏ hàng!");

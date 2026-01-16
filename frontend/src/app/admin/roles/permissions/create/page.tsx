@@ -9,6 +9,7 @@ import PermissionForm from "@/app/components/Form/PermissionForm/PermissionForm"
 import PrivateRoute from "@/app/components/Auth/PrivateRoute/PrivateRoute";
 
 const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function CreatePermission() {
   const [form, setForm] = useState({
@@ -24,7 +25,7 @@ export default function CreatePermission() {
 
   useEffect(() => {
     axios
-      .get(`http://localhost:3001/api/v1/${ADMIN_PREFIX}/roles/permissions`, {
+      .get(`${API_URL}/api/v1/${ADMIN_PREFIX}/roles/permissions`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
@@ -60,7 +61,7 @@ export default function CreatePermission() {
     toast
       .promise(
         axios.post(
-          `http://localhost:3001/api/v1/${ADMIN_PREFIX}/roles/permissions/create`,
+          `${API_URL}/api/v1/${ADMIN_PREFIX}/roles/permissions/create`,
           data,
           {
             headers: {
