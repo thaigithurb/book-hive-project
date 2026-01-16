@@ -11,60 +11,47 @@ const payOS = new PayOS({
 
 // [POST] /api/v1/payment/create
 module.exports.createPaymentLink = async (req, res) => {
-  const { orderCode, amount, description, items } = req.body;
-
   try {
-    const existingOrder = await Order.findOne({ orderCode: Number(orderCode) });
+    const { orderCode, amount, description, items } = req.body;
 
-    if (!existingOrder) {
-      return res.status(404).json({
-        error: -1,
-        message: "Không tìm thấy đơn hàng",
-      });
+    const order = await Order.findOne({ orderCode: String(orderCode) });
+
+    if (!order) {
+      return res
+        .status(404)
+        .json({ error: -1, message: "Không tìm thấy đơn hàng" });
+    }
+    
+    if (order.expiredAt && new Date() > order.expiredAt) {
+      order.status = "cancelled";
+      order.isExpired = true;
+      await order.save();
+      return res
+        .status(400)
+        .json({ error: -1, message: "Đơn hàng đã hết hạn" });
     }
 
-    // ✅ Kiểm tra hết hạn
-    const now = new Date();
-    if (existingOrder.expiredAt && now > existingOrder.expiredAt) {
-      existingOrder.isExpired = true;
-      existingOrder.status = "cancelled";
-      await existingOrder.save();
-
-      return res.status(400).json({
-        error: -1,
-        message: "Đơn hàng đã hết hạn",
-      });
-    }
-
-    // ✅ Nếu đã có link, trả về luôn
-    if (existingOrder.checkoutUrl) {
+    if (order.checkoutUrl) {
       return res.json({
         error: 0,
-        message: "Link thanh toán đã tồn tại",
-        data: {
-          checkoutUrl: existingOrder.checkoutUrl,
-          orderCode: existingOrder.orderCode,
-        },
+        message: "Link đã tồn tại",
+        data: { checkoutUrl: order.checkoutUrl, orderCode: order.orderCode },
       });
     }
 
-    // ✅ Tạo link mới
-    const paymentData = {
+    const paymentLink = await payOS.paymentRequests.create({
       orderCode: Number(orderCode),
       amount: Number(amount),
-      description: description,
+      description,
       items: items || [],
       cancelUrl: `${process.env.FRONTEND_URL || "http://localhost:3000"}/cart`,
       returnUrl: `${
         process.env.FRONTEND_URL || "http://localhost:3000"
       }/order-success`,
-    };
+    });
 
-    const paymentLink = await payOS.paymentRequests.create(paymentData);
-
-    // ✅ Lưu checkout URL vào database
-    existingOrder.checkoutUrl = paymentLink.checkoutUrl;
-    await existingOrder.save();
+    order.checkoutUrl = paymentLink.checkoutUrl;
+    await order.save();
 
     return res.json({
       error: 0,
@@ -72,11 +59,10 @@ module.exports.createPaymentLink = async (req, res) => {
       data: {
         checkoutUrl: paymentLink.checkoutUrl,
         orderCode: paymentLink.orderCode,
-        paymentLinkId: paymentLink.paymentLinkId,
       },
     });
   } catch (err) {
-    console.error("❌ Lỗi tạo payment link:", err);
+    console.error("❌ Lỗi tạo link:", err);
     return res.status(500).json({
       error: -1,
       message: "Lỗi tạo link thanh toán",
@@ -88,31 +74,27 @@ module.exports.createPaymentLink = async (req, res) => {
 // [POST] /api/v1/payment/webhook
 module.exports.webhook = async (req, res) => {
   try {
-    const webhookData = req.body;
+    const { code, desc, data } = req.body;
 
-    if (webhookData.code === "00" && webhookData.desc === "success") {
-      const orderCode = webhookData.data.orderCode;
-
-      const order = await Order.findOne({ orderCode: orderCode });
+    if (code === "00" && desc === "success") {
+      const order = await Order.findOne({ orderCode: String(data.orderCode) });
 
       if (order && order.status === "pending") {
         order.status = "paid";
         await order.save();
 
-        const transaction = new Transaction({
-          orderCode: String(orderCode),
-          bankCode: webhookData.data.counterAccountBankId || "PAYOS",
-          accountNo: webhookData.data.accountNumber || "",
-          amount: webhookData.data.amount || 0,
-          description: webhookData.data.description || "Thanh toán",
-          transactionDate: webhookData.data.transactionDateTime
-            ? new Date(webhookData.data.transactionDateTime)
+        await new Transaction({
+          orderCode: String(data.orderCode),
+          bankCode: data.counterAccountBankId,
+          accountNo: data.accountNumber,
+          amount: data.amount,
+          description: data.description,
+          transactionDate: data.transactionDateTime
+            ? new Date(data.transactionDateTime)
             : new Date(),
           status: "success",
           verifiedAt: new Date(),
-        });
-
-        await transaction.save();
+        }).save();
 
         await sendOrderConfirmationEmail(
           order.userInfo.email,
@@ -122,13 +104,13 @@ module.exports.webhook = async (req, res) => {
           order.totalAmount
         );
 
-        console.log("✅ Cập nhật trạng thái thành công:", orderCode);
+        console.log("✅ Thanh toán thành công:", data.orderCode);
       }
     }
 
-    return res.json({ message: "Webhook xử lý thành công" });
+    return res.json({ message: "OK" });
   } catch (err) {
-    console.error("❌ Lỗi xử lý webhook:", err);
+    console.error("❌ Lỗi webhook:", err);
     return res.status(500).json({ message: "Lỗi xử lý webhook" });
   }
 };
@@ -136,22 +118,20 @@ module.exports.webhook = async (req, res) => {
 // [POST] /api/v1/payment/cancel/:orderCode
 module.exports.cancelPaymentLink = async (req, res) => {
   try {
-    const { orderCode } = req.params;
-
-    const order = await Order.findOne({ orderCode: Number(orderCode) });
+    const order = await Order.findOne({
+      orderCode: String(req.params.orderCode),
+    });
 
     if (!order) {
-      return res.status(404).json({
-        error: -1,
-        message: "Không tìm thấy đơn hàng",
-      });
+      return res
+        .status(404)
+        .json({ error: -1, message: "Không tìm thấy đơn hàng" });
     }
 
     if (order.status === "paid") {
-      return res.status(400).json({
-        error: -1,
-        message: "Đơn hàng đã thanh toán, không thể hủy",
-      });
+      return res
+        .status(400)
+        .json({ error: -1, message: "Đã thanh toán, không thể hủy" });
     }
 
     order.status = "cancelled";
@@ -159,21 +139,15 @@ module.exports.cancelPaymentLink = async (req, res) => {
     await order.save();
 
     try {
-      await payOS.paymentRequests.cancel(Number(orderCode));
-    } catch (cancelErr) {
-      console.log("⚠️ Không hủy được trên PayOS:", cancelErr.message);
+      await payOS.paymentRequests.cancel(Number(req.params.orderCode));
+    } catch (e) {
+      console.log("⚠️ Không hủy được trên PayOS");
     }
 
-    return res.json({
-      error: 0,
-      message: "Hủy đơn hàng thành công",
-    });
+    return res.json({ error: 0, message: "Hủy thành công" });
   } catch (err) {
-    console.error("❌ Lỗi hủy đơn:", err);
-    return res.status(500).json({
-      error: -1,
-      message: "Lỗi hủy đơn hàng",
-    });
+    console.error("❌ Lỗi hủy:", err);
+    return res.status(500).json({ error: -1, message: "Lỗi hủy đơn hàng" });
   }
 };
 

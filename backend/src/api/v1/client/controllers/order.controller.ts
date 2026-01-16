@@ -17,9 +17,9 @@ module.exports.index = async (req, res) => {
 
     return res.status(200).json({
       message: "Lấy danh sách đơn hàng thành công!",
-      orders: orders,
-      total: total,
-      limit: limit,
+      orders,
+      total,
+      limit,
     });
   } catch (error) {
     return res.status(500).json({
@@ -48,21 +48,17 @@ module.exports.create = async (req, res) => {
       items,
       totalAmount,
       paymentMethod,
-      status: "pending",
-      expiredAt: new Date(Date.now() + 5 * 60 * 1000), 
-      isExpired: false,
-      checkoutUrl: null,
     });
 
     await order.save();
 
     return res.status(201).json({
       message: "Tạo đơn hàng thành công!",
-      order: order,
-      orderCode: orderCode,
+      order,
+      orderCode,
     });
   } catch (error) {
-    console.error("Lỗi tạo đơn hàng:", error);
+    console.error("❌ Lỗi tạo đơn:", error);
     return res.status(500).json({
       message: "Lỗi tạo đơn hàng!",
       error: error.message,
@@ -73,28 +69,26 @@ module.exports.create = async (req, res) => {
 // [GET] /api/v1/orders/detail/:orderCode
 module.exports.detail = async (req, res) => {
   try {
-    const { orderCode } = req.params;
-
-    const order = await Order.findOne({ orderCode });
+    const order = await Order.findOne({ orderCode: req.params.orderCode });
 
     if (!order) {
-      return res.status(404).json({
-        message: "Không tìm thấy đơn hàng!",
-      });
+      return res.status(404).json({ message: "Không tìm thấy đơn hàng!" });
     }
 
     const now = new Date();
-    if (order.expiredAt && now > order.expiredAt && !order.isExpired) {
+    if (
+      order.expiredAt &&
+      now > order.expiredAt &&
+      order.status === "pending"
+    ) {
+      order.status = "cancelled";
       order.isExpired = true;
-      if (order.status === "pending") {
-        order.status = "cancelled";
-      }
       await order.save();
     }
 
     return res.status(200).json({
       message: "Lấy thông tin đơn hàng thành công!",
-      order: order,
+      order,
     });
   } catch (error) {
     return res.status(500).json({
@@ -112,12 +106,6 @@ module.exports.getOrdersByUser = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
-    if (!email) {
-      return res.status(400).json({
-        message: "Email không hợp lệ!",
-      });
-    }
-
     const orders = await Order.find({ "userInfo.email": email })
       .skip(skip)
       .limit(limit)
@@ -126,11 +114,10 @@ module.exports.getOrdersByUser = async (req, res) => {
     const total = await Order.countDocuments({ "userInfo.email": email });
 
     return res.status(200).json({
-      message: "Lấy danh sách đơn hàng thành công!",
-      orders: orders,
-      total: total,
-      page: page,
-      limit: limit,
+      orders,
+      total,
+      page,
+      limit,
     });
   } catch (error) {
     return res.status(500).json({

@@ -19,58 +19,50 @@ const payOS = new PayOS({
     checksumKey: process.env.PAYOS_CHECKSUM_KEY,
 });
 module.exports.createPaymentLink = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { orderCode, amount, description, items } = req.body;
     try {
-        const existingOrder = yield Order.findOne({ orderCode: Number(orderCode) });
-        if (!existingOrder) {
-            return res.status(404).json({
-                error: -1,
-                message: "Không tìm thấy đơn hàng",
-            });
+        const { orderCode, amount, description, items } = req.body;
+        const order = yield Order.findOne({ orderCode: String(orderCode) });
+        if (!order) {
+            return res
+                .status(404)
+                .json({ error: -1, message: "Không tìm thấy đơn hàng" });
         }
-        const now = new Date();
-        if (existingOrder.expiredAt && now > existingOrder.expiredAt) {
-            existingOrder.isExpired = true;
-            existingOrder.status = "cancelled";
-            yield existingOrder.save();
-            return res.status(400).json({
-                error: -1,
-                message: "Đơn hàng đã hết hạn",
-            });
+        if (order.expiredAt && new Date() > order.expiredAt) {
+            order.status = "cancelled";
+            order.isExpired = true;
+            yield order.save();
+            return res
+                .status(400)
+                .json({ error: -1, message: "Đơn hàng đã hết hạn" });
         }
-        if (existingOrder.checkoutUrl) {
+        if (order.checkoutUrl) {
             return res.json({
                 error: 0,
-                message: "Link thanh toán đã tồn tại",
-                data: {
-                    checkoutUrl: existingOrder.checkoutUrl,
-                    orderCode: existingOrder.orderCode,
-                },
+                message: "Link đã tồn tại",
+                data: { checkoutUrl: order.checkoutUrl, orderCode: order.orderCode },
             });
         }
-        const paymentData = {
+        const paymentLink = yield payOS.paymentRequests.create({
             orderCode: Number(orderCode),
             amount: Number(amount),
-            description: description,
+            description,
             items: items || [],
             cancelUrl: `${process.env.FRONTEND_URL || "http://localhost:3000"}/cart`,
             returnUrl: `${process.env.FRONTEND_URL || "http://localhost:3000"}/order-success`,
-        };
-        const paymentLink = yield payOS.paymentRequests.create(paymentData);
-        existingOrder.checkoutUrl = paymentLink.checkoutUrl;
-        yield existingOrder.save();
+        });
+        order.checkoutUrl = paymentLink.checkoutUrl;
+        yield order.save();
         return res.json({
             error: 0,
             message: "Tạo link thành công",
             data: {
                 checkoutUrl: paymentLink.checkoutUrl,
                 orderCode: paymentLink.orderCode,
-                paymentLinkId: paymentLink.paymentLinkId,
             },
         });
     }
     catch (err) {
-        console.error("❌ Lỗi tạo payment link:", err);
+        console.error("❌ Lỗi tạo link:", err);
         return res.status(500).json({
             error: -1,
             message: "Lỗi tạo link thanh toán",
@@ -80,72 +72,63 @@ module.exports.createPaymentLink = (req, res) => __awaiter(void 0, void 0, void 
 });
 module.exports.webhook = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const webhookData = req.body;
-        if (webhookData.code === "00" && webhookData.desc === "success") {
-            const orderCode = webhookData.data.orderCode;
-            const order = yield Order.findOne({ orderCode: orderCode });
+        const { code, desc, data } = req.body;
+        if (code === "00" && desc === "success") {
+            const order = yield Order.findOne({ orderCode: String(data.orderCode) });
             if (order && order.status === "pending") {
                 order.status = "paid";
                 yield order.save();
-                const transaction = new Transaction({
-                    orderCode: String(orderCode),
-                    bankCode: webhookData.data.counterAccountBankId || "PAYOS",
-                    accountNo: webhookData.data.accountNumber || "",
-                    amount: webhookData.data.amount || 0,
-                    description: webhookData.data.description || "Thanh toán",
-                    transactionDate: webhookData.data.transactionDateTime
-                        ? new Date(webhookData.data.transactionDateTime)
+                yield new Transaction({
+                    orderCode: String(data.orderCode),
+                    bankCode: data.counterAccountBankId,
+                    accountNo: data.accountNumber,
+                    amount: data.amount,
+                    description: data.description,
+                    transactionDate: data.transactionDateTime
+                        ? new Date(data.transactionDateTime)
                         : new Date(),
                     status: "success",
                     verifiedAt: new Date(),
-                });
-                yield transaction.save();
+                }).save();
                 yield sendOrderConfirmationEmail(order.userInfo.email, order.userInfo.fullName, order.orderCode, order.items, order.totalAmount);
-                console.log("✅ Cập nhật trạng thái thành công:", orderCode);
+                console.log("✅ Thanh toán thành công:", data.orderCode);
             }
         }
-        return res.json({ message: "Webhook xử lý thành công" });
+        return res.json({ message: "OK" });
     }
     catch (err) {
-        console.error("❌ Lỗi xử lý webhook:", err);
+        console.error("❌ Lỗi webhook:", err);
         return res.status(500).json({ message: "Lỗi xử lý webhook" });
     }
 });
 module.exports.cancelPaymentLink = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { orderCode } = req.params;
-        const order = yield Order.findOne({ orderCode: Number(orderCode) });
+        const order = yield Order.findOne({
+            orderCode: String(req.params.orderCode),
+        });
         if (!order) {
-            return res.status(404).json({
-                error: -1,
-                message: "Không tìm thấy đơn hàng",
-            });
+            return res
+                .status(404)
+                .json({ error: -1, message: "Không tìm thấy đơn hàng" });
         }
         if (order.status === "paid") {
-            return res.status(400).json({
-                error: -1,
-                message: "Đơn hàng đã thanh toán, không thể hủy",
-            });
+            return res
+                .status(400)
+                .json({ error: -1, message: "Đã thanh toán, không thể hủy" });
         }
         order.status = "cancelled";
         order.isExpired = true;
         yield order.save();
         try {
-            yield payOS.paymentRequests.cancel(Number(orderCode));
+            yield payOS.paymentRequests.cancel(Number(req.params.orderCode));
         }
-        catch (cancelErr) {
-            console.log("⚠️ Không hủy được trên PayOS:", cancelErr.message);
+        catch (e) {
+            console.log("⚠️ Không hủy được trên PayOS");
         }
-        return res.json({
-            error: 0,
-            message: "Hủy đơn hàng thành công",
-        });
+        return res.json({ error: 0, message: "Hủy thành công" });
     }
     catch (err) {
-        console.error("❌ Lỗi hủy đơn:", err);
-        return res.status(500).json({
-            error: -1,
-            message: "Lỗi hủy đơn hàng",
-        });
+        console.error("❌ Lỗi hủy:", err);
+        return res.status(500).json({ error: -1, message: "Lỗi hủy đơn hàng" });
     }
 });
