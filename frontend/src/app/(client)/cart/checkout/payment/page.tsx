@@ -7,6 +7,8 @@ import { useCart } from "@/contexts/CartContext";
 import { Loading } from "@/app/components/Loading/Loading";
 import axios from "axios";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
 export default function PaymentPage() {
   const router = useRouter();
   const { items, clearCart } = useCart();
@@ -30,13 +32,19 @@ export default function PaymentPage() {
     setIsLoaded(true);
   }, [router]);
 
-  // kiểm tra trạng thái đơn hàng khi cố truy cập vào link thanh toán
   const checkOrderStatus = async (code: string) => {
     try {
       const response = await axios.get(
-        `http://localhost:3001/api/v1/orders/detail/${code}`
+        `${API_URL}/api/v1/orders/detail/${code}`
       );
       const order = response.data.order;
+
+      if (new Date() > new Date(order.expiredAt)) {
+        toast.error("❌ Link thanh toán đã hết hạn!");
+        sessionStorage.removeItem("orderCode");
+        router.replace("/cart");
+        return;
+      }
 
       if (order.status === "paid") {
         toast.success("✅ Đơn hàng đã được thanh toán!");
@@ -51,10 +59,36 @@ export default function PaymentPage() {
         router.replace("/cart");
         return;
       }
+
+      const timeRemaining = Math.floor(
+        (new Date(order.expiredAt).getTime() - new Date().getTime()) / 1000
+      );
+      setTimeLeft(Math.max(0, timeRemaining));
     } catch (err: any) {
       console.error("Lỗi kiểm tra trạng thái:", err);
     }
   };
+
+  useEffect(() => {
+    if (!isLoaded || !orderCode) return;
+
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          cancelPaymentLink();
+
+          toast.error("⏱️ Hết thời gian thanh toán!");
+          sessionStorage.removeItem("orderCode");
+          clearCart();
+          router.replace("/cart");
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [isLoaded, orderCode, router, clearCart]);
 
   useEffect(() => {
     if (!isLoaded || !orderCode) return;

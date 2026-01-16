@@ -1,47 +1,48 @@
 const mongoose = require("mongoose");
 
-const orderSchema = new mongoose.Schema({
-  orderCode: {
-    type: String,
-    unique: true,
-    required: true,
-  },
-  userInfo: {
-    fullName: String,
-    email: String,
-    phone: String,
-    address: String,
-  },
-  items: [
-    {
-      id: String,
-      title: String,
-      price: Number,
-      quantity: Number,
-      image: String,
-      slug: String,
+const orderSchema = new mongoose.Schema(
+  {
+    orderCode: {
+      type: String,
+      unique: true,
+      required: true,
     },
-  ],
-  totalAmount: Number,
-  paymentMethod: {
-    type: String,
-    enum: ["transfer", "cod"],
-    default: "transfer",
+    userInfo: {
+      fullName: String,
+      email: String,
+      phone: String,
+      address: String,
+    },
+    items: [
+      {
+        id: String,
+        title: String,
+        price: Number,
+        quantity: Number,
+        image: String,
+        slug: String,
+      },
+    ],
+    totalAmount: Number,
+    paymentMethod: {
+      type: String,
+      enum: ["transfer", "cod"],
+      default: "transfer",
+    },
+    status: {
+      type: String,
+      enum: ["pending", "paid", "shipped", "delivered", "cancelled"],
+      default: "pending",
+    },
+    expiredAt: {
+      type: Date,
+      default: () => new Date(Date.now() + 5 * 60 * 1000), 
+    },
   },
-  status: {
-    type: String,
-    enum: ["pending", "paid", "shipped", "delivered", "cancelled"],
-    default: "pending",
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-  updatedAt: {
-    type: Date,
-    default: Date.now,
-  },
-});
+  {
+    timestamps: true, 
+  }
+);
 
 const Order = mongoose.model("Order", orderSchema, "orders");
 

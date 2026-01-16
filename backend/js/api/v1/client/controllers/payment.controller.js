@@ -23,14 +23,13 @@ module.exports.createPaymentLink = (req, res) => __awaiter(void 0, void 0, void 
     const paymentData = {
         orderCode: Number(orderCode),
         amount: Number(amount),
-        description: description || "Thanh toán",
+        description: description,
         items: items || [],
         cancelUrl: "http://localhost:3000/cart",
         returnUrl: "http://localhost:3000/order-success",
     };
     try {
         const paymentLink = yield payOS.paymentRequests.create(paymentData);
-        console.log("✅ Success:", paymentLink.checkoutUrl);
         return res.json({
             error: 0,
             message: "Tạo link thành công",
@@ -42,7 +41,6 @@ module.exports.createPaymentLink = (req, res) => __awaiter(void 0, void 0, void 
         });
     }
     catch (err) {
-        console.error("❌ Error:", err.message);
         return res.status(500).json({
             error: -1,
             message: "Lỗi tạo link",
@@ -54,7 +52,6 @@ module.exports.webhook = (req, res) => __awaiter(void 0, void 0, void 0, functio
     var _a, _b, _c, _d, _e;
     try {
         const webhookData = yield payOS.webhooks.verify(req.body);
-        console.log("Thanh toán thành công:", webhookData);
         const orderCode = webhookData.orderCode || ((_a = webhookData.data) === null || _a === void 0 ? void 0 : _a.orderCode);
         if (orderCode) {
             const order = yield Order.findOneAndUpdate({ orderCode: Number(orderCode) }, { status: "paid" });
@@ -65,7 +62,9 @@ module.exports.webhook = (req, res) => __awaiter(void 0, void 0, void 0, functio
                     "PAYOS",
                 accountNo: webhookData.accountNumber || ((_c = webhookData.data) === null || _c === void 0 ? void 0 : _c.accountNumber) || "",
                 amount: webhookData.amount || ((_d = webhookData.data) === null || _d === void 0 ? void 0 : _d.amount) || 0,
-                description: webhookData.description || ((_e = webhookData.data) === null || _e === void 0 ? void 0 : _e.description) || "Payment",
+                description: webhookData.description ||
+                    ((_e = webhookData.data) === null || _e === void 0 ? void 0 : _e.description) ||
+                    "Thanh toan",
                 transactionDate: webhookData.transactionDateTime
                     ? new Date(webhookData.transactionDateTime)
                     : new Date(),
@@ -77,10 +76,9 @@ module.exports.webhook = (req, res) => __awaiter(void 0, void 0, void 0, functio
                 yield sendOrderConfirmationEmail(order);
             }
         }
-        res.status(200).send("OK");
+        res.status(200).send("Chạy vào webhook");
     }
     catch (error) {
-        console.error("Webhook không hợp lệ:", error);
         res.status(400).send("Invalid webhook");
     }
 });
@@ -92,6 +90,12 @@ module.exports.cancelPaymentLink = (req, res) => __awaiter(void 0, void 0, void 
             return res.status(404).json({
                 error: -1,
                 message: "Không tìm thấy đơn hàng",
+            });
+        }
+        if (order.status === "paid") {
+            return res.status(400).json({
+                error: -1,
+                message: "Đơn hàng đã thanh toán, không thể hủy",
             });
         }
         yield Order.findOneAndUpdate({ orderCode: Number(orderCode) }, { status: "cancelled" });

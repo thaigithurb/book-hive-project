@@ -34,14 +34,12 @@ const orderSchema = new mongoose.Schema({
         enum: ["pending", "paid", "shipped", "delivered", "cancelled"],
         default: "pending",
     },
-    createdAt: {
+    expiredAt: {
         type: Date,
-        default: Date.now,
+        default: () => new Date(Date.now() + 5 * 60 * 1000),
     },
-    updatedAt: {
-        type: Date,
-        default: Date.now,
-    },
+}, {
+    timestamps: true,
 });
 const Order = mongoose.model("Order", orderSchema, "orders");
 module.exports = Order;

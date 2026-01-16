@@ -16,7 +16,7 @@ module.exports.createPaymentLink = async (req, res) => {
   const paymentData = {
     orderCode: Number(orderCode),
     amount: Number(amount),
-    description: description || "Thanh toán",
+    description: description,
     items: items || [],
     cancelUrl: "http://localhost:3000/cart",
     returnUrl: "http://localhost:3000/order-success",
@@ -24,8 +24,6 @@ module.exports.createPaymentLink = async (req, res) => {
 
   try {
     const paymentLink = await payOS.paymentRequests.create(paymentData);
-
-    console.log("✅ Success:", paymentLink.checkoutUrl);
 
     return res.json({
       error: 0,
@@ -37,7 +35,6 @@ module.exports.createPaymentLink = async (req, res) => {
       },
     });
   } catch (err) {
-    console.error("❌ Error:", err.message);
     return res.status(500).json({
       error: -1,
       message: "Lỗi tạo link",
@@ -50,7 +47,6 @@ module.exports.createPaymentLink = async (req, res) => {
 module.exports.webhook = async (req, res) => {
   try {
     const webhookData = await payOS.webhooks.verify(req.body);
-    console.log("Thanh toán thành công:", webhookData);
 
     const orderCode = webhookData.orderCode || webhookData.data?.orderCode;
     if (orderCode) {
@@ -69,7 +65,9 @@ module.exports.webhook = async (req, res) => {
           webhookData.accountNumber || webhookData.data?.accountNumber || "",
         amount: webhookData.amount || webhookData.data?.amount || 0,
         description:
-          webhookData.description || webhookData.data?.description || "Payment",
+          webhookData.description ||
+          webhookData.data?.description ||
+          "Thanh toan",
         transactionDate: webhookData.transactionDateTime
           ? new Date(webhookData.transactionDateTime)
           : new Date(),
@@ -83,13 +81,11 @@ module.exports.webhook = async (req, res) => {
         await sendOrderConfirmationEmail(order);
       }
     }
-    res.status(200).send("OK");
+    res.status(200).send("Chạy vào webhook");
   } catch (error) {
-    console.error("Webhook không hợp lệ:", error);
     res.status(400).send("Invalid webhook");
   }
 };
-
 
 // [POST] /api/v1/payment/cancel/:orderCode
 module.exports.cancelPaymentLink = async (req, res) => {
@@ -101,6 +97,13 @@ module.exports.cancelPaymentLink = async (req, res) => {
       return res.status(404).json({
         error: -1,
         message: "Không tìm thấy đơn hàng",
+      });
+    }
+
+    if (order.status === "paid") {
+      return res.status(400).json({
+        error: -1,
+        message: "Đơn hàng đã thanh toán, không thể hủy",
       });
     }
 
@@ -120,7 +123,5 @@ module.exports.cancelPaymentLink = async (req, res) => {
     });
   }
 };
-
-export {};
 
 export {};
