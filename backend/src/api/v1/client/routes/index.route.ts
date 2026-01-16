@@ -9,7 +9,7 @@ module.exports = (app) => {
 
     app.use(version + "/orders", orderRoutes);
 
-    app.use(version + "/payments", paymentRoutes);
+    app.use(version + "/payment", paymentRoutes);
 }
 
 export {};

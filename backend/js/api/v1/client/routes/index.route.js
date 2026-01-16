@@ -7,5 +7,5 @@ module.exports = (app) => {
     const version = "/api/v1";
     app.use(version + "/books", bookRoutes);
     app.use(version + "/orders", orderRoutes);
-    app.use(version + "/payments", paymentRoutes);
+    app.use(version + "/payment", paymentRoutes);
 };

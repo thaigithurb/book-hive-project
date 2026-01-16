@@ -9,8 +9,6 @@ router.post("/create", controller.create);
 
 router.get("/detail/:orderCode", controller.detail);
 
-router.patch("/detail/:orderCode/payment", controller.confirmPayment);
-
 module.exports = router;
 
 export {};

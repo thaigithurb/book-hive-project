@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import { useCart } from "@/contexts/CartContext";
 import { Loading } from "@/app/components/Loading/Loading";
@@ -9,27 +9,46 @@ import axios from "axios";
 
 export default function PaymentPage() {
   const router = useRouter();
-  const { items } = useCart();
+  const { items, clearCart } = useCart();
   const [isLoaded, setIsLoaded] = useState(false);
   const [checkoutUrl, setCheckoutUrl] = useState<string>("");
   const [orderCode, setOrderCode] = useState<string>("");
   const [isCreating, setIsCreating] = useState(false);
   const [totalAmount, setTotalAmount] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(300);
 
   useEffect(() => {
-    setIsLoaded(true);
-
     const savedOrderCode = sessionStorage.getItem("orderCode");
 
     if (!savedOrderCode) {
-      toast.error("Không tìm thấy đơn hàng!");
-      router.push("/cart");
+      router.replace("/cart");
       return;
     }
 
-    console.log("📋 Saved orderCode:", savedOrderCode);
     setOrderCode(savedOrderCode);
+    setIsLoaded(true);
   }, [router]);
+
+  useEffect(() => {
+    if (!isLoaded || !orderCode) return;
+
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          localStorage.removeItem("cart");
+          sessionStorage.removeItem("orderCode");
+          sessionStorage.removeItem("paymentMethod");
+          clearCart();
+          toast.warning("⏱️ Hết thời gian thanh toán!");
+          router.replace("/cart");
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [isLoaded, orderCode, router, clearCart]);
 
   useEffect(() => {
     if (!orderCode || items.length === 0 || isCreating) return;
@@ -38,13 +57,9 @@ export default function PaymentPage() {
       (sum, item) => sum + item.price * item.quantity,
       0
     );
-    console.log("💰 Calculated amount:", amount);
-    console.log("📦 Items:", items);
-
     setTotalAmount(amount);
-
     createPaymentLink(Number(orderCode), amount);
-  }, [orderCode, items]);
+  }, [orderCode]);
 
   const createPaymentLink = async (code: number, amount: number) => {
     setIsCreating(true);
@@ -62,20 +77,16 @@ export default function PaymentPage() {
       };
 
       const response = await axios.post(
-        "http://localhost:3001/api/v1/payments/create",
+        "http://localhost:3001/api/v1/payment/create",
         paymentPayload
       );
 
-
       if (response.data.error === 0 && response.data.data?.checkoutUrl) {
         setCheckoutUrl(response.data.data.checkoutUrl);
-        toast.success("✅ Tạo link thanh toán thành công!");
-      } else {
-        toast.error(response.data.message || "Không tạo được link thanh toán!");
       }
     } catch (err: any) {
+      toast.error("Lỗi tạo link thanh toán!");
       console.error("❌ Error:", err);
-      toast.error(err.response?.data?.details || "Lỗi tạo link thanh toán!");
     } finally {
       setIsCreating(false);
     }
@@ -87,6 +98,12 @@ export default function PaymentPage() {
       currency: "VND",
       minimumFractionDigits: 0,
     }).format(amount);
+  };
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
   };
 
   if (!isLoaded) {
@@ -104,9 +121,18 @@ export default function PaymentPage() {
             <p className="text-slate-600">
               Mã đơn hàng: <span className="font-bold">{orderCode}</span>
             </p>
+
+            <div
+              className={`mt-4 p-3 rounded-lg font-bold text-lg ${
+                timeLeft < 60
+                  ? "bg-red-100 text-red-600"
+                  : "bg-yellow-100 text-yellow-600"
+              }`}
+            >
+              ⏱️ Thời gian còn lại: {formatTime(timeLeft)}
+            </div>
           </div>
 
-          {/* ✅ Hiển thị tổng tiền */}
           <div className="mb-8 p-4 bg-blue-50 rounded-lg">
             <p className="text-sm text-slate-600 mb-2">Tổng tiền:</p>
             <p className="text-3xl font-bold text-blue-600">
@@ -114,7 +140,6 @@ export default function PaymentPage() {
             </p>
           </div>
 
-          {/* ✅ Hiển thị chi tiết đơn hàng */}
           <div className="mb-8 p-4 bg-gray-50 rounded-lg">
             <p className="text-sm font-semibold text-slate-700 mb-3">
               📦 Chi tiết đơn hàng:
@@ -139,7 +164,6 @@ export default function PaymentPage() {
             </div>
           </div>
 
-          {/* ✅ Button thanh toán */}
           {isCreating ? (
             <div className="text-center py-8">
               <p className="text-slate-600">⏳ Đang tạo link thanh toán...</p>
@@ -149,7 +173,7 @@ export default function PaymentPage() {
               href={checkoutUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="block w-full py-4 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-colors text-center text-lg"
+              className="block w-full py-4 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-colors text-center text-lg mb-4"
             >
               🔗 Bấm vào để thanh toán
             </a>
@@ -158,6 +182,16 @@ export default function PaymentPage() {
               <p className="text-red-600">❌ Không tạo được link thanh toán</p>
             </div>
           )}
+
+          <button
+            onClick={() => {
+              sessionStorage.removeItem("orderCode");
+              router.replace("/cart");
+            }}
+            className="w-full py-3 bg-gray-200 text-slate-800 font-bold rounded-lg hover:bg-gray-300 transition-colors"
+          >
+            ← Quay lại giỏ hàng
+          </button>
         </div>
       </div>
 

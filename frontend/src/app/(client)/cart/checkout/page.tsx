@@ -84,7 +84,6 @@ export default function CheckoutPage() {
 
       const { orderCode } = response.data;
 
-      // Lưu orderCode vào sessionStorage để sử dụng ở trang payment
       sessionStorage.setItem("orderCode", orderCode);
       sessionStorage.setItem("paymentMethod", paymentMethod);
 

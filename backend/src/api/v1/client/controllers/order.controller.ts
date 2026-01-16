@@ -93,33 +93,5 @@ module.exports.detail = async (req, res) => {
   }
 };
 
-// [PATCH] /api/v1/orders/detail/:orderCode/payment
-module.exports.confirmPayment = async (req, res) => {
-  try {
-    const { orderCode } = req.params;
-
-    const order = await Order.findOneAndUpdate(
-      { orderCode },
-      { status: "paid", updatedAt: new Date() },
-      { new: true }
-    );
-
-    if (!order) {
-      return res.status(404).json({
-        message: "Không tìm thấy đơn hàng!",
-      });
-    }
-
-    return res.status(200).json({
-      message: "Xác nhận thanh toán thành công!",
-      order: order,
-    });
-  } catch (error) {
-    return res.status(500).json({
-      message: "Lỗi xác nhận thanh toán!",
-      error: error.message,
-    });
-  }
-};
 
 export {};

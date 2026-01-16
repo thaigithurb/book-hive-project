@@ -88,24 +88,3 @@ module.exports.detail = (req, res) => __awaiter(void 0, void 0, void 0, function
         });
     }
 });
-module.exports.confirmPayment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const { orderCode } = req.params;
-        const order = yield Order.findOneAndUpdate({ orderCode }, { status: "paid", updatedAt: new Date() }, { new: true });
-        if (!order) {
-            return res.status(404).json({
-                message: "Không tìm thấy đơn hàng!",
-            });
-        }
-        return res.status(200).json({
-            message: "Xác nhận thanh toán thành công!",
-            order: order,
-        });
-    }
-    catch (error) {
-        return res.status(500).json({
-            message: "Lỗi xác nhận thanh toán!",
-            error: error.message,
-        });
-    }
-});

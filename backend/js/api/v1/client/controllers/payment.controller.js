@@ -10,6 +10,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const { PayOS } = require("@payos/node");
+const Order = require("../../models/order.model");
+const Transaction = require("../../models/transaction.model");
+const { sendOrderConfirmationEmail } = require("../../../../helpers/sendEmail");
 const payOS = new PayOS({
     clientId: process.env.PAYOS_CLIENT_ID,
     apiKey: process.env.PAYOS_API_KEY,
@@ -45,6 +48,63 @@ module.exports.createPaymentLink = (req, res) => __awaiter(void 0, void 0, void 
             error: -1,
             message: "Lỗi tạo link",
             details: err.message,
+        });
+    }
+});
+module.exports.webhook = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a, _b, _c, _d, _e;
+    try {
+        const webhookData = yield payOS.webhooks.verify(req.body);
+        console.log("Thanh toán thành công:", webhookData);
+        const orderCode = webhookData.orderCode || ((_a = webhookData.data) === null || _a === void 0 ? void 0 : _a.orderCode);
+        if (orderCode) {
+            const order = yield Order.findOneAndUpdate({ orderCode: Number(orderCode) }, { status: "paid" });
+            const transaction = new Transaction({
+                orderCode: String(orderCode),
+                bankCode: webhookData.counterAccountBankId ||
+                    ((_b = webhookData.data) === null || _b === void 0 ? void 0 : _b.counterAccountBankId) ||
+                    "PAYOS",
+                accountNo: webhookData.accountNumber || ((_c = webhookData.data) === null || _c === void 0 ? void 0 : _c.accountNumber) || "",
+                amount: webhookData.amount || ((_d = webhookData.data) === null || _d === void 0 ? void 0 : _d.amount) || 0,
+                description: webhookData.description || ((_e = webhookData.data) === null || _e === void 0 ? void 0 : _e.description) || "Payment",
+                transactionDate: webhookData.transactionDateTime
+                    ? new Date(webhookData.transactionDateTime)
+                    : new Date(),
+                status: "success",
+                verifiedAt: new Date(),
+            });
+            yield transaction.save();
+            if (order) {
+                yield sendOrderConfirmationEmail(order);
+            }
+        }
+        res.status(200).send("OK");
+    }
+    catch (error) {
+        console.error("Webhook không hợp lệ:", error);
+        res.status(400).send("Invalid webhook");
+    }
+});
+module.exports.cancelPaymentLink = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { orderCode } = req.params;
+        const order = yield Order.findOne({ orderCode: Number(orderCode) });
+        if (!order) {
+            return res.status(404).json({
+                error: -1,
+                message: "Không tìm thấy đơn hàng",
+            });
+        }
+        yield Order.findOneAndUpdate({ orderCode: Number(orderCode) }, { status: "cancelled" });
+        res.json({
+            error: 0,
+            message: "Hủy link thanh toán thành công",
+        });
+    }
+    catch (err) {
+        res.status(500).json({
+            error: -1,
+            message: "Lỗi hủy link thanh toán",
         });
     }
 });

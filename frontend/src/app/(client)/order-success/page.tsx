@@ -8,19 +8,23 @@ import { toast, ToastContainer } from "react-toastify";
 export default function OrderSuccessPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const [orderCode, setOrderCode] = useState<number | null>(null); 
+  const [orderCode, setOrderCode] = useState<number | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    setIsLoaded(true);
     const code = searchParams.get("orderCode");
 
     if (code) {
       setOrderCode(parseInt(code, 10));
+      setIsLoaded(true);
       toast.success("✅ Đặt hàng thành công!");
+
+      sessionStorage.removeItem("orderCode");
+      sessionStorage.removeItem("paymentMethod");
+      localStorage.removeItem("cart");
     } else {
       toast.error("Không tìm thấy thông tin đơn hàng!");
-      setTimeout(() => router.push("/home"), 2000);
+      router.replace("/home");
     }
   }, [searchParams, router]);
 
@@ -57,7 +61,7 @@ export default function OrderSuccessPage() {
                 </p>
                 <button
                   onClick={() => {
-                    navigator.clipboard.writeText(orderCode.toString()); // ✅ Chuyển thành string để copy
+                    navigator.clipboard.writeText(orderCode.toString());
                     toast.success("Đã sao chép mã đơn hàng!");
                   }}
                   className="text-green-700 hover:text-green-900 text-2xl transition-colors"
