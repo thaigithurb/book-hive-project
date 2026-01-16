@@ -100,6 +100,7 @@ export default function SearchPage() {
             <p className="text-xl text-gray-500">
               Không tìm thấy sách nào phù hợp với từ khóa "{keyword}"
             </p>
+            <div className="min-h-[400px]"></div>
           </div>
         )}
       </div>
