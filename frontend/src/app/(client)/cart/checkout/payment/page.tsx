@@ -22,6 +22,7 @@ export default function PaymentPage() {
   });
 
   const initialized = useRef(false);
+  const checkStatusInterval = useRef<any>(null);
 
   useEffect(() => {
     if (initialized.current) return;
@@ -47,9 +48,9 @@ export default function PaymentPage() {
         }
 
         if (order.status === "paid") {
-          toast.success("✅ Đã thanh toán!");
           sessionStorage.removeItem("orderCode");
           clearCart();
+          toast.success("✅ Đã thanh toán!");
           return router.replace("/order-success");
         }
 
@@ -88,6 +89,27 @@ export default function PaymentPage() {
         }
 
         setLoading(false);
+
+        checkStatusInterval.current = setInterval(async () => {
+          try {
+            const { data: checkRes } = await axios.get(
+              `${API_URL}/api/v1/orders/detail/${orderCode}`
+            );
+
+            if (checkRes.order.status === "paid") {
+              if (checkStatusInterval.current) {
+                clearInterval(checkStatusInterval.current);
+              }
+              sessionStorage.removeItem("orderCode");
+              clearCart();
+              toast.success("✅ Thanh toán thành công!");
+
+              router.replace("/order-success");
+            }
+          } catch (err) {
+            console.error("Lỗi check status:", err);
+          }
+        }, 3000);
       } catch (error) {
         console.error("❌ Lỗi:", error);
         toast.error("Có lỗi xảy ra!");
@@ -96,6 +118,12 @@ export default function PaymentPage() {
     };
 
     init();
+
+    return () => {
+      if (checkStatusInterval.current) {
+        clearInterval(checkStatusInterval.current);
+      }
+    };
   }, [router, clearCart]);
 
   useEffect(() => {
@@ -106,6 +134,9 @@ export default function PaymentPage() {
         const newTime = prev.timeLeft - 1;
 
         if (newTime <= 0) {
+          if (checkStatusInterval.current) {
+            clearInterval(checkStatusInterval.current);
+          }
           axios
             .post(`${API_URL}/api/v1/payment/cancel/${prev.orderCode}`)
             .catch(console.error);
@@ -123,6 +154,35 @@ export default function PaymentPage() {
     return () => clearInterval(timer);
   }, [loading, data.timeLeft, router, clearCart]);
 
+  useEffect(() => {
+    const handleVisibilityChange = async () => {
+      if (!document.hidden && data.orderCode) {
+        try {
+          const { data: res } = await axios.get(
+            `${API_URL}/api/v1/orders/detail/${data.orderCode}`
+          );
+
+          if (res.order.status === "paid") {
+            if (checkStatusInterval.current) {
+              clearInterval(checkStatusInterval.current);
+            }
+            sessionStorage.removeItem("orderCode");
+            clearCart();
+            toast.success("✅ Thanh toán thành công!");
+
+            router.replace("/order-success");
+          }
+        } catch (err) {
+          console.error(err);
+        }
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () =>
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, [data.orderCode, clearCart, router]);
+
   const formatTime = (sec: number) => {
     const m = Math.floor(sec / 60);
     const s = sec % 60;
@@ -136,6 +196,9 @@ export default function PaymentPage() {
     }).format(n);
 
   const handleCancel = async () => {
+    if (checkStatusInterval.current) {
+      clearInterval(checkStatusInterval.current);
+    }
     await axios
       .post(`${API_URL}/api/v1/payment/cancel/${data.orderCode}`)
       .catch(console.error);

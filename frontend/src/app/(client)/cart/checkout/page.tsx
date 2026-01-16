@@ -107,7 +107,6 @@ export default function CheckoutPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-8">
-            {/* User Information */}
             <div className="bg-white rounded-lg shadow p-6">
               <h2 className="text-2xl font-bold text-slate-800 mb-6">
                 Thông tin giao hàng
@@ -178,7 +177,6 @@ export default function CheckoutPage() {
               </div>
             </div>
 
-            {/* Payment Method */}
             <div className="bg-white rounded-lg shadow p-6">
               <h2 className="text-2xl font-bold text-slate-800 mb-6">
                 Phương thức thanh toán
@@ -245,7 +243,6 @@ export default function CheckoutPage() {
               </div>
             </div>
 
-            {/* Order Items */}
             <div className="bg-white rounded-lg shadow p-6">
               <h2 className="text-2xl font-bold text-slate-800 mb-6">
                 Chi tiết đơn hàng
@@ -281,7 +278,6 @@ export default function CheckoutPage() {
             </div>
           </div>
 
-          {/* Sidebar */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-lg shadow p-6 sticky top-40">
               <h3 className="text-xl font-bold text-slate-800 mb-6">Tóm tắt</h3>
