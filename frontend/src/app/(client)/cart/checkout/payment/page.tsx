@@ -25,9 +25,36 @@ export default function PaymentPage() {
       return;
     }
 
+    checkOrderStatus(savedOrderCode);
     setOrderCode(savedOrderCode);
     setIsLoaded(true);
   }, [router]);
+
+  // kiểm tra trạng thái đơn hàng khi cố truy cập vào link thanh toán
+  const checkOrderStatus = async (code: string) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:3001/api/v1/orders/detail/${code}`
+      );
+      const order = response.data.order;
+
+      if (order.status === "paid") {
+        toast.success("✅ Đơn hàng đã được thanh toán!");
+        sessionStorage.removeItem("orderCode");
+        router.replace("/order-success");
+        return;
+      }
+
+      if (order.status === "cancelled") {
+        toast.error("❌ Đơn hàng đã bị hủy!");
+        sessionStorage.removeItem("orderCode");
+        router.replace("/cart");
+        return;
+      }
+    } catch (err: any) {
+      console.error("Lỗi kiểm tra trạng thái:", err);
+    }
+  };
 
   useEffect(() => {
     if (!isLoaded || !orderCode) return;
@@ -35,6 +62,7 @@ export default function PaymentPage() {
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
+          cancelPaymentLink();
           localStorage.removeItem("cart");
           sessionStorage.removeItem("orderCode");
           sessionStorage.removeItem("paymentMethod");
@@ -109,6 +137,18 @@ export default function PaymentPage() {
   if (!isLoaded) {
     return <Loading fullScreen={true} size="lg" text="Đang tải..." />;
   }
+
+  // hủy link thanh toán
+  const cancelPaymentLink = async () => {
+    try {
+      await axios.post(
+        `http://localhost:3001/api/v1/payment/cancel/${orderCode}`
+      );
+      toast.info("Đã hủy link thanh toán");
+    } catch (err: any) {
+      console.error("❌ Lỗi hủy link:", err);
+    }
+  };
 
   return (
     <div className="min-h-screen py-12 bg-gray-50">

@@ -28,7 +28,6 @@ module.exports.createPaymentLink = (req, res) => __awaiter(void 0, void 0, void 
         cancelUrl: "http://localhost:3000/cart",
         returnUrl: "http://localhost:3000/order-success",
     };
-    console.log("📞 Creating PayOS link with keys from .env");
     try {
         const paymentLink = yield payOS.paymentRequests.create(paymentData);
         console.log("✅ Success:", paymentLink.checkoutUrl);

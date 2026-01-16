@@ -22,7 +22,6 @@ module.exports.createPaymentLink = async (req, res) => {
     returnUrl: "http://localhost:3000/order-success",
   };
 
-  console.log("📞 Creating PayOS link with keys from .env");
   try {
     const paymentLink = await payOS.paymentRequests.create(paymentData);
 
