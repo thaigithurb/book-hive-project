@@ -38,6 +38,14 @@ const orderSchema = new mongoose.Schema({
         type: Date,
         default: () => new Date(Date.now() + 5 * 60 * 1000),
     },
+    checkoutUrl: {
+        type: String,
+        default: null,
+    },
+    isExpired: {
+        type: Boolean,
+        default: false,
+    },
 }, {
     timestamps: true,
 });

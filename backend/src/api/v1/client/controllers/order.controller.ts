@@ -40,7 +40,6 @@ module.exports.create = async (req, res) => {
       });
     }
 
-    // Tạo mã đơn hàng
     const orderCode = generateHelper.generateOrderCode();
 
     const order = new Order({
@@ -50,6 +49,9 @@ module.exports.create = async (req, res) => {
       totalAmount,
       paymentMethod,
       status: "pending",
+      expiredAt: new Date(Date.now() + 5 * 60 * 1000), 
+      isExpired: false,
+      checkoutUrl: null,
     });
 
     await order.save();
@@ -81,6 +83,15 @@ module.exports.detail = async (req, res) => {
       });
     }
 
+    const now = new Date();
+    if (order.expiredAt && now > order.expiredAt && !order.isExpired) {
+      order.isExpired = true;
+      if (order.status === "pending") {
+        order.status = "cancelled";
+      }
+      await order.save();
+    }
+
     return res.status(200).json({
       message: "Lấy thông tin đơn hàng thành công!",
       order: order,
@@ -93,5 +104,40 @@ module.exports.detail = async (req, res) => {
   }
 };
 
+// [GET] /api/v1/orders/user/:email
+module.exports.getOrdersByUser = async (req, res) => {
+  try {
+    const { email } = req.params;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    if (!email) {
+      return res.status(400).json({
+        message: "Email không hợp lệ!",
+      });
+    }
+
+    const orders = await Order.find({ "userInfo.email": email })
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 });
+
+    const total = await Order.countDocuments({ "userInfo.email": email });
+
+    return res.status(200).json({
+      message: "Lấy danh sách đơn hàng thành công!",
+      orders: orders,
+      total: total,
+      page: page,
+      limit: limit,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Lỗi lấy danh sách đơn hàng!",
+      error: error.message,
+    });
+  }
+};
 
 export {};
