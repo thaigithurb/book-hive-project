@@ -47,7 +47,7 @@ export default function OrderSuccessPage() {
           </h1>
 
           <p className="text-xl text-slate-600 mb-8">
-            Cảm ơn bạn đã mua sắm tại Book Hive 📚
+            Cảm ơn bạn đã mua sắm tại BookHive 📚
           </p>
 
           {orderCode && (

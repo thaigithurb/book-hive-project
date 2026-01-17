@@ -2,10 +2,7 @@ const brevo = require("@getbrevo/brevo");
 
 const apiInstance = new brevo.TransactionalEmailsApi();
 
-// ← SỬA: Dùng cách này
 apiInstance.authentications["apiKey"].apiKey = process.env.BREVO_API_KEY;
-
-console.log("✅ Brevo email service initialized");
 
 const sendOrderConfirmationEmail = async (order) => {
   try {
@@ -48,7 +45,7 @@ const sendOrderConfirmationEmail = async (order) => {
           <!-- Header -->
           <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center;">
             <h1 style="margin: 0; font-size: 28px;">✅ Đơn Hàng Thành Công</h1>
-            <p style="margin: 10px 0 0 0; font-size: 14px;">Book Hive - Cửa hàng sách online</p>
+            <p style="margin: 10px 0 0 0; font-size: 14px;">BookHive - Cửa hàng sách online</p>
           </div>
 
           <!-- Content -->
@@ -152,7 +149,7 @@ const sendOrderConfirmationEmail = async (order) => {
           <!-- Footer -->
           <div style="background-color: #f5f5f5; padding: 20px; text-align: center; border-top: 1px solid #ddd;">
             <p style="margin: 0; color: #666; font-size: 12px;">
-              © 2026 Book Hive. Tất cả quyền được bảo lưu.
+              © 2026 BookHive. Tất cả quyền được bảo lưu.
             </p>
             <p style="margin: 5px 0 0 0; color: #999; font-size: 11px;">
               Đây là email tự động, vui lòng không trả lời email này.
@@ -167,7 +164,7 @@ const sendOrderConfirmationEmail = async (order) => {
     const sendSmtpEmail = new brevo.SendSmtpEmail();
     sendSmtpEmail.to = [{ email: userInfo.email, name: userInfo.fullName }];
     sendSmtpEmail.sender = {
-      name: "Book Hive",
+      name: "BookHive",
       email: process.env.BREVO_SENDER_EMAIL || "noreply@bookhive.com",
     };
     sendSmtpEmail.subject = `✅ Đơn Hàng Thành Công - Mã: ${orderCode}`;
@@ -178,17 +175,14 @@ const sendOrderConfirmationEmail = async (order) => {
 
     const data = await apiInstance.sendTransacEmail(sendSmtpEmail);
 
-    console.log(
-      `✅ Email sent successfully to ${userInfo.email} - MessageID: ${data.messageId}`
-    );
-    return { success: true, messageId: data.messageId };
+    return { success: true };
   } catch (error) {
     console.error("❌ Error sending email:", {
       message: error.message,
       email: order?.userInfo?.email,
       orderCode: order?.orderCode,
     });
-    return { success: false, error: error.message };
+    return { success: false };
   }
 };
 
