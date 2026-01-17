@@ -1,33 +1,19 @@
-const nodemailer = require("nodemailer");
+const { Resend } = require("resend");
 
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD?.replace(/\s/g, ""), // ← Xóa khoảng trắng
-  },
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-// ← THÊM: Verify connection khi start
-transporter.verify((error, success) => {
-  if (error) {
-    console.error("❌ Email transporter error:", error.message);
-  } else {
-    console.log("✅ Email transporter ready");
-  }
-});
+console.log("✅ Resend email service initialized");
 
 const sendOrderConfirmationEmail = async (order) => {
   try {
     const { userInfo, orderCode, items, totalAmount } = order;
 
-    // ← THÊM: Validate data
     if (!userInfo?.email || !orderCode) {
       console.error("❌ Missing required email data:", {
         email: userInfo?.email,
         orderCode,
       });
-      return false;
+      return { success: false, error: "Missing email or orderCode" };
     }
 
     const itemsHtml = items
@@ -48,7 +34,9 @@ const sendOrderConfirmationEmail = async (order) => {
       )
       .join("");
 
-    const trackingLink = `http://localhost:3000/order-tracking/${orderCode}`;
+    const trackingLink = `${
+      process.env.FRONTEND_URL || "http://localhost:3000"
+    }/order-tracking/${orderCode}`;
 
     const htmlContent = `
       <div style="font-family: Arial, sans-serif; background-color: #f5f5f5; padding: 20px;">
@@ -173,25 +161,28 @@ const sendOrderConfirmationEmail = async (order) => {
 
     console.log(`📧 Sending email to ${userInfo.email}...`);
 
-    const info = await transporter.sendMail({
-      from: `"Book Hive" <${process.env.EMAIL_USER}>`, // ← Thêm display name
+    const data = await resend.emails.send({
+      from: `Book Hive <onboarding@resend.dev>`, // ← Resend sandbox domain
       to: userInfo.email,
       subject: `✅ Đơn Hàng Thành Công - Mã: ${orderCode}`,
       html: htmlContent,
     });
 
+    if (data.error) {
+      throw data.error;
+    }
+
     console.log(
-      `✅ Email sent successfully to ${userInfo.email} - MessageID: ${info.messageId}`
+      `✅ Email sent successfully to ${userInfo.email} - ID: ${data.data.id}`
     );
-    return true;
+    return { success: true, messageId: data.data.id };
   } catch (error) {
     console.error("❌ Error sending email:", {
       message: error.message,
-      code: error.code,
       email: order?.userInfo?.email,
       orderCode: order?.orderCode,
     });
-    return false;
+    return { success: false, error: error.message };
   }
 };
 

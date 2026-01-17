@@ -7,23 +7,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var _a;
-const nodemailer = require("nodemailer");
-const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: (_a = process.env.EMAIL_PASSWORD) === null || _a === void 0 ? void 0 : _a.replace(/\s/g, ""),
-    },
-});
-transporter.verify((error, success) => {
-    if (error) {
-        console.error("❌ Email transporter error:", error.message);
-    }
-    else {
-        console.log("✅ Email transporter ready");
-    }
-});
+const { Resend } = require("resend");
+const resend = new Resend(process.env.RESEND_API_KEY);
+console.log("✅ Resend email service initialized");
 const sendOrderConfirmationEmail = (order) => __awaiter(this, void 0, void 0, function* () {
     var _a;
     try {
@@ -33,7 +19,7 @@ const sendOrderConfirmationEmail = (order) => __awaiter(this, void 0, void 0, fu
                 email: userInfo === null || userInfo === void 0 ? void 0 : userInfo.email,
                 orderCode,
             });
-            return false;
+            return { success: false, error: "Missing email or orderCode" };
         }
         const itemsHtml = items
             .map((item) => `
@@ -44,7 +30,7 @@ const sendOrderConfirmationEmail = (order) => __awaiter(this, void 0, void 0, fu
       </tr>
     `)
             .join("");
-        const trackingLink = `http://localhost:3000/order-tracking/${orderCode}`;
+        const trackingLink = `${process.env.FRONTEND_URL || "http://localhost:3000"}/order-tracking/${orderCode}`;
         const htmlContent = `
       <div style="font-family: Arial, sans-serif; background-color: #f5f5f5; padding: 20px;">
         <div style="max-width: 600px; margin: 0 auto; background-color: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
@@ -164,23 +150,25 @@ const sendOrderConfirmationEmail = (order) => __awaiter(this, void 0, void 0, fu
       </div>
     `;
         console.log(`📧 Sending email to ${userInfo.email}...`);
-        const info = yield transporter.sendMail({
-            from: `"Book Hive" <${process.env.EMAIL_USER}>`,
+        const data = yield resend.emails.send({
+            from: `Book Hive <onboarding@resend.dev>`,
             to: userInfo.email,
             subject: `✅ Đơn Hàng Thành Công - Mã: ${orderCode}`,
             html: htmlContent,
         });
-        console.log(`✅ Email sent successfully to ${userInfo.email} - MessageID: ${info.messageId}`);
-        return true;
+        if (data.error) {
+            throw data.error;
+        }
+        console.log(`✅ Email sent successfully to ${userInfo.email} - ID: ${data.data.id}`);
+        return { success: true, messageId: data.data.id };
     }
     catch (error) {
         console.error("❌ Error sending email:", {
             message: error.message,
-            code: error.code,
             email: (_a = order === null || order === void 0 ? void 0 : order.userInfo) === null || _a === void 0 ? void 0 : _a.email,
             orderCode: order === null || order === void 0 ? void 0 : order.orderCode,
         });
-        return false;
+        return { success: false, error: error.message };
     }
 });
 module.exports = { sendOrderConfirmationEmail };
