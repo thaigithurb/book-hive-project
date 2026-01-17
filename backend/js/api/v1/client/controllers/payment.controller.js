@@ -90,7 +90,13 @@ module.exports.webhook = (req, res) => __awaiter(void 0, void 0, void 0, functio
                     status: "success",
                     verifiedAt: new Date(),
                 }).save();
-                yield sendOrderConfirmationEmail(order.userInfo.email, order.userInfo.fullName, order.orderCode, order.items, order.totalAmount);
+                const emailResult = yield sendOrderConfirmationEmail(order);
+                if (emailResult.success) {
+                    console.log(`✅ Order ${data.orderCode} confirmed with email sent`);
+                }
+                else {
+                    console.error(`⚠️ Order ${data.orderCode} paid but email failed: ${emailResult.error}`);
+                }
                 console.log("Thanh toán thành công:", data.orderCode);
             }
         }

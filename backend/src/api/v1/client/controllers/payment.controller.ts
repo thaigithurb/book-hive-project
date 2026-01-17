@@ -21,7 +21,7 @@ module.exports.createPaymentLink = async (req, res) => {
         .status(404)
         .json({ error: -1, message: "Không tìm thấy đơn hàng" });
     }
-    
+
     if (order.expiredAt && new Date() > order.expiredAt) {
       order.status = "cancelled";
       order.isExpired = true;
@@ -96,13 +96,14 @@ module.exports.webhook = async (req, res) => {
           verifiedAt: new Date(),
         }).save();
 
-        await sendOrderConfirmationEmail(
-          order.userInfo.email,
-          order.userInfo.fullName,
-          order.orderCode,
-          order.items,
-          order.totalAmount
-        );
+        const emailResult = await sendOrderConfirmationEmail(order);
+        if (emailResult.success) {
+          console.log(`✅ Order ${data.orderCode} confirmed with email sent`);
+        } else {
+          console.error(
+            `⚠️ Order ${data.orderCode} paid but email failed: ${emailResult.error}`
+          );
+        }
 
         console.log("Thanh toán thành công:", data.orderCode);
       }
