@@ -18,11 +18,13 @@ export default function PaymentPage() {
     checkoutUrl: "",
     totalAmount: 0,
     timeLeft: 0,
+    expiredAt: "",
     items: [] as any[],
   });
 
   const initialized = useRef(false);
   const checkStatusInterval = useRef<any>(null);
+  const countdownInterval = useRef<any>(null);
 
   useEffect(() => {
     if (initialized.current) return;
@@ -62,6 +64,7 @@ export default function PaymentPage() {
           checkoutUrl: order.checkoutUrl || "",
           totalAmount: order.totalAmount,
           timeLeft: Math.max(0, timeRemaining),
+          expiredAt: order.expiredAt,
           items: order.items,
         });
 
@@ -100,6 +103,9 @@ export default function PaymentPage() {
               if (checkStatusInterval.current) {
                 clearInterval(checkStatusInterval.current);
               }
+              if (countdownInterval.current) {
+                clearInterval(countdownInterval.current);
+              }
               sessionStorage.removeItem("orderCode");
               clearCart();
               toast.success("✅ Thanh toán thành công!");
@@ -123,19 +129,29 @@ export default function PaymentPage() {
       if (checkStatusInterval.current) {
         clearInterval(checkStatusInterval.current);
       }
+      if (countdownInterval.current) {
+        clearInterval(countdownInterval.current);
+      }
     };
   }, [router, clearCart]);
 
   useEffect(() => {
-    if (loading || data.timeLeft <= 0) return;
+    if (loading || !data.expiredAt || !data.orderCode) return;
 
-    const timer = setInterval(() => {
+    const updateCountdown = () => {
+      const now = new Date().getTime();
+      const expiredTime = new Date(data.expiredAt).getTime();
+      const remaining = Math.floor((expiredTime - now) / 1000);
+
       setData((prev) => {
-        const newTime = prev.timeLeft - 1;
+        const newTime = Math.max(0, remaining);
 
         if (newTime <= 0) {
           if (checkStatusInterval.current) {
             clearInterval(checkStatusInterval.current);
+          }
+          if (countdownInterval.current) {
+            clearInterval(countdownInterval.current);
           }
           axios
             .post(`${API_URL}/api/v1/payment/cancel/${prev.orderCode}`)
@@ -149,10 +165,18 @@ export default function PaymentPage() {
 
         return { ...prev, timeLeft: newTime };
       });
-    }, 1000);
+    };
 
-    return () => clearInterval(timer);
-  }, [loading, data.timeLeft, router, clearCart]);
+    updateCountdown();
+
+    countdownInterval.current = setInterval(updateCountdown, 1000);
+
+    return () => {
+      if (countdownInterval.current) {
+        clearInterval(countdownInterval.current);
+      }
+    };
+  }, [loading, data.expiredAt, data.orderCode, router, clearCart]);
 
   useEffect(() => {
     const handleVisibilityChange = async () => {
@@ -165,6 +189,9 @@ export default function PaymentPage() {
           if (res.order.status === "paid") {
             if (checkStatusInterval.current) {
               clearInterval(checkStatusInterval.current);
+            }
+            if (countdownInterval.current) {
+              clearInterval(countdownInterval.current);
             }
             sessionStorage.removeItem("orderCode");
             clearCart();
@@ -198,6 +225,9 @@ export default function PaymentPage() {
   const handleCancel = async () => {
     if (checkStatusInterval.current) {
       clearInterval(checkStatusInterval.current);
+    }
+    if (countdownInterval.current) {
+      clearInterval(countdownInterval.current);
     }
     await axios
       .post(`${API_URL}/api/v1/payment/cancel/${data.orderCode}`)

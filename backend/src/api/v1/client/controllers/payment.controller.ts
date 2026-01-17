@@ -62,7 +62,7 @@ module.exports.createPaymentLink = async (req, res) => {
       },
     });
   } catch (err) {
-    console.error("❌ Lỗi tạo link:", err);
+    console.error("Lỗi tạo link:", err);
     return res.status(500).json({
       error: -1,
       message: "Lỗi tạo link thanh toán",
@@ -104,7 +104,7 @@ module.exports.webhook = async (req, res) => {
           order.totalAmount
         );
 
-        console.log("✅ Thanh toán thành công:", data.orderCode);
+        console.log("Thanh toán thành công:", data.orderCode);
       }
     }
 
@@ -141,7 +141,7 @@ module.exports.cancelPaymentLink = async (req, res) => {
     try {
       await payOS.paymentRequests.cancel(Number(req.params.orderCode));
     } catch (e) {
-      console.log("⚠️ Không hủy được trên PayOS");
+      console.log(" Không hủy được trên PayOS");
     }
 
     return res.json({ error: 0, message: "Hủy thành công" });

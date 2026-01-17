@@ -62,7 +62,7 @@ module.exports.createPaymentLink = (req, res) => __awaiter(void 0, void 0, void 
         });
     }
     catch (err) {
-        console.error("❌ Lỗi tạo link:", err);
+        console.error("Lỗi tạo link:", err);
         return res.status(500).json({
             error: -1,
             message: "Lỗi tạo link thanh toán",
@@ -91,7 +91,7 @@ module.exports.webhook = (req, res) => __awaiter(void 0, void 0, void 0, functio
                     verifiedAt: new Date(),
                 }).save();
                 yield sendOrderConfirmationEmail(order.userInfo.email, order.userInfo.fullName, order.orderCode, order.items, order.totalAmount);
-                console.log("✅ Thanh toán thành công:", data.orderCode);
+                console.log("Thanh toán thành công:", data.orderCode);
             }
         }
         return res.json({ message: "OK" });
@@ -123,7 +123,7 @@ module.exports.cancelPaymentLink = (req, res) => __awaiter(void 0, void 0, void 
             yield payOS.paymentRequests.cancel(Number(req.params.orderCode));
         }
         catch (e) {
-            console.log("⚠️ Không hủy được trên PayOS");
+            console.log(" Không hủy được trên PayOS");
         }
         return res.json({ error: 0, message: "Hủy thành công" });
     }
