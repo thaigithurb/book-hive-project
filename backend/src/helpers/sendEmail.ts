@@ -159,8 +159,6 @@ const sendOrderConfirmationEmail = async (order) => {
       </div>
     `;
 
-    console.log(`📧 Sending email to ${userInfo.email}...`);
-
     const sendSmtpEmail = new brevo.SendSmtpEmail();
     sendSmtpEmail.to = [{ email: userInfo.email, name: userInfo.fullName }];
     sendSmtpEmail.sender = {
