@@ -12,6 +12,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
+    "@getbrevo/brevo": "^3.0.1",
     "@payos/node": "^2.0.4",
     "axios": "^1.13.2",
     "bcryptjs": "^3.0.3",

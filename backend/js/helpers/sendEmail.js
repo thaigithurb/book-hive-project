@@ -7,9 +7,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-const { Resend } = require("resend");
-const resend = new Resend(process.env.RESEND_API_KEY);
-console.log("✅ Resend email service initialized");
+const brevo = require("@getbrevo/brevo");
+const apiInstance = new brevo.TransactionalEmailsApi();
+apiInstance.authentications["apiKey"].apiKey = process.env.BREVO_API_KEY;
+console.log("✅ Brevo email service initialized");
 const sendOrderConfirmationEmail = (order) => __awaiter(this, void 0, void 0, function* () {
     var _a;
     try {
@@ -150,17 +151,20 @@ const sendOrderConfirmationEmail = (order) => __awaiter(this, void 0, void 0, fu
       </div>
     `;
         console.log(`📧 Sending email to ${userInfo.email}...`);
-        const data = yield resend.emails.send({
-            from: `Book Hive <onboarding@resend.dev>`,
-            to: userInfo.email,
-            subject: `✅ Đơn Hàng Thành Công - Mã: ${orderCode}`,
-            html: htmlContent,
-        });
-        if (data.error) {
-            throw data.error;
-        }
-        console.log(`✅ Email sent successfully to ${userInfo.email} - ID: ${data.data.id}`);
-        return { success: true, messageId: data.data.id };
+        const sendSmtpEmail = new brevo.SendSmtpEmail();
+        sendSmtpEmail.to = [{ email: userInfo.email, name: userInfo.fullName }];
+        sendSmtpEmail.sender = {
+            name: "Book Hive",
+            email: process.env.BREVO_SENDER_EMAIL || "noreply@bookhive.com",
+        };
+        sendSmtpEmail.subject = `✅ Đơn Hàng Thành Công - Mã: ${orderCode}`;
+        sendSmtpEmail.htmlContent = htmlContent;
+        sendSmtpEmail.replyTo = {
+            email: process.env.BREVO_SENDER_EMAIL || "support@bookhive.com",
+        };
+        const data = yield apiInstance.sendTransacEmail(sendSmtpEmail);
+        console.log(`✅ Email sent successfully to ${userInfo.email} - MessageID: ${data.messageId}`);
+        return { success: true, messageId: data.messageId };
     }
     catch (error) {
         console.error("❌ Error sending email:", {

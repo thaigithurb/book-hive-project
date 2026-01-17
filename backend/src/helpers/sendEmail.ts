@@ -1,8 +1,11 @@
-const { Resend } = require("resend");
+const brevo = require("@getbrevo/brevo");
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const apiInstance = new brevo.TransactionalEmailsApi();
 
-console.log("✅ Resend email service initialized");
+// ← SỬA: Dùng cách này
+apiInstance.authentications["apiKey"].apiKey = process.env.BREVO_API_KEY;
+
+console.log("✅ Brevo email service initialized");
 
 const sendOrderConfirmationEmail = async (order) => {
   try {
@@ -161,21 +164,24 @@ const sendOrderConfirmationEmail = async (order) => {
 
     console.log(`📧 Sending email to ${userInfo.email}...`);
 
-    const data = await resend.emails.send({
-      from: `Book Hive <onboarding@resend.dev>`, // ← Resend sandbox domain
-      to: userInfo.email,
-      subject: `✅ Đơn Hàng Thành Công - Mã: ${orderCode}`,
-      html: htmlContent,
-    });
+    const sendSmtpEmail = new brevo.SendSmtpEmail();
+    sendSmtpEmail.to = [{ email: userInfo.email, name: userInfo.fullName }];
+    sendSmtpEmail.sender = {
+      name: "Book Hive",
+      email: process.env.BREVO_SENDER_EMAIL || "noreply@bookhive.com",
+    };
+    sendSmtpEmail.subject = `✅ Đơn Hàng Thành Công - Mã: ${orderCode}`;
+    sendSmtpEmail.htmlContent = htmlContent;
+    sendSmtpEmail.replyTo = {
+      email: process.env.BREVO_SENDER_EMAIL || "support@bookhive.com",
+    };
 
-    if (data.error) {
-      throw data.error;
-    }
+    const data = await apiInstance.sendTransacEmail(sendSmtpEmail);
 
     console.log(
-      `✅ Email sent successfully to ${userInfo.email} - ID: ${data.data.id}`
+      `✅ Email sent successfully to ${userInfo.email} - MessageID: ${data.messageId}`
     );
-    return { success: true, messageId: data.data.id };
+    return { success: true, messageId: data.messageId };
   } catch (error) {
     console.error("❌ Error sending email:", {
       message: error.message,
