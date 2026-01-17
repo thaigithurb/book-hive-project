@@ -285,6 +285,7 @@ export default function Accounts() {
               : ""
           }
           label="Xóa"
+          labelCancel="Hủy"
         />
         <ToastContainer
           autoClose={1500}

@@ -335,6 +335,7 @@ export default function Permission() {
               : ""
           }
           label="Xóa"
+          labelCancel="Hủy"
         />
       </PrivateRoute>
     </>

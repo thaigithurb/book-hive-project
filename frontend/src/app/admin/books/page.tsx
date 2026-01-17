@@ -87,16 +87,13 @@ export default function Books() {
   }, [books]);
 
   const fetchAllBooks = async () => {
-    const res = await axios.get(
-      `${API_URL}/api/v1/${ADMIN_PREFIX}/books`,
-      {
-        params: { page: 1, limit: 10000 },
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-        withCredentials: true,
-      }
-    );
+    const res = await axios.get(`${API_URL}/api/v1/${ADMIN_PREFIX}/books`, {
+      params: { page: 1, limit: 10000 },
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      withCredentials: true,
+    });
     return res.data.books || [];
   };
 
@@ -290,6 +287,7 @@ export default function Books() {
               : ""
           }
           label="Xóa"
+          labelCancel="Hủy"
         />
         <ToastContainer
           autoClose={1500}

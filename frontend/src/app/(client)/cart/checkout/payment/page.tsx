@@ -6,6 +6,7 @@ import { toast, ToastContainer } from "react-toastify";
 import { useCart } from "@/contexts/CartContext";
 import { Loading } from "@/app/components/Loading/Loading";
 import axios from "axios";
+import ConfirmModal from "@/app/components/ConfirmModal/ConfirmModal";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -13,6 +14,7 @@ export default function PaymentPage() {
   const router = useRouter();
   const { clearCart } = useCart();
   const [loading, setLoading] = useState(true);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [data, setData] = useState({
     orderCode: "",
     checkoutUrl: "",
@@ -301,13 +303,25 @@ export default function PaymentPage() {
           )}
 
           <button
-            onClick={handleCancel}
+            onClick={() => setShowConfirmModal(true)}
             className="w-full py-3 bg-gray-200 text-slate-800 font-bold rounded-lg hover:bg-gray-300"
           >
             ← Hủy và quay lại
           </button>
         </div>
       </div>
+
+      <ConfirmModal
+        open={showConfirmModal}
+        onCancel={() => setShowConfirmModal(false)}
+        onConfirm={() => {
+          setShowConfirmModal(false);
+          handleCancel();
+        }}
+        message="⚠️ Xác nhận hủy đơn hàng?"
+        label="Hủy đơn"
+        labelCancel="Tiếp tục"
+      />
 
       <ToastContainer autoClose={1500} hideProgressBar pauseOnHover={false} />
     </div>

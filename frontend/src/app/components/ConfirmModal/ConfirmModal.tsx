@@ -8,6 +8,7 @@ interface ConfirmModalProps {
   onConfirm: () => void;
   message: string;
   label: string;
+  labelCancel: string;
 }
 
 export default function ConfirmModal({
@@ -15,7 +16,8 @@ export default function ConfirmModal({
   onCancel,
   onConfirm,
   message,
-  label
+  label,
+  labelCancel,
 }: ConfirmModalProps) {
   return (
     <AnimatePresence>
@@ -44,7 +46,7 @@ export default function ConfirmModal({
                 className="px-5 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 transition-all duration-200 cursor-pointer font-medium"
                 onClick={onCancel}
               >
-                Hủy
+                {labelCancel}
               </button>
               <button
                 className="px-5 py-2 rounded-lg bg-red-500 transition-all duration-200 text-white cursor-pointer hover:bg-red-600 font-medium shadow-md hover:shadow-lg"

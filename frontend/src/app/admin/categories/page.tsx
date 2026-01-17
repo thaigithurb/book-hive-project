@@ -285,6 +285,7 @@ export default function Categories() {
               : ""
           }
           label="Xóa"
+          labelCancel="Hủy"
         />
         <ToastContainer
           autoClose={1500}

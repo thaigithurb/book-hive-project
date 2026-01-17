@@ -79,16 +79,13 @@ export default function Roles() {
   }, [roles]);
 
   const fetchAllRoles = async () => {
-    const res = await axios.get(
-      `${API_URL}/api/v1/${ADMIN_PREFIX}/roles`,
-      {
-        params: { page: 1, limit: 10000 },
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-        withCredentials: true,
-      }
-    );
+    const res = await axios.get(`${API_URL}/api/v1/${ADMIN_PREFIX}/roles`, {
+      params: { page: 1, limit: 10000 },
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      withCredentials: true,
+    });
     return res.data.roles || [];
   };
 
@@ -275,6 +272,7 @@ export default function Roles() {
               : ""
           }
           label="Xóa"
+          labelCancel="Hủy"
         />
         <ToastContainer
           autoClose={1500}

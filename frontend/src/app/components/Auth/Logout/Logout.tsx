@@ -45,6 +45,7 @@ export default function Logout({ url, href }: LogoutProps) {
         onConfirm={handleLogout}
         message="Bạn có chắc chắn muốn đăng xuất?"
         label="Có"
+        labelCancel="Hủy"
       />
       <div className="flex justify-center mb-[50px]">
         <button
