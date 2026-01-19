@@ -32,7 +32,7 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      await axios.post(`http://localhost:3001/api/v1/auth/register`, formData);
+      await axios.post(`${API_URL}/api/v1/auth/register`, formData);
       toast.success("Đăng ký thành công! Vui lòng đăng nhập.");
 
       setTimeout(() => {

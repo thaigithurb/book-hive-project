@@ -20,7 +20,7 @@ export default function LoginPage() {
 
     try {
       const res = await axios.post(
-        `http://localhost:3001/api/v1/auth/loginWithPassword`,
+        `${API_URL}/api/v1/auth/loginWithPassword`,
         { email, password },
         { withCredentials: true }
       );
