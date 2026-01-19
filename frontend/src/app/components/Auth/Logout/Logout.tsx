@@ -7,9 +7,10 @@ import axios from "axios";
 interface LogoutProps {
   url: string;
   href: string;
+  className: string;
 }
 
-export default function Logout({ url, href }: LogoutProps) {
+export default function Logout({ url, href, className }: LogoutProps) {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const handleLogout = async () => {
@@ -47,15 +48,10 @@ export default function Logout({ url, href }: LogoutProps) {
         label="Có"
         labelCancel="Hủy"
       />
-      <div className="flex justify-center mb-[50px]">
-        <button
-          onClick={handleOpenLogoutModal}
-          className="flex w-[80%] items-center py-3 px-6 bg-[#F37B74] transition-colors duration-200 text-white rounded-[12px] text-[16px] font-semibold cursor-pointer hover:bg-[#F2656E]"
-        >
-          <MdLogout className="" />
-          <span className="flex-1">Đăng xuất</span>
-        </button>
-      </div>
+      <button onClick={handleOpenLogoutModal} className={className}>
+        <MdLogout className="mr-2" />
+        <span className="flex-1">Đăng xuất</span>
+      </button>
     </>
   );
 }

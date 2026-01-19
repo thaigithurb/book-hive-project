@@ -5,12 +5,15 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ToastContainer } from "react-toastify";
+import Logout from "../../Auth/Logout/Logout";
 
 export const Header = () => {
   const router = useRouter();
   const { getTotalItems } = useCart();
   const [keyword, setKeyword] = useState("");
   const cartCount = getTotalItems();
+  const userString = localStorage.getItem("user");
+  const user = userString ? JSON.parse(userString) : null;
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -111,12 +114,14 @@ export const Header = () => {
                 </span>
               )}
             </Link>
-            <Link
-              href="/account"
-              className="px-4 py-2 text-primary font-medium transition-all duration-300 hover:bg-blue-50 hover:text-blue-600 rounded-lg hover:shadow-[0_4px_12px_rgba(59,130,246,0.2)]"
-            >
-              👤 Tài khoản
-            </Link>
+            <div className="relative group">
+              <Link
+                href="/account"
+                className="px-4 py-2 text-primary font-medium transition-all duration-300 hover:bg-blue-50 hover:text-blue-600 rounded-lg hover:shadow-[0_4px_12px_rgba(59,130,246,0.2)]"
+              >
+                👤 {user?.fullName ?? "Tài khoản"}
+              </Link>
+            </div>
           </div>
         </nav>
       </header>

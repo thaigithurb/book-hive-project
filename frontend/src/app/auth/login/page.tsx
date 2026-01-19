@@ -1,123 +1,190 @@
 "use client";
-
 import { useState } from "react";
-import axios from "axios";
-import { toast, ToastContainer } from "react-toastify";
 import { useRouter } from "next/navigation";
+import axios from "axios";
+import Link from "next/link";
+import { toast, ToastContainer } from "react-toastify";
 
-const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-export default function Login() {
-  const [showPassword, setShowPassword] = useState(false);
+export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
 
-  const inputClass =
-    "border bg-[#ffff] border-gray-300 rounded-lg px-4 py-2 text-[15px] outline-none focus:ring-2 focus:ring-secondary1 hover:border-secondary1 focus:border-secondary1 transition duration-200 w-full";
-
-  const handleSubmit = (e: any) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
-    toast
-      .promise(
-        axios.post(
-          `${API_URL}/api/v1/${ADMIN_PREFIX}/auth/login`,
-          {
-            email,
-            password,
-          },
-          { withCredentials: true }
-        ),
-        {
-          pending: "Đang đăng nhập...",
-          success: {
-            render({ data }) {
-              localStorage.setItem("accessToken", data?.data?.accessToken);
-              localStorage.setItem("user", JSON.stringify(data?.data?.user));
-              setEmail("");
-              setPassword("");
-              router.push("/admin/dashboard");
-              return data?.data?.message;
-            },
-          },
-          error: {
-            render({ data }) {
-              if (axios.isAxiosError(data)) {
-                return data.response?.data?.message;
-              }
-              return "Đăng nhập thất bại";
-            },
-          },
-        }
-      )
-      .finally(() => {
-        setLoading(false);
+    try {
+      const res = await axios.post(
+        `http://localhost:3001/api/v1/auth/loginWithPassword`,
+        { email, password },
+        { withCredentials: true }
+      );
+
+      localStorage.setItem("accessToken", res.data.accessToken);
+      localStorage.setItem("user", JSON.stringify(res.data.user));
+
+      toast.success("Đăng nhập thành công!");
+      setTimeout(() => {
+        router.push("/home");
+      }, 1600);
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || "Đăng nhập thất bại", {
+        autoClose: 2000,
       });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <>
-      <div className="flex mt-[150px] justify-center">
-        <form
-          className="bg-white px-10 py-12 rounded-lg shadow-lg w-full max-w-md flex flex-col gap-4"
-          onSubmit={handleSubmit}
-        >
-          <div className="flex gap-[12px] items-center">
-            <span className="text-[32px]">📚</span>
-            <div>
-              <h1
-                className="m-0 text-[24px] font-[700] text-[#1e293b]"
-                title="BookHive"
-              >
-                BookHive
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4">
+        <div className="w-full max-w-md">
+          <div className="bg-white rounded-lg shadow-xl overflow-hidden">
+            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-8 text-center">
+              <h1 className="text-3xl font-bold text-white mb-2">
+                📚 BookHive
               </h1>
-              <p className="text-[13.6px] text-[#64748b]">Admin System</p>
+              <p className="text-blue-100">Nơi tri thức hội tụ</p>
             </div>
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className="mb-1 font-medium text-primary">Email</label>
-            <input
-              id="email"
-              type="email"
-              placeholder="Nhập email"
-              className={inputClass}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className="mb-1 font-medium text-primary">Mật khẩu</label>
-            <div className="relative">
-              <input
-                id="password"
-                type={showPassword ? "text" : "password"}
-                placeholder="Nhập mật khẩu"
-                className={inputClass + " pr-16"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
+
+            <form onSubmit={handleLogin} className="px-6 py-8 space-y-6">
+              <div>
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-semibold text-gray-700 mb-2"
+                >
+                  Email
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="your@email.com"
+                  required
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-semibold text-gray-700 mb-2"
+                >
+                  Mật Khẩu
+                </label>
+                <div className="relative">
+                  <input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    required
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                  >
+                    {showPassword ? "👁️" : "👁️‍🗨️"}
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="w-4 h-4 rounded border-gray-300 focus:ring-2 focus:ring-blue-500"
+                  />
+                  <span className="text-sm text-gray-600">Ghi nhớ tôi</span>
+                </label>
+                <Link
+                  href="/forgot-password"
+                  className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                >
+                  Quên mật khẩu?
+                </Link>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-2.5 rounded-lg transition duration-200 flex items-center justify-center gap-2"
+              >
+                {loading ? (
+                  <>
+                    <span className="animate-spin">⏳</span>
+                    Đang đăng nhập...
+                  </>
+                ) : (
+                  <>
+                    <span>🔐</span>
+                    Đăng Nhập
+                  </>
+                )}
+              </button>
+
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-300"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-white text-gray-500">Hoặc</span>
+                </div>
+              </div>
+
               <button
                 type="button"
-                onClick={() => setShowPassword((show) => !show)}
-                className="absolute right-3 top-1/2 cursor-pointer -translate-y-1/2 text-sm text-blue-600 font-semibold focus:outline-none"
-                tabIndex={-1}
+                className="w-full border-2 border-gray-300 hover:border-gray-400 text-gray-700 font-semibold py-2.5 rounded-lg transition flex items-center justify-center gap-2"
               >
-                {showPassword ? "Ẩn" : "Hiện"}
+                <span>🔵</span>
+                Đăng nhập với Google
               </button>
+
+              <button
+                type="button"
+                className="w-full border-2 border-gray-300 hover:border-gray-400 text-gray-700 font-semibold py-2.5 rounded-lg transition flex items-center justify-center gap-2"
+              >
+                <span>📘</span>
+                Đăng nhập với Facebook
+              </button>
+            </form>
+
+            <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 text-center">
+              <p className="text-gray-600 text-sm">
+                Chưa có tài khoản?{" "}
+                <Link
+                  href="/auth/register"
+                  className="text-blue-600 hover:text-blue-700 font-semibold"
+                >
+                  Đăng ký ngay
+                </Link>
+              </p>
             </div>
           </div>
-          <button
-            type="submit"
-            className="w-full transition-colors duration-200 bg-secondary1 cursor-pointer hover:bg-blue-600 text-white py-2 rounded font-semibold mt-4"
-            disabled={loading}
-          >
-            {loading ? "Đang xử lý..." : "Đăng nhập"}
-          </button>
-        </form>
+
+          <div className="mt-6 text-center text-gray-600 text-xs">
+            <p>
+              Bằng cách đăng nhập, bạn đã đồng ý với{" "}
+              <Link href="/terms" className="text-blue-600 hover:underline">
+                Điều khoản dịch vụ
+              </Link>{" "}
+              và{" "}
+              <Link href="/privacy" className="text-blue-600 hover:underline">
+                Chính sách bảo mật
+              </Link>
+            </p>
+          </div>
+        </div>
       </div>
       <ToastContainer
         autoClose={1500}

@@ -9,7 +9,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 const jwt = require("jsonwebtoken");
 const Account = require("../api/v1/models/account.model");
-module.exports.auth = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+const User = require("../api/v1/models/account.model");
+module.exports.adminAuth = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
     var _a, _b;
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -36,5 +37,49 @@ module.exports.auth = (req, res, next) => __awaiter(this, void 0, void 0, functi
         return res
             .status(400)
             .json({ message: "Token không hợp lệ hoặc đã hết hạn" });
+    }
+});
+module.exports.clientAuth = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+    try {
+        const authHeader = req.headers.authorization;
+        if (!authHeader || !authHeader.startsWith("Bearer ")) {
+            return res.status(401).json({
+                success: false,
+                message: "Không có accessToken",
+            });
+        }
+        const token = authHeader.split(" ")[1];
+        try {
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            const user = yield User.findOne({
+                _id: decoded.id,
+                deleted: false,
+                status: "active",
+            });
+            if (!user) {
+                return res.status(403).json({
+                    success: false,
+                    message: "Tài khoản không hợp lệ hoặc đã bị khóa",
+                });
+            }
+            req.user = {
+                id: decoded.id,
+                email: decoded.email,
+                userId: user._id,
+            };
+            next();
+        }
+        catch (err) {
+            return res.status(401).json({
+                success: false,
+                message: "Token không hợp lệ hoặc đã hết hạn",
+            });
+        }
+    }
+    catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Lỗi server",
+        });
     }
 });

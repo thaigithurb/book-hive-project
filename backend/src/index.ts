@@ -13,10 +13,22 @@ database.connect();
 const app = express();
 const port = process.env.PORT;
 
-app.use(cors({
-  origin: "*",
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      const allowedOrigins = [
+        "http://localhost:3000",
+        "https://book-hive-project-1.onrender.com",
+      ];
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error("Not allowed by CORS"));
+    },
+    credentials: true,
+  })
+);
 
 app.use(cookieParser());
 

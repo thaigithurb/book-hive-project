@@ -32,11 +32,11 @@ module.exports.login = async (req, res) => {
     // Lưu refreshToken mới vào DB
     user.refreshToken = refreshToken;
     user.refreshTokenExpiresAt = new Date(
-      Date.now() + 7 * 24 * 60 * 60 * 1000 // 7 ngày
+      Date.now() + 7 * 24 * 60 * 60 * 1000 
     );
     await user.save();
 
-    res.cookie("refreshToken", refreshToken, {
+    res.cookie("refreshToken_admin", refreshToken, {
       httpOnly: true,
       secure: true,
       sameSite: "strict",
@@ -70,7 +70,7 @@ module.exports.login = async (req, res) => {
 // [POST] /api/v1/admin/auth/refresh
 module.exports.refresh = async (req, res) => {
   try {
-    const refreshToken = req.cookies.refreshToken;
+    const refreshToken = req.cookies.refreshToken_admin;
     if (!refreshToken) {
       return res.status(401).json({ message: "Không có refreshToken" });
     }
@@ -130,7 +130,7 @@ module.exports.verify = async (req, res) => {
 // [POST] /api/v1/admin/auth/logout
 module.exports.logout = async (req, res) => {
   try {
-    const refreshToken = req.cookies.refreshToken;
+    const refreshToken = req.cookies.refreshToken_admin;
 
     await Account.findOneAndUpdate(
       {
@@ -139,7 +139,7 @@ module.exports.logout = async (req, res) => {
       { refreshToken: null, refreshTokenExpiresAt: null }
     );
 
-    res.clearCookie("refreshToken", {
+    res.clearCookie("refreshToken_admin", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",

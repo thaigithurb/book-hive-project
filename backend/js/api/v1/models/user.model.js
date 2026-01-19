@@ -1,0 +1,45 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const mongoose = require("mongoose");
+const userSchema = new mongoose.Schema({
+    fullName: String,
+    email: String,
+    password: String,
+    googleId: {
+        type: String,
+        unique: true,
+        sparse: true,
+        index: true,
+    },
+    googleEmail: String,
+    refreshToken: {
+        type: String,
+        default: null,
+    },
+    refreshTokenExpiresAt: Date,
+    phone: String,
+    avatar: String,
+    status: String,
+    isEmailVerified: {
+        type: Boolean,
+        default: false,
+    },
+    lastLogin: Date,
+    loginMethod: String,
+    deleted: {
+        type: Boolean,
+        default: false,
+        index: true,
+    },
+    deletedAt: Date,
+    slug: {
+        type: String,
+        required: true,
+        unique: true,
+        index: true,
+    },
+}, {
+    timestamps: true,
+});
+const User = mongoose.model("User", userSchema, "users");
+module.exports = User;

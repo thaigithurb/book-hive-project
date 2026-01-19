@@ -39,7 +39,7 @@ const menu = [
     href: "/admin/accounts",
     permission: "view_accounts",
   },
-  { label: "👤 Thông tin cá nhân", key: "profile", href: "/admin/profile" }, 
+  { label: "👤 Thông tin cá nhân", key: "profile", href: "/admin/profile" },
 ];
 
 const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;
@@ -89,12 +89,13 @@ export const SideBar = () => {
               </Link>
             ))}
         </nav>
+
         <Logout
           url={`${API_URL}/api/v1/${ADMIN_PREFIX}/auth/logout`}
           href={"/auth/login"}
+          className="flex w-[80%] items-center py-3 px-6 bg-[#F37B74] transition-colors duration-200 text-white rounded-[12px] text-[16px] font-semibold cursor-pointer hover:bg-[#F2656E]"
         />
       </aside>
-    
     </>
   );
 };

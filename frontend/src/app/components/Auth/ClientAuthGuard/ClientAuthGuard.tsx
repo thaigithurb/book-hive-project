@@ -2,17 +2,18 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useUser } from "@/contexts/UserContext";
+import { useRouter } from "next/navigation";
 
-const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-export default function AdminAuthGuard({
+export default function ClientAuthGuard({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const [checkedAuth, setCheckedAuth] = useState(false);
   const { setUser } = useUser();
+  const router = useRouter();
 
   const setUserFromToken = (token: string) => {
     try {
@@ -25,8 +26,6 @@ export default function AdminAuthGuard({
       setUser({
         id: payload.id,
         email: payload.email,
-        role: payload.role,
-        permissions: payload.permissions || [],
       });
     } catch {
       setUser(null);
@@ -39,7 +38,7 @@ export default function AdminAuthGuard({
       if (!accessToken) {
         try {
           const res = await axios.post(
-            `${API_URL}/api/v1/${ADMIN_PREFIX}/auth/refresh`,
+            `http://localhost:3001/api/v1/auth/refresh`,
             {},
             { withCredentials: true }
           );
@@ -47,12 +46,13 @@ export default function AdminAuthGuard({
           setUserFromToken(res.data.accessToken);
           setCheckedAuth(true);
         } catch {
-          window.location.href = `/auth/${ADMIN_PREFIX}/login`;
+          router.push("/auth/login");
+          setCheckedAuth(true);
         }
       } else {
         try {
           await axios.post(
-            `${API_URL}/api/v1/${ADMIN_PREFIX}/auth/verify`,
+            `http://localhost:3001/api/v1/auth/verify`,
             {},
             {
               headers: {
@@ -65,7 +65,7 @@ export default function AdminAuthGuard({
         } catch {
           try {
             const res = await axios.post(
-              `${API_URL}/api/v1/${ADMIN_PREFIX}/auth/refresh`,
+              `http://localhost:3001/api/v1/auth/refresh`,
               {},
               { withCredentials: true }
             );
@@ -73,13 +73,17 @@ export default function AdminAuthGuard({
             setUserFromToken(res.data.accessToken);
             setCheckedAuth(true);
           } catch {
-            window.location.href = `/auth/${ADMIN_PREFIX}/login`;
+            localStorage.removeItem("accessToken");
+            localStorage.removeItem("user");
+            router.push("/auth/login");
+            setCheckedAuth(true);
           }
         }
       }
     };
+
     checkAuth();
-  }, []);
+  }, [setUser, router]);
 
   if (!checkedAuth) return null;
   return <>{children}</>;
