@@ -14,7 +14,7 @@ export default function Profile() {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const accessToken = localStorage.getItem("accessToken");
+        const accessToken = localStorage.getItem("accessToken_admin");
         const res = await axios.get(
           `${API_URL}/api/v1/${ADMIN_PREFIX}/accounts/profile`,
           {

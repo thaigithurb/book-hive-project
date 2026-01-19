@@ -18,7 +18,7 @@ export default function AccountResetPassword() {
   const [checkedMatch, setCheckedMatch] = useState(true);
   const [loading, setLoading] = useState(false);
 
-  const accessToken = localStorage.getItem("accessToken");
+  const accessToken = localStorage.getItem("accessToken_admin");
 
   const params = useParams();
   const slug = params.slug;

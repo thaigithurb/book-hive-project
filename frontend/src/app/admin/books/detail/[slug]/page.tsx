@@ -17,7 +17,7 @@ export default function BookDetail() {
   const [book, setBook] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
-  const accessToken = localStorage.getItem("accessToken");
+  const accessToken = localStorage.getItem("accessToken_admin");
 
   useEffect(() => {
     const fetchBook = async () => {

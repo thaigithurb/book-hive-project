@@ -18,13 +18,11 @@ export default function RootLayout({
 }>) {
   return (
     <UserProvider>
-      <ClientAuthGuard>
-        <CartProvider>
-          <Header />
-          <main className="pt-[144px]">{children}</main>
-          <Footer />
-        </CartProvider>
-      </ClientAuthGuard>
+      <CartProvider>
+        <Header />
+        <main className="pt-[144px]">{children}</main>
+        <Footer />
+      </CartProvider>
     </UserProvider>
   );
 }

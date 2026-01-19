@@ -30,7 +30,7 @@ export default function Permission() {
   const [selectedPerm, setSelectedPerm] = useState<any>(null);
 
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const accessToken = localStorage.getItem("accessToken");
+  const accessToken = localStorage.getItem("accessToken_admin");
 
   useEffect(() => {
     setLoading(true);
@@ -128,7 +128,7 @@ export default function Permission() {
             ...user,
             permissions: currentRole.permissions,
           };
-          localStorage.setItem("user", JSON.stringify(updatedUser));
+          localStorage.setItem("admin_user", JSON.stringify(updatedUser));
           setUser(updatedUser);
         }
       }

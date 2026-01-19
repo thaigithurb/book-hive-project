@@ -7,8 +7,8 @@ const authRoutes = require("./auth.route");
 const { clientAuth } = require("../../../../middleware/auth.middleware");
 module.exports = (app) => {
     const version = "/api/v1";
-    app.use(version + "/books", clientAuth, bookRoutes);
-    app.use(version + "/orders", clientAuth, orderRoutes);
-    app.use(version + "/payment", clientAuth, paymentRoutes);
+    app.use(version + "/books", bookRoutes);
+    app.use(version + "/orders", orderRoutes);
+    app.use(version + "/payment", paymentRoutes);
     app.use(version + "/auth", authRoutes);
 };

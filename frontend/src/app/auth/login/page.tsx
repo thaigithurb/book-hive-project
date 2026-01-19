@@ -14,7 +14,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = async (e: any) => {
     e.preventDefault();
     setLoading(true);
 
@@ -25,8 +25,8 @@ export default function LoginPage() {
         { withCredentials: true }
       );
 
-      localStorage.setItem("accessToken", res.data.accessToken);
-      localStorage.setItem("user", JSON.stringify(res.data.user));
+      localStorage.setItem("accessToken_user", res.data.accessToken);
+      localStorage.setItem("client_user", JSON.stringify(res.data.user));
 
       toast.success("Đăng nhập thành công!");
       setTimeout(() => {

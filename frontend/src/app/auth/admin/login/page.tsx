@@ -36,8 +36,8 @@ export default function Login() {
           pending: "Đang đăng nhập...",
           success: {
             render({ data }) {
-              localStorage.setItem("accessToken", data?.data?.accessToken);
-              localStorage.setItem("user", JSON.stringify(data?.data?.user));
+              localStorage.setItem("accessToken_admin", data?.data?.accessToken);
+              localStorage.setItem("admin_user", JSON.stringify(data?.data?.user));
               setEmail("");
               setPassword("");
               router.push("/admin/dashboard");

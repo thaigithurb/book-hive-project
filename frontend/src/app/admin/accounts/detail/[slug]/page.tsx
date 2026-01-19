@@ -16,7 +16,7 @@ export default function AccountDetail() {
   const params = useParams();
   const router = useRouter();
   const slug = params.slug;
-  const accessToken = localStorage.getItem("accessToken");
+  const accessToken = localStorage.getItem("accessToken_admin");
 
   const [account, setAccount] = useState<any>(null);
   const [role, setRole] = useState<any>(null);

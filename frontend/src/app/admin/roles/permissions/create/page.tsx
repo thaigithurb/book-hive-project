@@ -19,7 +19,7 @@ export default function CreatePermission() {
   });
   const [loading, setLoading] = useState(false);
   const [allPermissions, setAllPermissions] = useState<Permissions[]>([]);
-  const accessToken = localStorage.getItem("accessToken");
+  const accessToken = localStorage.getItem("accessToken_admin");
 
   let groupNames: string[] = [];
 

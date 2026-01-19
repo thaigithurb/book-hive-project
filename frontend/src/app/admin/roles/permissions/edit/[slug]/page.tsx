@@ -22,7 +22,7 @@ export default function EditPermission() {
   const [loading, setLoading] = useState(false);
   const [allPermissions, setAllPermissions] = useState<any>({});
   let groupNames: string[] = [];
-  const accessToken = localStorage.getItem("accessToken");
+  const accessToken = localStorage.getItem("accessToken_admin");
 
   const params = useParams();
   const router = useRouter();

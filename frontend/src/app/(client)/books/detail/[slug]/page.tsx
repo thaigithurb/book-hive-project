@@ -19,12 +19,13 @@ export default function Detail() {
   const [rentQuantity, setRentQuantity] = useState<number | string>(1);
   const { addToCart } = useCart();
 
+
   useEffect(() => {
     const fetchBook = async () => {
       try {
         setLoading(true);
         const res = await axios.get(
-          `${API_URL}/api/v1/books/detail/${params.slug}`
+          `${API_URL}/api/v1/books/detail/${params.slug}`,
         );
         setBook(res.data.book);
       } catch (err) {

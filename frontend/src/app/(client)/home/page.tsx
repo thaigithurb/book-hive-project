@@ -18,6 +18,7 @@ export default function Home() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+
         const [featuredRes, newestRes] = await Promise.all([
           axios.get(`${API_URL}/api/v1/books/featured`),
           axios.get(`${API_URL}/api/v1/books/newest`),

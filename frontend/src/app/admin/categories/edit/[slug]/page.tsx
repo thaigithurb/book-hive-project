@@ -26,7 +26,7 @@ export default function EditCategory() {
   });
   const [loading, setLoading] = useState(false);
   const [isPageLoading, setIsPageLoading] = useState(true);
-  const accessToken = localStorage.getItem("accessToken");
+  const accessToken = localStorage.getItem("accessToken_admin");
 
   const handleChange = (e: any) => {
     const { name, value, type } = e.target;

@@ -19,7 +19,7 @@ export default function Create() {
     status: "active",
   });
   const [loading, setLoading] = useState(false);
-  const accessToken = localStorage.getItem("accessToken");
+  const accessToken = localStorage.getItem("accessToken_admin");
 
   const handleChange = (e: any) => {
     const { name, value, type } = e.target;

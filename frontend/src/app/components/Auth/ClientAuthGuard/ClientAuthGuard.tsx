@@ -17,7 +17,7 @@ export default function ClientAuthGuard({
 
   const setUserFromToken = (token: string) => {
     try {
-      const userStr = localStorage.getItem("user");
+      const userStr = localStorage.getItem("client_user");
       if (userStr) {
         setUser(JSON.parse(userStr));
         return;
@@ -34,7 +34,7 @@ export default function ClientAuthGuard({
 
   useEffect(() => {
     const checkAuth = async () => {
-      let accessToken = localStorage.getItem("accessToken");
+      let accessToken = localStorage.getItem("accessToken_user");
       if (!accessToken) {
         try {
           const res = await axios.post(
@@ -42,12 +42,11 @@ export default function ClientAuthGuard({
             {},
             { withCredentials: true }
           );
-          localStorage.setItem("accessToken", res.data.accessToken);
+          localStorage.setItem("accessToken_user", res.data.accessToken);
           setUserFromToken(res.data.accessToken);
           setCheckedAuth(true);
         } catch {
-          router.push("/auth/login");
-          setCheckedAuth(true);
+          window.location.href = `/auth/login`;
         }
       } else {
         try {
@@ -69,21 +68,18 @@ export default function ClientAuthGuard({
               {},
               { withCredentials: true }
             );
-            localStorage.setItem("accessToken", res.data.accessToken);
+            localStorage.setItem("accessToken_user", res.data.accessToken);
             setUserFromToken(res.data.accessToken);
             setCheckedAuth(true);
           } catch {
-            localStorage.removeItem("accessToken");
-            localStorage.removeItem("user");
-            router.push("/auth/login");
-            setCheckedAuth(true);
+            window.location.href = `/auth/login`;
           }
         }
       }
     };
 
     checkAuth();
-  }, [setUser, router]);
+  }, []);
 
   if (!checkedAuth) return null;
   return <>{children}</>;

@@ -38,7 +38,7 @@ export default function Categories() {
   const [sort, setSort] = useState<{ key: string; value: 1 | -1 } | null>(null);
   const [isFirstLoad, setIsFirstLoad] = useState(true);
   const limit = 8;
-  const accessToken = localStorage.getItem("accessToken");
+  const accessToken = localStorage.getItem("accessToken_admin");
   const [sortValue, setSortValue] = useState("");
   const sortOptions = [
     { value: "", label: "Sắp xếp" },

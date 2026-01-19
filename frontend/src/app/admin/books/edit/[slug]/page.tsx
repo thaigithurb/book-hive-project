@@ -36,7 +36,7 @@ export default function EditBook() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [categories, setCategories] = useState<any[]>([]);
   const fileInputRef = useRef<any>(null);
-  const accessToken = localStorage.getItem("accessToken");
+  const accessToken = localStorage.getItem("accessToken_admin");
 
   const handleMoneyChange = (e: any) => {
     let value = e.target.value.replace(/\D/g, "");

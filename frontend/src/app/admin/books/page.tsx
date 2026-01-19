@@ -41,7 +41,7 @@ export default function Books() {
   const [sort, setSort] = useState<{ key: string; value: 1 | -1 } | null>(null);
   const [isFirstLoad, setIsFirstLoad] = useState(true);
   const limit = 7;
-  const accessToken = localStorage.getItem("accessToken");
+  const accessToken = localStorage.getItem("accessToken_admin");
   const sortOptions = [
     { value: "", label: "Sắp xếp" },
     { value: "title_asc", label: "Tên A-Z" },

@@ -35,7 +35,7 @@ export default function EditBook() {
   const [roles, setRoles] = useState<Role[]>([]);
   const fileInputRef = useRef<any>(null);
 
-  const accessToken = localStorage.getItem("accessToken");
+  const accessToken = localStorage.getItem("accessToken_admin");
 
   useEffect(() => {
     axios

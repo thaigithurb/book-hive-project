@@ -16,7 +16,7 @@ export default function AdminAuthGuard({
 
   const setUserFromToken = (token: string) => {
     try {
-      const userStr = localStorage.getItem("user");
+      const userStr = localStorage.getItem("admin_user");
       if (userStr) {
         setUser(JSON.parse(userStr));
         return;
@@ -35,7 +35,7 @@ export default function AdminAuthGuard({
 
   useEffect(() => {
     const checkAuth = async () => {
-      let accessToken = localStorage.getItem("accessToken");
+      let accessToken = localStorage.getItem("accessToken_admin");
       if (!accessToken) {
         try {
           const res = await axios.post(
@@ -43,7 +43,7 @@ export default function AdminAuthGuard({
             {},
             { withCredentials: true }
           );
-          localStorage.setItem("accessToken", res.data.accessToken);
+          localStorage.setItem("accessToken_admin", res.data.accessToken);
           setUserFromToken(res.data.accessToken);
           setCheckedAuth(true);
         } catch {
@@ -69,7 +69,7 @@ export default function AdminAuthGuard({
               {},
               { withCredentials: true }
             );
-            localStorage.setItem("accessToken", res.data.accessToken);
+            localStorage.setItem("accessToken_admin", res.data.accessToken);
             setUserFromToken(res.data.accessToken);
             setCheckedAuth(true);
           } catch {

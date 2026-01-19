@@ -25,7 +25,7 @@ export default function CreateAccount() {
   const [preview, setPreview] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [roles, setRoles] = useState<Role[]>([]);
-  const accessToken = localStorage.getItem("accessToken");
+  const accessToken = localStorage.getItem("accessToken_admin");
 
   const fileInputRef = useRef<any>(null);
 

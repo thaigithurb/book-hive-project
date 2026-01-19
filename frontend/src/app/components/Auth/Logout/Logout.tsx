@@ -8,21 +8,28 @@ interface LogoutProps {
   url: string;
   href: string;
   className: string;
+  side: string;
 }
 
-export default function Logout({ url, href, className }: LogoutProps) {
+export default function Logout({ url, href, className, side }: LogoutProps) {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const handleLogout = async () => {
     try {
       await axios.post(url, {}, { withCredentials: true });
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("user");
+      
+      if (side === "admin") {
+        localStorage.removeItem("admin_user");
+        localStorage.removeItem("accessToken_admin");
+      } else {
+        localStorage.removeItem("admin_user");
+        localStorage.removeItem("accessToken_user");
+      }
       setShowLogoutModal(false);
       toast.success("Đăng xuất thành công!");
       setTimeout(() => {
         window.location.href = href;
-      }, 1000);
+      }, 1600);
     } catch (error: any) {
       toast.error("Đăng xuất thất bại!");
       setShowLogoutModal(false);

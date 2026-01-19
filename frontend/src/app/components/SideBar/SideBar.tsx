@@ -90,12 +90,20 @@ export const SideBar = () => {
             ))}
         </nav>
 
-        <Logout
-          url={`${API_URL}/api/v1/${ADMIN_PREFIX}/auth/logout`}
-          href={"/auth/login"}
-          className="flex w-[80%] items-center py-3 px-6 bg-[#F37B74] transition-colors duration-200 text-white rounded-[12px] text-[16px] font-semibold cursor-pointer hover:bg-[#F2656E]"
-        />
+        <div className="flex justify-center w-full">
+          <Logout
+            url={`${API_URL}/api/v1/${ADMIN_PREFIX}/auth/logout`}
+            href={"/auth/admin/login"}
+            className="flex w-[80%] items-center py-3 px-6 bg-[#F37B74] transition-colors duration-200 text-white rounded-[12px] text-[16px] font-semibold cursor-pointer hover:bg-[#F2656E]"
+            side="admin"
+          />
+        </div>
       </aside>
+      <ToastContainer
+        autoClose={1500}
+        hideProgressBar={true}
+        pauseOnHover={false}
+      />
     </>
   );
 };
