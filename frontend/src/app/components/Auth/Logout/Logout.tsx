@@ -9,20 +9,27 @@ interface LogoutProps {
   href: string;
   className: string;
   side: string;
+  icon: boolean;
 }
 
-export default function Logout({ url, href, className, side }: LogoutProps) {
+export default function Logout({
+  url,
+  href,
+  className,
+  side,
+  icon,
+}: LogoutProps) {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const handleLogout = async () => {
     try {
       await axios.post(url, {}, { withCredentials: true });
-      
+
       if (side === "admin") {
         localStorage.removeItem("admin_user");
         localStorage.removeItem("accessToken_admin");
       } else {
-        localStorage.removeItem("admin_user");
+        localStorage.removeItem("client_user");
         localStorage.removeItem("accessToken_user");
       }
       setShowLogoutModal(false);
@@ -56,7 +63,7 @@ export default function Logout({ url, href, className, side }: LogoutProps) {
         labelCancel="Hủy"
       />
       <button onClick={handleOpenLogoutModal} className={className}>
-        <MdLogout className="mr-2" />
+        {icon && <MdLogout className="mr-2" />}
         <span className="flex-1">Đăng xuất</span>
       </button>
     </>

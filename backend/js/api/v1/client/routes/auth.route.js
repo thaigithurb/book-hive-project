@@ -7,4 +7,5 @@ router.post("/register", controller.register);
 router.post("/loginWithPassword", controller.loginWithPassword);
 router.post("/refresh", controller.refresh);
 router.post("/verify", controller.verify);
+router.post("/logout", controller.logout);
 module.exports = router;

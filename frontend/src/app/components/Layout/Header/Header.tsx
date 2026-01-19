@@ -12,7 +12,7 @@ export const Header = () => {
   const { getTotalItems } = useCart();
   const [keyword, setKeyword] = useState("");
   const cartCount = getTotalItems();
-  const userString = localStorage.getItem("user");
+  const userString = localStorage.getItem("client_user");
   const user = userString ? JSON.parse(userString) : null;
 
   const handleSearch = (e: React.FormEvent) => {
@@ -116,7 +116,7 @@ export const Header = () => {
             </Link>
             <div className="relative group">
               <Link
-                href="/account"
+                href="/profile"
                 className="px-4 py-2 text-primary font-medium transition-all duration-300 hover:bg-blue-50 hover:text-blue-600 rounded-lg hover:shadow-[0_4px_12px_rgba(59,130,246,0.2)]"
               >
                 👤 {user?.fullName ?? "Tài khoản"}

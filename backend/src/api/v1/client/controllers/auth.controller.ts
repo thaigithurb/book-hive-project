@@ -221,4 +221,30 @@ module.exports.logout = async (req, res) => {
   }
 };
 
+// [POST] /api/v1/auth/logout
+module.exports.logout = async (req, res) => {
+  try {
+    const refreshToken = req.cookies.refreshToken_admin;
+
+    await User.findOneAndUpdate(
+      {
+        refreshToken: refreshToken,
+      },
+      { refreshToken: null, refreshTokenExpiresAt: null }
+    );
+
+    res.clearCookie("refreshToken_user", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    });
+
+    return res.status(200).json({ message: "Đăng xuất thành công!" });
+  } catch (error) {
+    return res.status(400).json({
+      message: "Đăng xuất thất bại",
+    });
+  }
+};
+
 export {};
