@@ -249,9 +249,9 @@ export default function CheckoutPage() {
               </h2>
 
               <div className="space-y-3">
-                {items.map((item) => (
+                {items.map((item, index) => (
                   <div
-                    key={item.id}
+                    key={index}
                     className="flex justify-between items-center pb-3 border-b border-gray-200"
                   >
                     <div className="flex-1">

@@ -61,17 +61,14 @@ module.exports.editItem = async (req, res) => {
     const { id } = req.params;
     const { quantity } = req.body;
 
-    console.log(id);
-    console.log(quantity);
-
     const cart = await Cart.findOne({ userId });
     if (!cart) return res.status(404).json({ error: "Cart không tồn tại" });
 
-    const item = cart.items.find((item) => item._id.toString() === id);
+    const item = cart.items.find((item) => item.bookId.toString() === id);
     if (!item) return res.status(404).json({ error: "Item không tồn tại" });
 
     if (quantity <= 0) {
-      cart.items = cart.items.filter((item) => item._id.toString() !== id);
+      cart.items = cart.items.filter((item) => item.bookId.toString() !== id);
     } else {
       item.quantity = quantity;
     }
@@ -92,7 +89,7 @@ module.exports.deleteItem = async (req, res) => {
     const cart = await Cart.findOne({ userId });
     if (!cart) return res.status(404).json({ error: "Cart không tồn tại" });
 
-    cart.items = cart.items.filter((item) => item._id.toString() !== id);
+    cart.items = cart.items.filter((item) => item.bookId.toString() !== id);
 
     await cart.save();
     res.json({ items: cart.items });

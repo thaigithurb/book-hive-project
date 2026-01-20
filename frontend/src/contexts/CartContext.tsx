@@ -5,13 +5,12 @@ import axios from "axios";
 import { toast } from "react-toastify";
 
 interface CartItem {
-  bookId: unknow;
+  bookId: string;
   title: string;
   price: number;
   quantity: number;
   image?: string;
   slug: string;
-  _id: any;
 }
 
 interface CartContextType {
@@ -113,8 +112,10 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
         toast.error("Xóa sản phẩm thất bại");
       }
     } else {
-      setItems((prevItems) => prevItems.filter((item) => item.id !== id));
+      setItems((prevItems) => prevItems.filter((item) => item.bookId !== id));
     }
+
+    console.log(items);
   };
 
   const updateQuantity = (id: string, quantity: number) => {
@@ -123,7 +124,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
       return;
     }
     setItems((prevItems) =>
-      prevItems.map((item) => (item._id === id ? { ...item, quantity } : item)),
+      prevItems.map((item) => (item.bookId === id ? { ...item, quantity } : item)),
     );
     if (isAuthenticated) {
       const accessToken = localStorage.getItem("accessToken_user");
