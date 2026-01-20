@@ -19,9 +19,26 @@ export default function OrderSuccessPage() {
       setIsLoaded(true);
       toast.success("✅ Đặt hàng thành công!");
 
+       const clearUserCart = async () => {
+        try {
+          const accessToken = localStorage.getItem("accessToken_user");
+          if (accessToken) {
+            await axios.delete(`http://localhost:3001/api/v1/cart/delete-all`, {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+              },
+            });
+          }
+        } catch (error) {
+          console.error("Lỗi xóa cart:", error);
+        }
+      };
+
+      clearUserCart();
+
       sessionStorage.removeItem("orderCode");
       sessionStorage.removeItem("paymentMethod");
-      localStorage.removeItem("cart");
+      localStorage.removeItem("guest_cart");
     } else {
       toast.error("Không tìm thấy thông tin đơn hàng!");
       router.replace("/home");

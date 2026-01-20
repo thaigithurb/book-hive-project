@@ -38,7 +38,7 @@ export default function PaymentPage() {
 
       try {
         const { data: res } = await axios.get(
-          `${API_URL}/api/v1/orders/detail/${orderCode}`
+          `${API_URL}/api/v1/orders/detail/${orderCode}`,
         );
         const order = res.order;
 
@@ -53,13 +53,29 @@ export default function PaymentPage() {
 
         if (order.status === "paid") {
           sessionStorage.removeItem("orderCode");
+          const clearUserCart = async () => {
+            try {
+              const accessToken = localStorage.getItem("accessToken_user");
+              if (accessToken) {
+                await axios.delete(`${API_URL}/api/v1/cart/delete-all`, {
+                  headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                  },
+                });
+              }
+            } catch (error) {
+              console.error(error);
+            }
+          };
+
+          await clearUserCart();
           clearCart();
           toast.success("✅ Đã thanh toán!");
           return router.replace("/order-success");
         }
 
         const timeRemaining = Math.floor(
-          (expired.getTime() - now.getTime()) / 1000
+          (expired.getTime() - now.getTime()) / 1000,
         );
         setData({
           orderCode: order.orderCode,
@@ -82,7 +98,7 @@ export default function PaymentPage() {
                 quantity: item.quantity,
                 price: item.price,
               })),
-            }
+            },
           );
 
           if (payment.data?.checkoutUrl) {
@@ -98,7 +114,7 @@ export default function PaymentPage() {
         checkStatusInterval.current = setInterval(async () => {
           try {
             const { data: checkRes } = await axios.get(
-              `${API_URL}/api/v1/orders/detail/${orderCode}`
+              `${API_URL}/api/v1/orders/detail/${orderCode}`,
             );
 
             if (checkRes.order.status === "paid") {
@@ -109,6 +125,22 @@ export default function PaymentPage() {
                 clearInterval(countdownInterval.current);
               }
               sessionStorage.removeItem("orderCode");
+              const clearUserCart = async () => {
+                try {
+                  const accessToken = localStorage.getItem("accessToken_user");
+                  if (accessToken) {
+                    await axios.delete(`${API_URL}/api/v1/cart/delete-all`, {
+                      headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                      },
+                    });
+                  }
+                } catch (error) {
+                  console.error(error);
+                }
+              };
+
+              await clearUserCart();
               clearCart();
               toast.success("✅ Thanh toán thành công!");
 
@@ -159,7 +191,6 @@ export default function PaymentPage() {
             .post(`${API_URL}/api/v1/payment/cancel/${prev.orderCode}`)
             .catch(console.error);
           sessionStorage.removeItem("orderCode");
-          clearCart();
           toast.warning("⏱️ Hết thời gian!");
           router.replace("/cart");
           return prev;
@@ -185,7 +216,7 @@ export default function PaymentPage() {
       if (!document.hidden && data.orderCode) {
         try {
           const { data: res } = await axios.get(
-            `${API_URL}/api/v1/orders/detail/${data.orderCode}`
+            `${API_URL}/api/v1/orders/detail/${data.orderCode}`,
           );
 
           if (res.order.status === "paid") {
@@ -196,6 +227,22 @@ export default function PaymentPage() {
               clearInterval(countdownInterval.current);
             }
             sessionStorage.removeItem("orderCode");
+            const clearUserCart = async () => {
+              try {
+                const accessToken = localStorage.getItem("accessToken_user");
+                if (accessToken) {
+                  await axios.delete(`${API_URL}/api/v1/cart/delete-all`, {
+                    headers: {
+                      Authorization: `Bearer ${accessToken}`,
+                    },
+                  });
+                }
+              } catch (error) {
+                console.error(error);
+              }
+            };
+
+            await clearUserCart();
             clearCart();
             toast.success("✅ Thanh toán thành công!");
 
