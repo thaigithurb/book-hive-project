@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 const jwt = require("jsonwebtoken");
 const Account = require("../api/v1/models/account.model");
-const User = require("../api/v1/models/account.model");
+const User = require("../api/v1/models/user.model");
 module.exports.adminAuth = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
     var _a, _b;
     const authHeader = req.headers.authorization;

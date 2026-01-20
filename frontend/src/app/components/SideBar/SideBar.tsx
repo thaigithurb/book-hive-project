@@ -96,6 +96,7 @@ export const SideBar = () => {
             href={"/auth/admin/login"}
             className="flex w-[80%] items-center py-3 px-6 bg-[#F37B74] transition-colors duration-200 text-white rounded-[12px] text-[16px] font-semibold cursor-pointer hover:bg-[#F2656E]"
             side="admin"
+            icon={true}
           />
         </div>
       </aside>

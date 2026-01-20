@@ -4,10 +4,13 @@ const bookRoutes = require("./book.route");
 const orderRoutes = require("./order.route");
 const paymentRoutes = require("./payment.route");
 const authRoutes = require("./auth.route");
+const cartRoutes = require("./cart.route");
+const { clientAuth } = require("../../../../middleware/auth.middleware");
 module.exports = (app) => {
     const version = "/api/v1";
     app.use(version + "/books", bookRoutes);
     app.use(version + "/orders", orderRoutes);
     app.use(version + "/payment", paymentRoutes);
+    app.use(version + "/cart", clientAuth, cartRoutes);
     app.use(version + "/auth", authRoutes);
 };
