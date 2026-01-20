@@ -9,14 +9,9 @@ import { Loading } from "@/app/components/Loading/Loading";
 
 export default function CartPage() {
   const router = useRouter();
-  const { items, removeFromCart, updateQuantity } = useCart();
-  const [isLoaded, setIsLoaded] = useState(false);
+  const { items, removeFromCart, updateQuantity, isLoading } = useCart();
 
-  useEffect(() => {
-    setIsLoaded(true);
-  }, []);
-
-  if (!isLoaded) {
+  if (isLoading) {
     return <Loading fullScreen={true} size="lg" text="Đang tải giỏ hàng..." />;
   }
 
@@ -46,10 +41,8 @@ export default function CartPage() {
 
   const totalPrice = items.reduce(
     (sum, item) => sum + item.price * item.quantity,
-    0
+    0,
   );
-
-  console.log(items);
 
   const handleCheckout = () => {
     if (items.length === 0) {
@@ -67,12 +60,14 @@ export default function CartPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-4">
             {items.map((item, index) => (
-              <Link
+              <div
                 key={index}
-                href={`/books/detail/${item.slug}`}
-                className="bg-white rounded-lg shadow p-6 flex gap-6 items-start hover:shadow-lg transition-shadow duration-200 block"
+                className="bg-white rounded-lg shadow p-6 flex gap-6 items-start hover:shadow-lg transition-shadow duration-200"
               >
-                <div className="flex-shrink-0 w-24 h-32 bg-gray-100 rounded-lg overflow-hidden">
+                <Link
+                  href={`/books/detail/${item.slug}`}
+                  className="flex-shrink-0 w-24 h-32 bg-gray-100 rounded-lg overflow-hidden hover:opacity-80 transition-opacity duration-200"
+                >
                   {item.image ? (
                     <img
                       src={item.image}
@@ -84,21 +79,40 @@ export default function CartPage() {
                       📚
                     </div>
                   )}
-                </div>
+                </Link>
 
-                <div className="flex-1">
+                <Link
+                  href={`/books/detail/${item.slug}`}
+                  className="flex-1 hover:opacity-80 transition-opacity duration-200"
+                >
                   <h3 className="text-lg font-bold text-slate-800 mb-2">
                     {item.title}
                   </h3>
                   <p className="text-primary font-bold text-xl mb-4">
                     {item.price.toLocaleString("vi-VN")} đ
                   </p>
+                </Link>
 
-                  <div className="flex items-center gap-3 mb-4">
+                <div className="flex flex-col gap-3 items-end">
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      removeFromCart(item._id);
+                      toast.info("Đã xóa khỏi giỏ hàng");
+                    }}
+                    className="flex-shrink-0 cursor-pointer px-4 py-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg transition-colors duration-200 font-semibold"
+                  >
+                    🗑️ Xóa
+                  </button>
+
+                  <div className="flex items-center gap-3">
                     <button
                       onClick={(e) => {
                         e.preventDefault();
-                        updateQuantity(item.id, Math.max(1, item.quantity - 1));
+                        updateQuantity(
+                          item._id,
+                          Math.max(1, item.quantity - 1),
+                        );
                       }}
                       className="w-8 h-8 flex items-center justify-center bg-gray-200 hover:bg-gray-300 rounded-md transition-colors duration-200 font-bold text-slate-700"
                     >
@@ -111,7 +125,7 @@ export default function CartPage() {
                       onChange={(e) => {
                         const value = parseInt(e.target.value) || 1;
                         if (value > 0) {
-                          updateQuantity(item.id, value);
+                          updateQuantity(item._id, value);
                         }
                       }}
                       className="w-12 h-8 text-center border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
@@ -119,30 +133,20 @@ export default function CartPage() {
                     <button
                       onClick={(e) => {
                         e.preventDefault();
-                        updateQuantity(item.id, item.quantity + 1);
+                        updateQuantity(item._id, item.quantity + 1);
                       }}
                       className="w-8 h-8 flex items-center justify-center bg-gray-200 hover:bg-gray-300 rounded-md transition-colors duration-200 font-bold text-slate-700"
                     >
                       +
                     </button>
                   </div>
-                  <p className="text-sm text-slate-500">
+
+                  <p className="text-sm text-slate-500 whitespace-nowrap">
                     Tổng: {(item.price * item.quantity).toLocaleString("vi-VN")}{" "}
                     đ
                   </p>
                 </div>
-
-                <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    removeFromCart(item.id);
-                    toast.info("Đã xóa khỏi giỏ hàng");
-                  }}
-                  className="flex-shrink-0 px-4 py-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg transition-colors duration-200 font-semibold"
-                >
-                  🗑️ Xóa
-                </button>
-              </Link>
+              </div>
             ))}
           </div>
 

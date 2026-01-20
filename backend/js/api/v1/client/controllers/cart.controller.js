@@ -28,18 +28,18 @@ module.exports.index = (req, res) => __awaiter(this, void 0, void 0, function* (
 module.exports.add = (req, res) => __awaiter(this, void 0, void 0, function* () {
     try {
         const userId = req.user.id;
-        const { id, quantity, title, price, image, slug } = req.body;
+        const { bookId, quantity, title, price, image, slug } = req.body;
         let cart = yield Cart.findOne({ userId });
         if (!cart) {
             cart = new Cart({ userId, items: [] });
         }
-        const existing = cart.items.find((item) => item.bookId.toString() === id);
+        const existing = cart.items.find((item) => item.bookId.toString() === bookId);
         if (existing) {
             existing.quantity += quantity;
         }
         else {
             cart.items.push({
-                bookId: id,
+                bookId,
                 quantity,
                 title,
                 price,
@@ -54,19 +54,21 @@ module.exports.add = (req, res) => __awaiter(this, void 0, void 0, function* () 
         res.status(500).json({ error: "Thêm vào cart thất bại" });
     }
 });
-module.exports.update = (req, res) => __awaiter(this, void 0, void 0, function* () {
+module.exports.editItem = (req, res) => __awaiter(this, void 0, void 0, function* () {
     try {
         const userId = req.user.id;
         const { id } = req.params;
         const { quantity } = req.body;
+        console.log(id);
+        console.log(quantity);
         const cart = yield Cart.findOne({ userId });
         if (!cart)
             return res.status(404).json({ error: "Cart không tồn tại" });
-        const item = cart.items.find((item) => item.bookId.toString() === id);
+        const item = cart.items.find((item) => item._id.toString() === id);
         if (!item)
             return res.status(404).json({ error: "Item không tồn tại" });
         if (quantity <= 0) {
-            cart.items = cart.items.filter((item) => item.bookId.toString() !== id);
+            cart.items = cart.items.filter((item) => item._id.toString() !== id);
         }
         else {
             item.quantity = quantity;
@@ -85,7 +87,7 @@ module.exports.deleteItem = (req, res) => __awaiter(this, void 0, void 0, functi
         const cart = yield Cart.findOne({ userId });
         if (!cart)
             return res.status(404).json({ error: "Cart không tồn tại" });
-        cart.items = cart.items.filter((item) => item.bookId.toString() !== id);
+        cart.items = cart.items.filter((item) => item._id.toString() !== id);
         yield cart.save();
         res.json({ items: cart.items });
     }

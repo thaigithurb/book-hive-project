@@ -51,7 +51,7 @@ export default function Detail() {
     if (!book) return;
 
     addToCart({
-      id: book.id?.toString() || book._id?.toString() || String(Math.random()),
+      bookId: book._id,
       title: book.title,
       price: book.priceBuy,
       quantity: 1,

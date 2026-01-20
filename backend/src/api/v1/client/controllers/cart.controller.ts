@@ -25,20 +25,20 @@ module.exports.index = async (req, res) => {
 module.exports.add = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { id, quantity, title, price, image, slug } = req.body;
+    const { bookId, quantity, title, price, image, slug } = req.body;
 
     let cart = await Cart.findOne({ userId });
     if (!cart) {
       cart = new Cart({ userId, items: [] });
     }
 
-    const existing = cart.items.find((item) => item.bookId.toString() === id);
+    const existing = cart.items.find((item) => item.bookId.toString() === bookId);
 
     if (existing) {
       existing.quantity += quantity;
     } else {
       cart.items.push({
-        bookId: id,
+        bookId,
         quantity,
         title,
         price,
@@ -54,21 +54,24 @@ module.exports.add = async (req, res) => {
   }
 };
 
-// PATCH /api/v1/cart/:id - Sửa số lượng item
-module.exports.update = async (req, res) => {
+// [PATCH] /api/v1/cart/edit/:id 
+module.exports.editItem = async (req, res) => {
   try {
     const userId = req.user.id;
     const { id } = req.params;
     const { quantity } = req.body;
 
+    console.log(id);
+    console.log(quantity);
+
     const cart = await Cart.findOne({ userId });
     if (!cart) return res.status(404).json({ error: "Cart không tồn tại" });
 
-    const item = cart.items.find((item) => item.bookId.toString() === id);
+    const item = cart.items.find((item) => item._id.toString() === id);
     if (!item) return res.status(404).json({ error: "Item không tồn tại" });
 
     if (quantity <= 0) {
-      cart.items = cart.items.filter((item) => item.bookId.toString() !== id);
+      cart.items = cart.items.filter((item) => item._id.toString() !== id);
     } else {
       item.quantity = quantity;
     }
@@ -89,7 +92,7 @@ module.exports.deleteItem = async (req, res) => {
     const cart = await Cart.findOne({ userId });
     if (!cart) return res.status(404).json({ error: "Cart không tồn tại" });
 
-    cart.items = cart.items.filter((item) => item.bookId.toString() !== id);
+    cart.items = cart.items.filter((item) => item._id.toString() !== id);
 
     await cart.save();
     res.json({ items: cart.items });

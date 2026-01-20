@@ -5,12 +5,13 @@ import axios from "axios";
 import { toast } from "react-toastify";
 
 interface CartItem {
-  id: string;
+  bookId: unknow;
   title: string;
   price: number;
   quantity: number;
   image?: string;
   slug: string;
+  _id: any;
 }
 
 interface CartContextType {
@@ -21,6 +22,7 @@ interface CartContextType {
   clearCart: () => void;
   getTotalItems: () => number;
   isAuthenticated: boolean;
+  isLoading: boolean;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -28,6 +30,7 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   const [items, setItems] = useState<CartItem[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
@@ -35,6 +38,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     setIsAuthenticated(!!accessToken);
 
     if (accessToken) {
+      setIsLoading(true);
       axios
         .get("http://localhost:3001/api/v1/cart", {
           headers: {
@@ -44,10 +48,12 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
         .then((res) => {
           setItems(res.data.items || []);
           setIsLoaded(true);
+          setIsLoading(false);
         })
         .catch(() => {
           setItems([]);
           setIsLoaded(true);
+          setIsLoading(false);
         });
     } else {
       const savedCart = localStorage.getItem("guest_cart");
@@ -55,6 +61,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
         setItems(JSON.parse(savedCart));
       }
       setIsLoaded(true);
+      setIsLoading(false);
     }
   }, []);
 
@@ -67,12 +74,14 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
 
   const addToCart = (newItem: CartItem) => {
     setItems((prevItems) => {
-      const existingItem = prevItems.find((item) => item.id === newItem.id);
+      const existingItem = prevItems.find(
+        (item) => item.bookId === newItem.bookId,
+      );
       if (existingItem) {
         return prevItems.map((item) =>
-          item.id === newItem.id
+          item.bookId === newItem.bookId
             ? { ...item, quantity: item.quantity + newItem.quantity }
-            : item
+            : item,
         );
       }
       return [...prevItems, newItem];
@@ -97,7 +106,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
             headers: {
               Authorization: `Bearer ${accessToken}`,
             },
-          }
+          },
         );
         setItems(res.data.items || []);
       } catch (error) {
@@ -114,7 +123,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
       return;
     }
     setItems((prevItems) =>
-      prevItems.map((item) => (item.id === id ? { ...item, quantity } : item))
+      prevItems.map((item) => (item._id === id ? { ...item, quantity } : item)),
     );
     if (isAuthenticated) {
       const accessToken = localStorage.getItem("accessToken_user");
@@ -125,7 +134,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },
-        }
+        },
       );
     }
   };
@@ -156,6 +165,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
         clearCart,
         getTotalItems,
         isAuthenticated,
+        isLoading,
       }}
     >
       {children}
