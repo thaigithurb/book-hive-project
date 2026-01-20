@@ -49,6 +49,8 @@ export default function CartPage() {
     0
   );
 
+  console.log(items);
+
   const handleCheckout = () => {
     if (items.length === 0) {
       toast.error("Giỏ hàng trống!");
@@ -64,9 +66,9 @@ export default function CartPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-4">
-            {items.map((item) => (
+            {items.map((item, index) => (
               <Link
-                key={item.id}
+                key={index}
                 href={`/books/detail/${item.slug}`}
                 className="bg-white rounded-lg shadow p-6 flex gap-6 items-start hover:shadow-lg transition-shadow duration-200 block"
               >
