@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 import Link from "next/link";
 import { toast, ToastContainer } from "react-toastify";
+import { GoogleLogin } from "@react-oauth/google";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -20,9 +21,9 @@ export default function LoginPage() {
 
     try {
       const res = await axios.post(
-        `${API_URL}/api/v1/auth/loginWithPassword`,
+        `http://localhost:3001/api/v1/auth/loginWithPassword`,
         { email, password },
-        { withCredentials: true }
+        { withCredentials: true },
       );
 
       localStorage.setItem("accessToken_user", res.data.accessToken);
@@ -33,12 +34,45 @@ export default function LoginPage() {
         router.push("/home");
       }, 1600);
     } catch (err: any) {
-      toast.error(err.response?.data?.message || "Đăng nhập thất bại", {
+      toast.error(err.response?.data?.message, {
+        autoClose: 1600,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse: any) => {
+    try {
+      setLoading(true);
+      const token = credentialResponse.credential;
+
+      const res = await axios.post(
+        `http://localhost:3001/api/v1/auth/loginWithGoogle`,
+        { token },
+        { withCredentials: true },
+      );
+
+      localStorage.setItem("accessToken_user", res.data.accessToken);
+      localStorage.setItem("client_user", JSON.stringify(res.data.user));
+
+      toast.success("Đăng nhập với Google thành công!");
+      setTimeout(() => {
+        router.push("/home");
+      }, 1600);
+    } catch (err: any) {
+      toast.error(err.response?.data?.message, {
         autoClose: 2000,
       });
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleGoogleError = () => {
+    toast.error("Đăng nhập Google thất bại", {
+      autoClose: 2000,
+    });
   };
 
   return (
@@ -142,13 +176,10 @@ export default function LoginPage() {
                 </div>
               </div>
 
-              <button
-                type="button"
-                className="w-full border-2 border-gray-300 hover:border-gray-400 text-gray-700 font-semibold py-2.5 rounded-lg transition flex items-center justify-center gap-2"
-              >
-                <span>🔵</span>
-                Đăng nhập với Google
-              </button>
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={handleGoogleError}
+              />
 
               <button
                 type="button"

@@ -1,10 +1,12 @@
 import slugify from "slugify";
 
+const { OAuth2Client } = require("google-auth-library");
 const generate = require("../../../../helpers/generate");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-
 const User = require("../../models/user.model");
+
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // /api/v1/register
 exports.register = async (req, res) => {
@@ -109,7 +111,7 @@ exports.loginWithPassword = async (req, res) => {
     const accessToken = jwt.sign(
       { id: user._id, email: user.email },
       process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN }
+      { expiresIn: process.env.JWT_EXPIRES_IN },
     );
 
     await user.save();
@@ -156,7 +158,7 @@ module.exports.refresh = async (req, res) => {
     const accessToken = jwt.sign(
       { id: user._id, email: user.email },
       process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN }
+      { expiresIn: process.env.JWT_EXPIRES_IN },
     );
 
     return res.status(200).json({
@@ -204,7 +206,7 @@ module.exports.logout = async (req, res) => {
       {
         refreshToken: refreshToken,
       },
-      { refreshToken: null, refreshTokenExpiresAt: null }
+      { refreshToken: null, refreshTokenExpiresAt: null },
     );
 
     res.clearCookie("refreshToken_user", {
@@ -230,7 +232,7 @@ module.exports.logout = async (req, res) => {
       {
         refreshToken: refreshToken,
       },
-      { refreshToken: null, refreshTokenExpiresAt: null }
+      { refreshToken: null, refreshTokenExpiresAt: null },
     );
 
     res.clearCookie("refreshToken_user", {
@@ -243,6 +245,104 @@ module.exports.logout = async (req, res) => {
   } catch (error) {
     return res.status(400).json({
       message: "Đăng xuất thất bại",
+    });
+  }
+};
+
+// [POST] /api/v1/auth/google
+module.exports.loginWithGoogle = async (req, res) => {
+  try {
+    const { token } = req.body;
+
+    if (!token) {
+      return res.status(400).json({
+        success: false,
+        message: "Token Google không được cung cấp",
+      });
+    }
+
+    const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+    const googleId = payload.sub;
+    const googleEmail = payload.email;
+    const fullName = payload.name;
+
+    let user = await User.findOne({ googleId, deleted: false });
+
+    if (!user) {
+      user = await User.findOne({ email: googleEmail, deleted: false });
+
+      if (!user) {
+        const slug = slugify(fullName, {
+          lower: true,
+          strict: true,
+          locale: "vi",
+        });
+
+        user = new User({
+          fullName,
+          email: googleEmail,
+          googleId,
+          googleEmail,
+          slug,
+          loginMethod: "google",
+          status: "active",
+          isEmailVerified: true,
+        });
+
+        await user.save();
+      } else {
+        user.googleId = googleId;
+        user.googleEmail = googleEmail;
+        user.loginMethod = "google";
+        user.isEmailVerified = true;
+        await user.save();
+      }
+    }
+
+    // Tạo refreshToken
+    const refreshToken = generate.generateRefreshToken();
+    user.refreshToken = refreshToken;
+    user.refreshTokenExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+
+    // Tạo accessToken
+    const accessToken = jwt.sign(
+      { id: user._id, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRES_IN },
+    );
+
+    res.cookie("refreshToken_user", refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "strict",
+      expires: user.refreshTokenExpiresAt,
+    });
+
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Đăng nhập với Google thành công!",
+      accessToken,
+      refreshToken,
+      user: {
+        id: user._id,
+        email: user.email,
+        fullName: user.fullName,
+        loginMethod: user.loginMethod,
+      },
+    });
+  } catch (error) {
+    console.error("Google auth error:", error);
+    return res.status(400).json({
+      success: false,
+      message: "Đăng nhập Google thất bại",
+      error: error.message,
     });
   }
 };

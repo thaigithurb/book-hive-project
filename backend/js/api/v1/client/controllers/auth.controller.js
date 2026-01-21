@@ -10,10 +10,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const slugify_1 = require("slugify");
+const { OAuth2Client } = require("google-auth-library");
 const generate = require("../../../../helpers/generate");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../../models/user.model");
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 exports.register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { fullName, email, password, confirmPassword } = req.body;
@@ -195,6 +197,85 @@ module.exports.logout = (req, res) => __awaiter(void 0, void 0, void 0, function
     catch (error) {
         return res.status(400).json({
             message: "Đăng xuất thất bại",
+        });
+    }
+});
+module.exports.loginWithGoogle = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { token } = req.body;
+        if (!token) {
+            return res.status(400).json({
+                success: false,
+                message: "Token Google không được cung cấp",
+            });
+        }
+        const ticket = yield client.verifyIdToken({
+            idToken: token,
+            audience: process.env.GOOGLE_CLIENT_ID,
+        });
+        const payload = ticket.getPayload();
+        const googleId = payload.sub;
+        const googleEmail = payload.email;
+        const fullName = payload.name;
+        let user = yield User.findOne({ googleId, deleted: false });
+        if (!user) {
+            user = yield User.findOne({ email: googleEmail, deleted: false });
+            if (!user) {
+                const slug = (0, slugify_1.default)(fullName, {
+                    lower: true,
+                    strict: true,
+                    locale: "vi",
+                });
+                user = new User({
+                    fullName,
+                    email: googleEmail,
+                    googleId,
+                    googleEmail,
+                    slug,
+                    loginMethod: "google",
+                    status: "active",
+                    isEmailVerified: true,
+                });
+                yield user.save();
+            }
+            else {
+                user.googleId = googleId;
+                user.googleEmail = googleEmail;
+                user.loginMethod = "google";
+                user.isEmailVerified = true;
+                yield user.save();
+            }
+        }
+        const refreshToken = generate.generateRefreshToken();
+        user.refreshToken = refreshToken;
+        user.refreshTokenExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+        const accessToken = jwt.sign({ id: user._id, email: user.email }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });
+        res.cookie("refreshToken_user", refreshToken, {
+            httpOnly: true,
+            secure: true,
+            sameSite: "strict",
+            expires: user.refreshTokenExpiresAt,
+        });
+        yield user.save();
+        return res.status(200).json({
+            success: true,
+            message: "Đăng nhập với Google thành công!",
+            accessToken,
+            refreshToken,
+            user: {
+                id: user._id,
+                email: user.email,
+                fullName: user.fullName,
+                loginMethod: user.loginMethod,
+            },
+        });
+    }
+    catch (error) {
+        console.error("Google auth error:", error);
+        return res.status(400).json({
+            success: false,
+            message: "Đăng nhập Google thất bại",
+            error: error.message,
         });
     }
 });

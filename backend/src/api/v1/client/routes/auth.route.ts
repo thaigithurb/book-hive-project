@@ -13,6 +13,8 @@ router.post("/verify", controller.verify);
 
 router.post("/logout", controller.logout);
 
+router.post("/loginWithGoogle", controller.loginWithGoogle);
+
 module.exports = router;
 
 export {};
