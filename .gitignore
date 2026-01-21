@@ -402,3 +402,7 @@ FodyWeavers.xsd
 
 .env
 backend/.env
+frontend/.env
+.env.local
+backend/.env.local
+frontend/.env.local
