@@ -21,7 +21,7 @@ export default function LoginPage() {
 
     try {
       const res = await axios.post(
-        `http://localhost:3001/api/v1/auth/loginWithPassword`,
+        `${API_URL}/api/v1/auth/loginWithPassword`,
         { email, password },
         { withCredentials: true },
       );
@@ -48,7 +48,7 @@ export default function LoginPage() {
       const token = credentialResponse.credential;
 
       const res = await axios.post(
-        `http://localhost:3001/api/v1/auth/loginWithGoogle`,
+        `${API_URL}/api/v1/auth/loginWithGoogle`,
         { token },
         { withCredentials: true },
       );

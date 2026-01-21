@@ -4,6 +4,9 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { toast, ToastContainer } from "react-toastify";
+import axios from "axios";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function OrderSuccessPage() {
   const searchParams = useSearchParams();
@@ -23,7 +26,7 @@ export default function OrderSuccessPage() {
         try {
           const accessToken = localStorage.getItem("accessToken_user");
           if (accessToken) {
-            await axios.delete(`http://localhost:3001/api/v1/cart/delete-all`, {
+            await axios.delete(`${API_URL}/api/v1/cart/delete-all`, {
               headers: {
                 Authorization: `Bearer ${accessToken}`,
               },
@@ -81,7 +84,7 @@ export default function OrderSuccessPage() {
                     navigator.clipboard.writeText(orderCode.toString());
                     toast.success("Đã sao chép mã đơn hàng!");
                   }}
-                  className="text-green-700 hover:text-green-900 text-2xl transition-colors"
+                  className="text-green-700 cursor-pointer hover:text-green-900 text-2xl transition-colors"
                   title="Sao chép"
                 >
                   📋

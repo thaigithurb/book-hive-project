@@ -39,7 +39,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     if (accessToken) {
       setIsLoading(true);
       axios
-        .get("http://localhost:3001/api/v1/cart", {
+        .get("${API_URL}/api/v1/cart", {
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },
@@ -87,7 +87,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     });
     if (isAuthenticated) {
       const accessToken = localStorage.getItem("accessToken_user");
-      axios.post("http://localhost:3001/api/v1/cart/add-item", newItem, {
+      axios.post("${API_URL}/api/v1/cart/add-item", newItem, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
@@ -100,7 +100,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
       const accessToken = localStorage.getItem("accessToken_user");
       try {
         const res = await axios.delete(
-          `http://localhost:3001/api/v1/cart/delete/${id}`,
+          `${API_URL}/api/v1/cart/delete/${id}`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,
@@ -129,7 +129,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     if (isAuthenticated) {
       const accessToken = localStorage.getItem("accessToken_user");
       axios.patch(
-        `http://localhost:3001/api/v1/cart/edit/${id}`,
+        `${API_URL}/api/v1/cart/edit/${id}`,
         { quantity },
         {
           headers: {
@@ -144,7 +144,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     setItems([]);
     if (isAuthenticated) {
       const accessToken = localStorage.getItem("accessToken_user");
-      axios.delete("http://localhost:3001/api/v1/cart/delete-all", {
+      axios.delete("${API_URL}/api/v1/cart/delete-all", {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },

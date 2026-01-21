@@ -109,14 +109,14 @@ export default function ProfilePage() {
             <div className="flex gap-4 pt-6 border-t">
               <button
                 onClick={() => router.push("/profile/edit")}
-                className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition"
+                className="flex-1 bg-blue-600 text-white cursor-pointer py-2 px-4 rounded-lg hover:bg-blue-700 transition"
               >
                 Chỉnh sửa
               </button>
               <Logout
-                url={`http://localhost:3001/api/v1/auth/logout`}
+                url={`${API_URL}/api/v1/auth/logout`}
                 href={"/home"}
-                className="flex-1 bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition"
+                className="flex-1 cursor-pointer bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition"
                 side="client"
                 icon={false}
               />

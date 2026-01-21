@@ -15,7 +15,7 @@ export default function CheckoutPage() {
   const { items } = useCart();
   const [isLoaded, setIsLoaded] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<"transfer" | "cod">(
-    "transfer"
+    "transfer",
   );
   const [userInfo, setUserInfo] = useState({
     fullName: "",
@@ -24,6 +24,7 @@ export default function CheckoutPage() {
     address: "",
   });
   const [isProcessing, setIsProcessing] = useState(false);
+  const { clearCart } = useCart();
 
   useEffect(() => {
     setIsLoaded(true);
@@ -55,7 +56,7 @@ export default function CheckoutPage() {
 
   const totalAmount = items.reduce(
     (sum, item) => sum + item.price * item.quantity,
-    0
+    0,
   );
 
   const handleContinue = async () => {
@@ -81,17 +82,41 @@ export default function CheckoutPage() {
 
       const response = await axios.post(
         `${API_URL}/api/v1/orders/create`,
-        orderData
+        orderData,
       );
 
       const { orderCode } = response.data;
 
-      sessionStorage.setItem("orderCode", orderCode);
-      sessionStorage.setItem("paymentMethod", paymentMethod);
+      if (paymentMethod === "cod") {
+        try {
+          const accessToken = localStorage.getItem("accessToken_user");
+          if (accessToken) {
+            await axios.delete(`${API_URL}/api/v1/cart/delete-all`, {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+              },
+            });
+          }
+        } catch (error) {
+          console.error("Lỗi xóa cart:", error);
+        }
 
-      toast.success("Đơn hàng đã được tạo!");
+        clearCart();
+        toast.success("✅ Đơn hàng đã được tạo!");
 
-      router.push("/cart/checkout/payment");
+        setTimeout(() => {
+          router.push(`/order-success?orderCode=${orderCode}`);
+        }, 1500);
+      } else {
+        sessionStorage.setItem("orderCode", orderCode);
+        sessionStorage.setItem("paymentMethod", paymentMethod);
+
+        toast.success("Đơn hàng đã được tạo!");
+
+        setTimeout(() => {
+          router.push("/cart/checkout/payment");
+        }, 1500);
+      }
     } catch (err) {
       toast.error("Lỗi tạo đơn hàng!");
       console.error(err);
