@@ -60,16 +60,6 @@ export default function CheckoutPage() {
   );
 
   const handleContinue = async () => {
-    if (
-      !userInfo.fullName ||
-      !userInfo.email ||
-      !userInfo.phone ||
-      !userInfo.address
-    ) {
-      toast.error("Vui lòng điền đầy đủ thông tin!");
-      return;
-    }
-
     setIsProcessing(true);
 
     try {
@@ -117,9 +107,9 @@ export default function CheckoutPage() {
           router.push("/cart/checkout/payment");
         }, 1500);
       }
-    } catch (err) {
-      toast.error("Lỗi tạo đơn hàng!");
-      console.error(err);
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || "Lỗi tạo đơn hàng!";
+      toast.error(errorMessage);
     } finally {
       setIsProcessing(false);
     }

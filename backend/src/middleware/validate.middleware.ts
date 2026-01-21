@@ -130,3 +130,59 @@ module.exports.validateLogin = (req, res, next) => {
 
   next();
 };
+
+module.exports.validateCheckout = (req, res, next) => {
+  const { userInfo } = req.body;
+
+  if (!userInfo || typeof userInfo !== "object") {
+    return res.status(400).json({ message: "Thông tin người dùng không hợp lệ!" });
+  }
+
+  const { fullName, email, phone, address } = userInfo;
+
+  if (!fullName || typeof fullName !== "string" || fullName.trim().length < 3) {
+    return res.status(400).json({ message: "Họ tên phải có ít nhất 3 ký tự!" });
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!email || !emailRegex.test(email)) {
+    return res.status(400).json({ message: "Email không hợp lệ!" });
+  }
+
+  if (!phone || !/^\d{10,11}$/.test(phone.replace(/\D/g, ""))) {
+    return res.status(400).json({ message: "Số điện thoại phải có 10-11 chữ số!" });
+  }
+
+  if (!address || typeof address !== "string" || address.trim().length < 5) {
+    return res.status(400).json({ message: "Địa chỉ phải có ít nhất 5 ký tự!" });
+  }
+
+  next();
+};
+
+module.exports.validateRegister = (req, res, next) => {
+  const { fullName, email, password, confirmPassword } = req.body;
+
+  if (!fullName || typeof fullName !== "string" || fullName.trim().length < 3) {
+    return res.status(400).json({ message: "Họ tên phải có ít nhất 3 ký tự!" });
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!email || !emailRegex.test(email)) {
+    return res.status(400).json({ message: "Email không hợp lệ!" });
+  }
+
+  if (!password || typeof password !== "string" || password.length < 6) {
+    return res
+      .status(400)
+      .json({ message: "Mật khẩu phải có ít nhất 6 ký tự!" });
+  }
+
+  if (!confirmPassword || confirmPassword !== password) {
+    return res
+      .status(400)
+      .json({ message: "Mật khẩu xác nhận không trùng khớp!" });
+  }
+
+  next();
+};
