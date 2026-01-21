@@ -304,14 +304,12 @@ module.exports.create = async (req, res) => {
     if (!position) {
       position = maxPosition + 1;
     } else {
-      // Nếu nhập vị trí hợp lệ, dồn các sách phía sau lên 1
       await Book.updateMany(
         { position: { $gte: position } },
         { $inc: { position: 1 } }
       );
     }
 
-    // tạo sách và lưu sách mới
     const newBook = new Book({
       ...newBookData,
       position,

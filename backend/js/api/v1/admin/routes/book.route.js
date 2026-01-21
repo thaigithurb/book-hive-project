@@ -4,7 +4,7 @@ const express = require("express");
 const router = express.Router();
 const controller = require("../controllers/book.controller");
 const uploadImageHelper = require("../../../../helpers/uploadImage");
-const validateBook = require("../../../../middleware/validateBook.middleware");
+const { validateBook } = require("../../../../middleware/validate.middleware");
 router.get("/", controller.index);
 router.patch("/change-status/:status/:id", controller.changeStatus);
 router.patch("/change-multi", controller.changeMulti);

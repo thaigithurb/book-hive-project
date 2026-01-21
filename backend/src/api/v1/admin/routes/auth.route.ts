@@ -2,8 +2,9 @@ const express = require("express");
 const router = express.Router();
 
 const controller = require("../controllers/auth.controller");
+const { validateLogin } = require("../../../../middleware/validate.middleware")
 
-router.post("/login", controller.login);
+router.post("/login", validateLogin, controller.login);
 
 router.post("/refresh", controller.refresh);
 

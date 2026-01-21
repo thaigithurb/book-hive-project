@@ -87,7 +87,6 @@ export default function EditBook() {
           }
         );
         const account = res.data.account;
-        console.log(account);
         setForm({
           fullName: account.fullName,
           email: account.email,

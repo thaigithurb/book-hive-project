@@ -74,7 +74,7 @@ module.exports.changeStatus = async (req, res) => {
       {
         status: status,
         updatedBy: req.user.id,
-      }
+      },
     );
 
     if (!category) {
@@ -102,7 +102,7 @@ module.exports.changeMulti = async (req, res) => {
       case "active":
         await Category.updateMany(
           { _id: { $in: ids } },
-          { status: "active", updatedBy: req.user.id }
+          { status: "active", updatedBy: req.user.id },
         );
         return res.status(200).json({
           message: `Cập nhật trạng thái thành công ${ids.length} thể loại!`,
@@ -110,7 +110,7 @@ module.exports.changeMulti = async (req, res) => {
       case "inactive":
         await Category.updateMany(
           { _id: { $in: ids } },
-          { status: "inactive", updatedBy: req.user.id }
+          { status: "inactive", updatedBy: req.user.id },
         );
         return res.status(200).json({
           message: `Cập nhật trạng thái thành công ${ids.length} thể loại!`,
@@ -118,7 +118,7 @@ module.exports.changeMulti = async (req, res) => {
       case "delete_all":
         await Category.updateMany(
           { _id: { $in: ids } },
-          { deleted: true, deletedAt: new Date(), deletedBy: req.user.id }
+          { deleted: true, deletedAt: new Date(), deletedBy: req.user.id },
         );
 
         // Sau khi xóa, cập nhật lại position cho các thể loại còn lại
@@ -128,7 +128,7 @@ module.exports.changeMulti = async (req, res) => {
         for (let i = 0; i < categoriesLeft.length; i++) {
           await Category.updateOne(
             { _id: categoriesLeft[i]._id },
-            { position: i + 1 }
+            { position: i + 1 },
           );
         }
 
@@ -156,18 +156,18 @@ module.exports.changeMulti = async (req, res) => {
           if (oldPos < newPos) {
             await Category.updateMany(
               { position: { $gt: oldPos, $lte: newPos }, deleted: false },
-              { $inc: { position: -1 } }
+              { $inc: { position: -1 } },
             );
           } else {
             await Category.updateMany(
               { position: { $gte: newPos, $lt: oldPos }, deleted: false },
-              { $inc: { position: 1 } }
+              { $inc: { position: 1 } },
             );
           }
 
           await Category.updateOne(
             { _id: id },
-            { position: newPos, updatedBy: req.user.id }
+            { position: newPos, updatedBy: req.user.id },
           );
 
           const categories = await Category.find({ deleted: false }).sort({
@@ -186,7 +186,7 @@ module.exports.changeMulti = async (req, res) => {
           const newPos = parseInt(newPosStr);
           await Category.updateOne(
             { _id: id },
-            { position: newPos, updatedBy: req.user.id }
+            { position: newPos, updatedBy: req.user.id },
           );
         }
 
@@ -197,7 +197,7 @@ module.exports.changeMulti = async (req, res) => {
         for (let i = 0; i < allCategories.length; i++) {
           await Category.updateOne(
             { _id: allCategories[i]._id },
-            { position: i + 1 }
+            { position: i + 1 },
           );
         }
 
@@ -229,7 +229,7 @@ module.exports.delete = async (req, res) => {
       {
         deleted: true,
         deletedBy: req.user.id,
-      }
+      },
     );
 
     // Cập nhật lại position cho các thể loại còn lại
@@ -239,7 +239,7 @@ module.exports.delete = async (req, res) => {
     for (let i = 0; i < categoriesLeft.length; i++) {
       await Category.updateOne(
         { _id: categoriesLeft[i]._id },
-        { position: i + 1, updatedBy: req.user.id }
+        { position: i + 1, updatedBy: req.user.id },
       );
     }
 
@@ -269,20 +269,18 @@ module.exports.create = async (req, res) => {
     if (!position) {
       position = maxPosition + 1;
     } else {
-      // Nếu nhập vị trí hợp lệ, dồn các thể loại phía sau lên 1
       await maxCategory.updateMany(
         { position: { $gte: position } },
-        { $inc: { position: 1 } }
+        { $inc: { position: 1 } },
       );
     }
 
-    // tạo thể loại và lưu thể loại mới
     const newCategory = new Category({
       ...newCategoryData,
       position,
       slug,
       title,
-      createdBy: req.user.id
+      createdBy: req.user.id,
     });
     await newCategory.save();
 
@@ -335,12 +333,12 @@ module.exports.edit = async (req, res) => {
       if (oldPos < newPos) {
         await Category.updateMany(
           { position: { $gt: oldPos, $lte: newPos }, deleted: false },
-          { $inc: { position: -1 } }
+          { $inc: { position: -1 } },
         );
       } else {
         await Category.updateMany(
           { position: { $gte: newPos, $lt: oldPos }, deleted: false },
-          { $inc: { position: 1 } }
+          { $inc: { position: 1 } },
         );
       }
     }

@@ -89,7 +89,7 @@ export default function Categories() {
           Authorization: `Bearer ${accessToken}`,
         },
         withCredentials: true,
-      }
+      },
     );
     return res.data.categories || [];
   };
@@ -117,7 +117,7 @@ export default function Categories() {
     "categories",
     setEditedCategories,
     editedCategories,
-    "thể loại"
+    "thể loại",
   );
 
   const handleDelete = async () => {
@@ -125,12 +125,13 @@ export default function Categories() {
     try {
       await axios.patch(
         `${API_URL}/api/v1/${ADMIN_PREFIX}/categories/delete/${deleteId}`,
+        {},
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },
           withCredentials: true,
-        }
+        },
       );
       setDeleteId(null);
       fetchData();
@@ -158,7 +159,7 @@ export default function Categories() {
           <h1 className="text-[32px] font-bold m-0 text-primary">
             📂 Quản lý thể loại
           </h1>
-          <ConditionalRender permission="create_cateogory">
+          <ConditionalRender permission="create_category">
             <NewAddButton label="Thêm thể loại mới" source="categories" />
           </ConditionalRender>
         </motion.div>
@@ -281,8 +282,8 @@ export default function Categories() {
             pendingDeleteIds.length > 0
               ? `Bạn có chắc chắn muốn xóa ${pendingDeleteIds.length} mục đã chọn?`
               : deleteId
-              ? "Bạn có chắc chắn muốn xóa mục này?"
-              : ""
+                ? "Bạn có chắc chắn muốn xóa mục này?"
+                : ""
           }
           label="Xóa"
           labelCancel="Hủy"
