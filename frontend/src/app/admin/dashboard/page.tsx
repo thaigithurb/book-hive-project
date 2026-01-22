@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { StatCard } from "@/app/components/Card/StatCard";
-import { Loading } from "@/app/components/Loading/Loading";
 
 type DashboardStats = {
   totalBooks: number;
@@ -12,6 +11,8 @@ type DashboardStats = {
   totalRevenue: number;
   recentOrders: any[];
 };
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function Dashboard() {
   const [stats, setStats] = useState<DashboardStats>({
@@ -38,13 +39,13 @@ export default function Dashboard() {
         }
 
         const [booksRes, ordersRes, usersRes] = await Promise.all([
-          axios.get("http://localhost:3001/api/v1/books", {
+          axios.get(`${API_URL}/api/v1/books`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          axios.get("http://localhost:3001/api/v1/orders", {
+          axios.get(`${API_URL}/api/v1/orders`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          axios.get("http://localhost:3001/api/v1/users", {
+          axios.get(`${API_URL}/api/v1/users`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
         ]);
@@ -91,9 +92,7 @@ export default function Dashboard() {
   return (
     <>
       {loading ? (
-        <div className="text-center text-gray-500 mt-[200px]">
-          Đang tải...
-        </div>
+        <div className="text-center text-gray-500 mt-[200px]">Đang tải...</div>
       ) : error ? (
         <div className="p-6">
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
