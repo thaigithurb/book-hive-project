@@ -3,6 +3,7 @@ const orderRoutes = require("./order.route");
 const paymentRoutes = require("./payment.route");
 const authRoutes = require("./auth.route");
 const cartRoutes = require("./cart.route");
+const userRoutes = require("./user.route");
 const { clientAuth } = require("../../../../middleware/auth.middleware");
 
 module.exports = (app) => {
@@ -17,6 +18,8 @@ module.exports = (app) => {
     app.use(version + "/cart", clientAuth, cartRoutes);
 
     app.use(version + "/auth", authRoutes);
+
+    app.use(version + "/users", userRoutes);
 }
 
 export {};
