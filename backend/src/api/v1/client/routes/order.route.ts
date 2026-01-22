@@ -10,6 +10,8 @@ router.post("/create", validateCheckout, controller.create);
 
 router.get("/detail/:orderCode", controller.detail);
 
+router.get("/user/:email", controller.getOrdersByUser);
+
 module.exports = router;
 
 export {};

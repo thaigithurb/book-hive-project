@@ -1,0 +1,509 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import axios from "axios";
+import Link from "next/link";
+import { toast, ToastContainer } from "react-toastify";
+import { Loading } from "@/app/components/Loading/Loading";
+import Pagination from "@/app/components/Pagination/Pagination";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+type Order = {
+  _id: string;
+  orderCode: string;
+  userInfo: {
+    fullName: string;
+    email: string;
+    phone: string;
+    address: string;
+  };
+  items: Array<{
+    bookId: string;
+    title: string;
+    price: number;
+    quantity: number;
+    image: string;
+  }>;
+  totalAmount: number;
+  paymentMethod: string;
+  status: "pending" | "processing" | "shipped" | "delivered" | "cancelled";
+  isExpired: boolean;
+  expiredAt: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export default function OrdersPage() {
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [searchEmail, setSearchEmail] = useState("");
+  const [searchMode, setSearchMode] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
+  const limit = 10;
+
+  const user =
+    typeof window !== "undefined"
+      ? JSON.parse(localStorage.getItem("client_user") || "{}")
+      : {};
+
+  useEffect(() => {
+    setIsLoggedIn(!!user.email);
+  }, [user.email]);
+
+  useEffect(() => {
+    if (isLoggedIn && !searchMode) {
+      fetchOrdersForLoggedInUser(1);
+    }
+  }, [isLoggedIn, searchMode]);
+
+  const fetchOrdersForLoggedInUser = async (currentPage: number) => {
+    try {
+      setLoading(true);
+      const res = await axios.get(
+        `http://localhost:3001/api/v1/orders/user/${user.email}`,
+        {
+          params: { page: currentPage, limit },
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken_user")}`,
+          },
+        },
+      );
+
+      setOrders(res.data.orders);
+      setTotal(res.data.total);
+      setPage(currentPage);
+    } catch (error: any) {
+      console.error("Error fetching orders:", error);
+      toast.error("Không thể tải danh sách đơn hàng");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSearchOrders = async (e: React.FormEvent, searchPage: number = 1) => {
+    e.preventDefault();
+
+    if (!searchEmail.trim()) {
+      toast.warning("Vui lòng nhập email");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setHasSearched(true);
+      const res = await axios.get(
+        `http://localhost:3001/api/v1/orders/user/${searchEmail.trim()}`,
+        {
+          params: { page: searchPage, limit },
+        },
+      );
+
+      setOrders(res.data.orders);
+      setTotal(res.data.total);
+      setPage(searchPage);
+
+      if (res.data.orders.length === 0) {
+        toast.info("Không tìm thấy đơn hàng nào cho email này");
+      }
+    } catch (error: any) {
+      console.error("Error searching orders:", error);
+      toast.error(
+        error.response?.data?.message ||
+          "Email không tồn tại hoặc không có đơn hàng",
+      );
+      setOrders([]);
+      setTotal(0);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "pending":
+        return "bg-yellow-50 text-yellow-700 border border-yellow-200";
+      case "processing":
+        return "bg-blue-50 text-blue-700 border border-blue-200";
+      case "shipped":
+        return "bg-purple-50 text-purple-700 border border-purple-200";
+      case "delivered":
+        return "bg-green-50 text-green-700 border border-green-200";
+      case "cancelled":
+        return "bg-red-50 text-red-700 border border-red-200";
+      default:
+        return "bg-gray-50 text-gray-700 border border-gray-200";
+    }
+  };
+
+  const getStatusText = (status: string) => {
+    const statusMap: Record<string, string> = {
+      pending: "Chờ xác nhận",
+      processing: "Đang xử lý",
+      shipped: "Đã gửi",
+      delivered: "Đã giao",
+      cancelled: "Đã hủy",
+      paid: "Đã thanh toán",
+    };
+    return statusMap[status] || status;
+  };
+
+  const OrderCard = ({ order }: { order: Order }) => (
+    <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden">
+      <Link href={`/orders/${order.orderCode}`} className="block p-6">
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-4">
+          <div>
+            <p className="text-xs font-semibold text-gray-500 uppercase mb-1">
+              Mã đơn hàng
+            </p>
+            <p className="font-mono text-sm font-bold text-slate-900 break-all">
+              {order.orderCode}
+            </p>
+          </div>
+
+          <div>
+            <p className="text-xs font-semibold text-gray-500 uppercase mb-1">
+              Ngày đặt hàng
+            </p>
+            <p className="text-sm font-medium text-slate-900">
+              {new Date(order.createdAt).toLocaleDateString("vi-VN", {
+                day: "numeric",
+                month: "numeric",
+                year: "numeric",
+              })}
+            </p>
+          </div>
+
+          <div>
+            <p className="text-xs font-semibold text-gray-500 uppercase mb-1">
+              Số lượng
+            </p>
+            <p className="text-sm font-medium text-slate-900">
+              {order.items.reduce((sum, item) => sum + item.quantity, 0)} sản
+              phẩm
+            </p>
+          </div>
+
+          <div>
+            <p className="text-xs font-semibold text-gray-500 uppercase mb-1">
+              Tổng tiền
+            </p>
+            <p className="text-sm font-bold text-primary">
+              {order.totalAmount.toLocaleString("vi-VN")} đ
+            </p>
+          </div>
+
+          <div className="col-span-2 md:col-span-1">
+            <p className="text-xs font-semibold text-gray-500 uppercase mb-1">
+              Trạng thái
+            </p>
+            <span
+              className={`inline-block px-3 py-1 rounded text-xs font-semibold ${getStatusColor(
+                order.status,
+              )}`}
+            >
+              {getStatusText(order.status)}
+            </span>
+          </div>
+        </div>
+
+        {order.items.length > 0 && (
+          <div className="pt-4 border-t border-gray-200">
+            <div className="flex items-center gap-3 overflow-hidden">
+              {order.items.slice(0, 2).map((item, idx) => (
+                <div
+                  key={idx}
+                  className="flex-shrink-0 w-14 h-16 bg-gray-100 rounded overflow-hidden"
+                >
+                  {item.image ? (
+                    <img
+                      src={item.image}
+                      alt={item.title}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-lg">
+                      📚
+                    </div>
+                  )}
+                </div>
+              ))}
+
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-slate-900 truncate">
+                  {order.items[0]?.title}
+                </p>
+                {order.items.length > 2 && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    + {order.items.length - 2} sản phẩm khác
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </Link>
+
+      <Link
+        href={`/orders/${order.orderCode}`}
+        className="flex items-center justify-between px-6 py-3 bg-gray-50 hover:bg-blue-50 border-t border-gray-200 transition-colors duration-200 group"
+      >
+        <span className="text-sm font-medium text-gray-700 group-hover:text-primary">
+          Xem chi tiết
+        </span>
+        <svg
+          className="w-5 h-5 text-gray-400 group-hover:text-primary transition-colors duration-200"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M9 5l7 7-7 7"
+          />
+        </svg>
+      </Link>
+    </div>
+  );
+
+  if (!isLoggedIn) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-16">
+        <div className="container max-w-md">
+          <div className="bg-white rounded-2xl shadow p-8 mb-8">
+            <h1 className="text-3xl font-bold text-slate-900 mb-2">
+              Tra cứu đơn hàng
+            </h1>
+            <p className="text-gray-600 mb-6">
+              Nhập email để xem lịch sử đơn hàng của bạn
+            </p>
+
+            <form
+              onSubmit={(e) => handleSearchOrders(e, 1)}
+              className="space-y-4"
+            >
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  value={searchEmail}
+                  onChange={(e) => setSearchEmail(e.target.value)}
+                  placeholder="Nhập email đặt hàng..."
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  required
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-2 bg-primary text-white font-bold rounded-lg hover:bg-blue-700 transition-colors duration-200 disabled:opacity-50"
+              >
+                {loading ? "Đang tìm..." : "Tra cứu"}
+              </button>
+            </form>
+
+            <div className="mt-6 pt-6 border-t border-gray-200">
+              <p className="text-sm text-gray-600 mb-3">
+                Bạn là khách hàng đã đăng ký?
+              </p>
+              <Link
+                href="/auth/login"
+                className="block w-full py-2 bg-blue-50 text-center text-primary font-bold rounded-lg hover:bg-blue-100 transition-colors duration-200"
+              >
+                Đăng nhập
+              </Link>
+            </div>
+          </div>
+
+          {hasSearched && (
+            <div>
+              {loading ? (
+                <Loading fullScreen={false} size="md" text="Đang tìm..." />
+              ) : orders.length > 0 ? (
+                <div className="space-y-3">
+                  <h2 className="text-lg font-bold text-slate-900 mb-4">
+                    Tìm thấy {total} đơn hàng
+                  </h2>
+                  {orders.map((order) => (
+                    <OrderCard key={order._id} order={order} />
+                  ))}
+
+                  <Pagination
+                    page={page}
+                    total={total}
+                    limit={limit}
+                    onPageChange={(newPage) =>
+                      handleSearchOrders(new Event("submit") as any, newPage)
+                    }
+                  />
+                </div>
+              ) : null}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  if (loading && orders.length === 0 && !searchMode) {
+    return <Loading fullScreen={true} size="lg" text="Đang tải đơn hàng..." />;
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 py-16">
+      <div className="container">
+        <div className="mb-8 flex gap-4">
+          <button
+            onClick={() => {
+              setSearchMode(false);
+              setSearchEmail("");
+              setPage(1);
+              setHasSearched(false);
+              setOrders([]);
+            }}
+            className={`px-6 py-3 font-semibold rounded-lg transition-all duration-200 ${
+              !searchMode
+                ? "bg-primary text-white shadow-md"
+                : "bg-white text-primary border border-gray-300 hover:bg-gray-50"
+            }`}
+          >
+            📦 Đơn hàng của tôi
+          </button>
+          <button
+            onClick={() => {
+              setSearchMode(true);
+              setSearchEmail("");
+              setOrders([]);
+              setTotal(0);
+              setPage(1);
+              setHasSearched(false);
+            }}
+            className={`px-6 py-3 font-semibold rounded-lg transition-all duration-200 ${
+              searchMode
+                ? "bg-primary text-white shadow-md"
+                : "bg-white text-primary border border-gray-300 hover:bg-gray-50"
+            }`}
+          >
+            🔍 Tra cứu đơn khác
+          </button>
+        </div>
+
+        {!searchMode ? (
+          <>
+            <h1 className="text-4xl font-bold text-slate-900 mb-12">
+              Đơn hàng của tôi
+            </h1>
+
+            {orders.length === 0 ? (
+              <div className="bg-white rounded-2xl p-16 shadow-sm text-center">
+                <div className="text-6xl mb-4">📦</div>
+                <h2 className="text-3xl font-bold text-slate-800 mb-2">
+                  Chưa có đơn hàng
+                </h2>
+                <p className="text-slate-500 mb-8">
+                  Bạn chưa mua sản phẩm nào. Hãy bắt đầu mua sắm ngay!
+                </p>
+                <Link
+                  href="/home"
+                  className="inline-block px-6 py-3 bg-primary text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-200"
+                >
+                  ← Tiếp tục mua sắm
+                </Link>
+              </div>
+            ) : (
+              <>
+                <div className="space-y-3">
+                  {orders.map((order) => (
+                    <OrderCard key={order._id} order={order} />
+                  ))}
+                </div>
+
+                <Pagination
+                  page={page}
+                  total={total}
+                  limit={limit}
+                  onPageChange={fetchOrdersForLoggedInUser}
+                />
+              </>
+            )}
+          </>
+        ) : (
+          <>
+            <h1 className="text-4xl font-bold text-slate-900 mb-8">
+              Tra cứu đơn hàng
+            </h1>
+
+            <div className="max-w-md mb-8">
+              <form
+                onSubmit={(e) => handleSearchOrders(e, 1)}
+                className="space-y-4"
+              >
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Nhập email để tìm đơn hàng
+                  </label>
+                  <input
+                    type="email"
+                    value={searchEmail}
+                    onChange={(e) => setSearchEmail(e.target.value)}
+                    placeholder="Nhập email..."
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                    required
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full py-2 bg-primary text-white font-bold rounded-lg hover:bg-blue-700 transition-colors duration-200 disabled:opacity-50"
+                >
+                  {loading ? "Đang tìm..." : "Tra cứu"}
+                </button>
+              </form>
+            </div>
+            {hasSearched && (
+              <>
+                {loading ? (
+                  <Loading fullScreen={false} size="md" text="Đang tìm..." />
+                ) : orders.length > 0 ? (
+                  <>
+                    <h2 className="text-lg font-bold text-slate-900 mb-6">
+                      Tìm thấy {total} đơn hàng
+                    </h2>
+                    <div className="space-y-3">
+                      {orders.map((order) => (
+                        <OrderCard key={order._id} order={order} />
+                      ))}
+                    </div>
+
+                    <Pagination
+                      page={page}
+                      total={total}
+                      limit={limit}
+                      onPageChange={(newPage) =>
+                        handleSearchOrders(new Event("submit") as any, newPage)
+                      }
+                    />
+                  </>
+                ) : null}
+              </>
+            )}
+          </>
+        )}
+      </div>
+      <ToastContainer
+        autoClose={1500}
+        hideProgressBar={true}
+        pauseOnHover={false}
+      />
+    </div>
+  );
+}

@@ -90,7 +90,7 @@ module.exports.deleteItem = (req, res) => __awaiter(this, void 0, void 0, functi
         res.json({ items: cart.items });
     }
     catch (error) {
-        res.status(500).json({ error: "Xóa item thất bại" });
+        res.status(500).json({ error: "Xóa sản phẩm thất bại" });
     }
 });
 module.exports.clear = (req, res) => __awaiter(this, void 0, void 0, function* () {

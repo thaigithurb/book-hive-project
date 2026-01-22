@@ -4,6 +4,8 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
 interface CartItem {
   bookId: string;
   title: string;
@@ -39,7 +41,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     if (accessToken) {
       setIsLoading(true);
       axios
-        .get("${API_URL}/api/v1/cart", {
+        .get(`${API_URL}/api/v1/cart`, {
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },
@@ -99,14 +101,11 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     if (isAuthenticated) {
       const accessToken = localStorage.getItem("accessToken_user");
       try {
-        const res = await axios.delete(
-          `${API_URL}/api/v1/cart/delete/${id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
+        const res = await axios.delete(`${API_URL}/api/v1/cart/delete/${id}`, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
           },
-        );
+        });
         setItems(res.data.items || []);
       } catch (error) {
         toast.error("Xóa sản phẩm thất bại");
@@ -124,7 +123,9 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
       return;
     }
     setItems((prevItems) =>
-      prevItems.map((item) => (item.bookId === id ? { ...item, quantity } : item)),
+      prevItems.map((item) =>
+        item.bookId === id ? { ...item, quantity } : item,
+      ),
     );
     if (isAuthenticated) {
       const accessToken = localStorage.getItem("accessToken_user");

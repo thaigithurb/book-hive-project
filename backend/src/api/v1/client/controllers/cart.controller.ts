@@ -94,7 +94,7 @@ module.exports.deleteItem = async (req, res) => {
     await cart.save();
     res.json({ items: cart.items });
   } catch (error) {
-    res.status(500).json({ error: "Xóa item thất bại" });
+    res.status(500).json({ error: "Xóa sản phẩm thất bại" });
   }
 };
 

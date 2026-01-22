@@ -3,19 +3,18 @@
 import { useCart } from "@/contexts/CartContext";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { ToastContainer } from "react-toastify";
-import Logout from "../../Auth/Logout/Logout";
+import { useState, useEffect } from "react";
 
 export const Header = () => {
   const router = useRouter();
   const { getTotalItems } = useCart();
   const [keyword, setKeyword] = useState("");
   const cartCount = getTotalItems();
-  const userString = localStorage.getItem("client_user");
+  const userString =
+    typeof window !== "undefined" ? localStorage.getItem("client_user") : null;
   const user = userString ? JSON.parse(userString) : null;
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = (e: any) => {
     e.preventDefault();
     if (!keyword.trim()) return;
 
@@ -33,7 +32,9 @@ export const Header = () => {
       <header className="p-[16px] fixed top-0 z-999 w-full bg-[#ffff] shadow-[0_2px_8px_rgba(0,0,0,0.05)] ">
         <nav className="container flex items-center justify-between">
           <Link href={"/home"} className="flex gap-[12px] items-center">
-            <span className="text-[32px]">📚</span>
+            <span className="text-[32px]">
+              <img src="/book-hive.jpg" className="w-20 h-20" alt="" />
+            </span>
             <div>
               <h1
                 className="m-0 text-[24px] font-[700] text-primary"
@@ -78,6 +79,7 @@ export const Header = () => {
                 Tìm
               </button>
             </form>
+
             <div className="relative group">
               <Link
                 href="/books"
@@ -103,6 +105,14 @@ export const Header = () => {
                 </Link>
               </div>
             </div>
+
+            <Link
+              href="/orders"
+              className="px-4 py-2 text-primary font-medium transition-all duration-300 hover:bg-blue-50 hover:text-blue-600 rounded-lg hover:shadow-[0_4px_12px_rgba(59,130,246,0.2)] whitespace-nowrap"
+            >
+              📋 Tra cứu
+            </Link>
+
             <Link
               href="/cart"
               className="relative px-4 py-2 text-primary font-medium transition-all duration-300 hover:bg-blue-50 hover:text-blue-600 rounded-lg hover:shadow-[0_4px_12px_rgba(59,130,246,0.2)]"
@@ -114,6 +124,7 @@ export const Header = () => {
                 </span>
               )}
             </Link>
+
             <div className="relative group">
               <Link
                 href="/profile"

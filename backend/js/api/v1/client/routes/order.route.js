@@ -7,4 +7,5 @@ const { validateCheckout } = require("../../../../middleware/validate.middleware
 router.get("/", controller.index);
 router.post("/create", validateCheckout, controller.create);
 router.get("/detail/:orderCode", controller.detail);
+router.get("/user/:email", controller.getOrdersByUser);
 module.exports = router;
