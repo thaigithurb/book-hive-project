@@ -4,10 +4,9 @@ import axios from "axios";
 import { useUser } from "@/contexts/UserContext";
 import { Loading } from "@/app/components/Loading/Loading";
 
-const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-export default function AdminAuthGuard({
+export default function ClientAuthGuard({
   children,
 }: {
   children: React.ReactNode;
@@ -17,7 +16,7 @@ export default function AdminAuthGuard({
 
   const setUserFromToken = (token: string) => {
     try {
-      const userStr = localStorage.getItem("admin_user");
+      const userStr = localStorage.getItem("client_user");
       if (userStr) {
         setUser(JSON.parse(userStr));
         return;
@@ -27,7 +26,6 @@ export default function AdminAuthGuard({
         id: payload.id,
         email: payload.email,
         role: payload.role,
-        permissions: payload.permissions || [],
       });
     } catch {
       setUser(null);
@@ -37,21 +35,21 @@ export default function AdminAuthGuard({
   const refreshAccessToken = async () => {
     try {
       const res = await axios.post(
-        `${API_URL}/api/v1/${ADMIN_PREFIX}/auth/refresh`,
+        `http://localhost:3001/api/v1/auth/refresh`,
         {},
         { withCredentials: true },
       );
 
       if (res.data?.accessToken) {
-        localStorage.setItem("accessToken_admin", res.data.accessToken);
+        localStorage.setItem("accessToken_user", res.data.accessToken);
         setUserFromToken(res.data.accessToken);
         return true;
       }
       return false;
     } catch (error) {
       console.error("Refresh token failed:", error);
-      localStorage.removeItem("accessToken_admin");
-      localStorage.removeItem("admin_user");
+      localStorage.removeItem("accessToken_user");
+      localStorage.removeItem("client_user");
       return false;
     }
   };
@@ -59,7 +57,7 @@ export default function AdminAuthGuard({
   const verifyToken = async (token: string) => {
     try {
       await axios.post(
-        `${API_URL}/api/v1/${ADMIN_PREFIX}/auth/verify`,
+        `http://localhost:3001/api/v1/auth/verify`,
         {},
         {
           headers: {
@@ -76,15 +74,15 @@ export default function AdminAuthGuard({
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        let accessToken = localStorage.getItem("accessToken_admin");
+        let accessToken = localStorage.getItem("accessToken_user");
 
         if (!accessToken) {
           const refreshed = await refreshAccessToken();
-          if (!refreshed) {
-            window.location.href = `/auth/${ADMIN_PREFIX}/login`;
-            return;
+          if (refreshed) {
+            setCheckedAuth(true);
+          } else {
+            setCheckedAuth(true);
           }
-          setCheckedAuth(true);
           return;
         }
 
@@ -96,14 +94,10 @@ export default function AdminAuthGuard({
         }
 
         const refreshed = await refreshAccessToken();
-        if (refreshed) {
-          setCheckedAuth(true);
-        } else {
-          window.location.href = `/auth/${ADMIN_PREFIX}/login`;
-        }
+        setCheckedAuth(true);
       } catch (error) {
         console.error("Auth check error:", error);
-        window.location.href = `/auth/${ADMIN_PREFIX}/login`;
+        setCheckedAuth(true);
       }
     };
 
