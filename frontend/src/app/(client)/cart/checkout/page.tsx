@@ -12,8 +12,16 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { items } = useCart();
+  const {
+    items,
+    clearCart,
+    getBuyItems,
+    getRentItems,
+    getTotalBuyPrice,
+    getTotalRentPrice,
+  } = useCart();
   const [isLoaded, setIsLoaded] = useState(false);
+  const [cartType, setCartType] = useState<"all" | "buy" | "rent">("all");
   const [paymentMethod, setPaymentMethod] = useState<"transfer" | "cod">(
     "transfer",
   );
@@ -24,13 +32,13 @@ export default function CheckoutPage() {
     address: "",
   });
   const [isProcessing, setIsProcessing] = useState(false);
-  const { clearCart } = useCart();
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   useEffect(() => {
     setIsLoaded(true);
   }, []);
 
-  if (!isLoaded) {
+  if (!isLoaded || isRedirecting) {
     return <Loading fullScreen={true} size="lg" text="Đang tải..." />;
   }
 
@@ -54,7 +62,32 @@ export default function CheckoutPage() {
     );
   }
 
-  const totalAmount = items.reduce(
+  const buyItems = getBuyItems();
+  const rentItems = getRentItems();
+  const displayItems =
+    cartType === "all" ? items : cartType === "buy" ? buyItems : rentItems;
+
+  if (displayItems.length === 0) {
+    return (
+      <div className="min-h-screen py-12">
+        <div className="container">
+          <div className="bg-white rounded-2xl p-12 shadow text-center">
+            <h1 className="text-3xl font-bold text-slate-800 mb-4">
+              Không có sản phẩm
+            </h1>
+            <Link
+              href="/home"
+              className="inline-block px-6 py-3 bg-primary text-white rounded-lg font-semibold hover:bg-blue-700"
+            >
+              Quay lại mua sắm
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const totalAmount = displayItems.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0,
   );
@@ -63,19 +96,51 @@ export default function CheckoutPage() {
     setIsProcessing(true);
 
     try {
+      const hasRentItems = displayItems.some((item) => item.type === "rent");
+      const endpoint = hasRentItems
+        ? `${API_URL}/api/v1/orders/rentals/create`
+        : `${API_URL}/api/v1/orders/create`;
+
+      const cleanItems = displayItems.map((item) => {
+        if (hasRentItems) {
+          return {
+            bookId: item.bookId,
+            title: item.title,
+            price: item.price,
+            quantity: item.quantity,
+            slug: item.slug,
+            image: item.image,
+            rentalType: item.rentalType,
+            rentalDays: item.rentalDays,
+          };
+        } else {
+          return {
+            title: item.title,
+            price: item.price,
+            quantity: item.quantity,
+            slug: item.slug,
+            image: item.image,
+          };
+        }
+      });
+
       const orderData = {
         userInfo,
-        items,
+        items: cleanItems,
         totalAmount,
         paymentMethod,
       };
 
-      const response = await axios.post(
-        `${API_URL}/api/v1/orders/create`,
-        orderData,
-      );
+      const response = await axios.post(endpoint, orderData);
 
-      const { orderCode } = response.data;
+      let code: string;
+      if (response.data.orderCode) {
+        code = String(response.data.orderCode);
+      } else if (response.data.rental?.rentalCode) {
+        code = response.data.rental.rentalCode;
+      } else {
+        throw new Error("No code in response");
+      }
 
       if (paymentMethod === "cod") {
         try {
@@ -93,12 +158,13 @@ export default function CheckoutPage() {
 
         clearCart();
         toast.success("✅ Đơn hàng đã được tạo!");
+        setIsRedirecting(true);
 
         setTimeout(() => {
-          router.push(`/order-success?orderCode=${orderCode}`);
+          router.push(`/order-success?orderCode=${code}`);
         }, 1500);
       } else {
-        sessionStorage.setItem("orderCode", orderCode);
+        sessionStorage.setItem("orderCode", code);
         sessionStorage.setItem("paymentMethod", paymentMethod);
 
         toast.success("Đơn hàng đã được tạo!");
@@ -119,6 +185,39 @@ export default function CheckoutPage() {
     <div className="min-h-screen py-12 bg-gray-50">
       <div className="container">
         <h1 className="text-4xl font-bold text-slate-800 mb-8">Thanh toán</h1>
+
+        <div className="mb-8 flex gap-4 border-b border-gray-300">
+          <button
+            onClick={() => setCartType("all")}
+            className={`px-6 py-3 font-semibold transition-colors ${
+              cartType === "all"
+                ? "text-primary border-b-2 border-primary"
+                : "text-slate-600 hover:text-slate-800"
+            }`}
+          >
+            Tất cả ({items.length})
+          </button>
+          <button
+            onClick={() => setCartType("buy")}
+            className={`px-6 py-3 font-semibold transition-colors ${
+              cartType === "buy"
+                ? "text-primary border-b-2 border-primary"
+                : "text-slate-600 hover:text-slate-800"
+            }`}
+          >
+            Mua ({buyItems.length})
+          </button>
+          <button
+            onClick={() => setCartType("rent")}
+            className={`px-6 py-3 font-semibold transition-colors ${
+              cartType === "rent"
+                ? "text-primary border-b-2 border-primary"
+                : "text-slate-600 hover:text-slate-800"
+            }`}
+          >
+            Thuê ({rentItems.length})
+          </button>
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-8">

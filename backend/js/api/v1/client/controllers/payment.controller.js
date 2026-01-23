@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const { PayOS } = require("@payos/node");
 const Order = require("../../models/order.model");
+const Rental = require("../../models/rental.model");
 const Transaction = require("../../models/transaction.model");
 const { sendOrderConfirmationEmail } = require("../../../../helpers/sendEmail");
 const payOS = new PayOS({
@@ -18,51 +19,84 @@ const payOS = new PayOS({
     apiKey: process.env.PAYOS_API_KEY,
     checksumKey: process.env.PAYOS_CHECKSUM_KEY,
 });
+const findDocumentByCode = (code) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log("🔍 Tìm document với code:", code);
+    let document = yield Order.findOne({ orderCode: String(code) });
+    console.log("✅ Order findOne:", document ? "Tìm được" : "Không tìm được");
+    if (document)
+        return { document, type: "order" };
+    document = yield Rental.findOne({ rentalCode: String(code) });
+    console.log("✅ Rental findOne:", document ? "Tìm được" : "Không tìm được");
+    if (document)
+        return { document, type: "rent" };
+    return { document: null, type: null };
+});
 module.exports.createPaymentLink = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { orderCode, amount, description, items } = req.body;
-        const order = yield Order.findOne({ orderCode: String(orderCode) });
-        if (!order) {
-            return res
-                .status(404)
-                .json({ error: -1, message: "Không tìm thấy đơn hàng" });
+        const { code, amount, description, items } = req.body;
+        console.log("📤 Nhận request với code:", code);
+        const { document, type } = yield findDocumentByCode(code);
+        if (!document) {
+            console.log("❌ Không tìm được document");
+            const allOrders = yield Order.find().select("orderCode status").limit(5);
+            console.log("Orders trong DB:", allOrders.map((o) => o.orderCode));
+            return res.status(404).json({
+                error: -1,
+                message: "Không tìm thấy đơn hàng!",
+                debug: {
+                    searchCode: code,
+                    foundOrders: allOrders.map((o) => o.orderCode),
+                },
+            });
         }
-        if (order.expiredAt && new Date() > order.expiredAt) {
-            order.status = "cancelled";
-            order.isExpired = true;
-            yield order.save();
-            return res
-                .status(400)
-                .json({ error: -1, message: "Đơn hàng đã hết hạn" });
+        console.log("✅ Tìm được document:", type, document._id);
+        if (document.isExpired ||
+            (document.expiredAt && new Date() > document.expiredAt)) {
+            document.status = "cancelled";
+            document.isExpired = true;
+            yield document.save();
+            return res.status(400).json({
+                error: -1,
+                message: `${type === "rent" ? "Đơn thuê" : "Đơn hàng"} đã hết hạn`,
+            });
         }
-        if (order.checkoutUrl) {
+        if (document.checkoutUrl) {
             return res.json({
                 error: 0,
                 message: "Link đã tồn tại",
-                data: { checkoutUrl: order.checkoutUrl, orderCode: order.orderCode },
+                data: {
+                    checkoutUrl: document.checkoutUrl,
+                    code: code,
+                },
             });
         }
+        const cancelUrl = type === "rent"
+            ? `${process.env.FRONTEND_URL || "http://localhost:3000"}/cart`
+            : `${process.env.FRONTEND_URL || "http://localhost:3000"}/cart`;
+        const returnUrl = type === "rent"
+            ? `${process.env.FRONTEND_URL || "http://localhost:3000"}/rental-success?code=${code}`
+            : `${process.env.FRONTEND_URL || "http://localhost:3000"}/order-success?code=${code}`;
         const paymentLink = yield payOS.paymentRequests.create({
-            orderCode: Number(orderCode),
+            orderCode: Number(String(code).replace(/\D/g, "")),
             amount: Number(amount),
             description,
             items: items || [],
-            cancelUrl: `${process.env.FRONTEND_URL || "http://localhost:3000"}/cart`,
-            returnUrl: `${process.env.FRONTEND_URL || "http://localhost:3000"}/order-success`,
+            cancelUrl,
+            returnUrl,
         });
-        order.checkoutUrl = paymentLink.checkoutUrl;
-        yield order.save();
+        document.checkoutUrl = paymentLink.checkoutUrl;
+        yield document.save();
         return res.json({
             error: 0,
-            message: "Tạo link thành công",
+            message: "Tạo link thanh toán thành công",
             data: {
                 checkoutUrl: paymentLink.checkoutUrl,
-                orderCode: paymentLink.orderCode,
+                code: code,
             },
         });
     }
     catch (err) {
-        console.error("Lỗi tạo link:", err);
+        console.error("❌ Lỗi tạo link:", err);
         return res.status(500).json({
             error: -1,
             message: "Lỗi tạo link thanh toán",
@@ -73,11 +107,15 @@ module.exports.createPaymentLink = (req, res) => __awaiter(void 0, void 0, void 
 module.exports.webhook = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { code, desc, data } = req.body;
+        console.log("🔔 Webhook nhận:", { code, desc });
         if (code === "00" && desc === "success") {
-            const order = yield Order.findOne({ orderCode: String(data.orderCode) });
-            if (order && order.status === "pending") {
-                order.status = "paid";
-                yield order.save();
+            const { document, type } = yield findDocumentByCode(data.orderCode);
+            if (document && document.status === "pending") {
+                document.status = "paid";
+                if (type === "rent") {
+                    document.rentedAt = new Date();
+                }
+                yield document.save();
                 yield new Transaction({
                     orderCode: String(data.orderCode),
                     bankCode: data.counterAccountBankId,
@@ -90,7 +128,15 @@ module.exports.webhook = (req, res) => __awaiter(void 0, void 0, void 0, functio
                     status: "success",
                     verifiedAt: new Date(),
                 }).save();
-                const emailResult = yield sendOrderConfirmationEmail(order);
+                console.log("✅ Thanh toán thành công!");
+                if (type === "order") {
+                    try {
+                        yield sendOrderConfirmationEmail(document.userInfo.email, document.orderCode);
+                    }
+                    catch (emailErr) {
+                        console.error("⚠️ Lỗi gửi email:", emailErr);
+                    }
+                }
             }
         }
         return res.json({ message: "OK" });
@@ -102,32 +148,41 @@ module.exports.webhook = (req, res) => __awaiter(void 0, void 0, void 0, functio
 });
 module.exports.cancelPaymentLink = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const order = yield Order.findOne({
-            orderCode: String(req.params.orderCode),
-        });
-        if (!order) {
-            return res
-                .status(404)
-                .json({ error: -1, message: "Không tìm thấy đơn hàng" });
+        const { code } = req.params;
+        console.log("❌ Cancel request với code:", code);
+        const { document, type } = yield findDocumentByCode(code);
+        if (!document) {
+            return res.status(404).json({
+                error: -1,
+                message: "Không tìm thấy đơn hàng!",
+            });
         }
-        if (order.status === "paid") {
-            return res
-                .status(400)
-                .json({ error: -1, message: "Đã thanh toán, không thể hủy" });
+        if (document.status === "paid") {
+            return res.status(400).json({
+                error: -1,
+                message: "Đã thanh toán, không thể hủy",
+            });
         }
-        order.status = "cancelled";
-        order.isExpired = true;
-        yield order.save();
+        document.status = "cancelled";
+        document.isExpired = true;
+        yield document.save();
         try {
-            yield payOS.paymentRequests.cancel(Number(req.params.orderCode));
+            const orderCode = Number(String(code).replace(/\D/g, ""));
+            yield payOS.paymentRequests.cancel(orderCode);
         }
         catch (e) {
-            console.log(" Không hủy được trên PayOS");
+            console.log("⚠️ Không hủy được trên PayOS:", e.message);
         }
-        return res.json({ error: 0, message: "Hủy thành công" });
+        return res.json({
+            error: 0,
+            message: "Hủy thành công",
+        });
     }
     catch (err) {
         console.error("❌ Lỗi hủy:", err);
-        return res.status(500).json({ error: -1, message: "Lỗi hủy đơn hàng" });
+        return res.status(500).json({
+            error: -1,
+            message: "Lỗi hủy",
+        });
     }
 });

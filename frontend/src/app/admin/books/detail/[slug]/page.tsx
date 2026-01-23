@@ -142,7 +142,7 @@ export default function BookDetail() {
                     <span className="text-2xl font-bold text-secondary1">
                       {book.priceBuy
                         ? book.priceBuy.toLocaleString("vi-VN") + "đ"
-                        : "N/A"}
+                        : "Liên hệ"}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">

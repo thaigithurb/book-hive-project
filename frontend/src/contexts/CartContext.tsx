@@ -13,15 +13,23 @@ interface CartItem {
   quantity: number;
   image?: string;
   slug: string;
+  type: "buy" | "rent"; // NEW
+  rentalType?: "day" | "week"; // NEW
+  rentalDays?: number; // NEW
 }
 
 interface CartContextType {
   items: CartItem[];
   addToCart: (item: CartItem) => void;
-  removeFromCart: (id: string) => void;
-  updateQuantity: (id: string, quantity: number) => void;
+  addToRent: (item: CartItem) => void; 
+  removeFromCart: (id: string, type?: "buy" | "rent") => void;
+  updateQuantity: (id: string, quantity: number, type?: "buy" | "rent") => void; 
   clearCart: () => void;
   getTotalItems: () => number;
+  getBuyItems: () => CartItem[]; // NEW
+  getRentItems: () => CartItem[]; // NEW
+  getTotalBuyPrice: () => number; // NEW
+  getTotalRentPrice: () => number; // NEW
   isAuthenticated: boolean;
   isLoading: boolean;
 }
@@ -74,22 +82,57 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   }, [items, isLoaded, isAuthenticated]);
 
   const addToCart = (newItem: CartItem) => {
+    newItem.type = "buy"; // UPDATED
     setItems((prevItems) => {
       const existingItem = prevItems.find(
-        (item) => item.bookId === newItem.bookId,
+        (item) => item.bookId === newItem.bookId && item.type === "buy" // UPDATED
       );
       if (existingItem) {
         return prevItems.map((item) =>
-          item.bookId === newItem.bookId
+          item.bookId === newItem.bookId && item.type === "buy" // UPDATED
             ? { ...item, quantity: item.quantity + newItem.quantity }
-            : item,
+            : item
         );
       }
       return [...prevItems, newItem];
     });
     if (isAuthenticated) {
       const accessToken = localStorage.getItem("accessToken_user");
-      axios.post("${API_URL}/api/v1/cart/add-item", newItem, {
+      axios.post(`${API_URL}/api/v1/cart/add-item`, newItem, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+    }
+    console.log(newItem);
+  };
+
+  // NEW: Thêm sách vào giỏ thuê
+  const addToRent = (newItem: CartItem) => {
+    newItem.type = "rent";
+    setItems((prevItems) => {
+      const existingItem = prevItems.find(
+        (item) =>
+          item.bookId === newItem.bookId &&
+          item.type === "rent" &&
+          item.rentalType === newItem.rentalType &&
+          item.rentalDays === newItem.rentalDays
+      );
+      if (existingItem) {
+        return prevItems.map((item) =>
+          item.bookId === newItem.bookId &&
+            item.type === "rent" &&
+            item.rentalType === newItem.rentalType &&
+            item.rentalDays === newItem.rentalDays
+            ? { ...item, quantity: item.quantity + newItem.quantity }
+            : item
+        );
+      }
+      return [...prevItems, newItem];
+    });
+    if (isAuthenticated) {
+      const accessToken = localStorage.getItem("accessToken_user");
+      axios.post(`${API_URL}/api/v1/cart/add-rental`, newItem, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
@@ -97,7 +140,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const removeFromCart = async (id: string) => {
+  const removeFromCart = async (id: string, type: "buy" | "rent" = "buy") => {
     if (isAuthenticated) {
       const accessToken = localStorage.getItem("accessToken_user");
       try {
@@ -111,21 +154,27 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
         toast.error("Xóa sản phẩm thất bại");
       }
     } else {
-      setItems((prevItems) => prevItems.filter((item) => item.bookId !== id));
+      setItems((prevItems) =>
+        prevItems.filter((item) => !(item.bookId === id && item.type === type))
+      );
     }
-
-    console.log(items);
   };
 
-  const updateQuantity = (id: string, quantity: number) => {
+  const updateQuantity = (
+    id: string,
+    quantity: number,
+    type: "buy" | "rent" = "buy"
+  ) => {
     if (quantity <= 0) {
-      removeFromCart(id);
+      removeFromCart(id, type);
       return;
     }
     setItems((prevItems) =>
       prevItems.map((item) =>
-        item.bookId === id ? { ...item, quantity } : item,
-      ),
+        item.bookId === id && item.type === type
+          ? { ...item, quantity }
+          : item
+      )
     );
     if (isAuthenticated) {
       const accessToken = localStorage.getItem("accessToken_user");
@@ -136,7 +185,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },
-        },
+        }
       );
     }
   };
@@ -145,7 +194,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     setItems([]);
     if (isAuthenticated) {
       const accessToken = localStorage.getItem("accessToken_user");
-      axios.delete("${API_URL}/api/v1/cart/delete-all", {
+      axios.delete(`${API_URL}/api/v1/cart/delete-all`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
@@ -157,15 +206,46 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     return items.reduce((total, item) => total + item.quantity, 0);
   };
 
+  // NEW: Lấy items mua
+  const getBuyItems = (): CartItem[] => {
+    return items.filter((item) => item.type === "buy");
+  };
+
+  // NEW: Lấy items thuê
+  const getRentItems = (): CartItem[] => {
+    return items.filter((item) => item.type === "rent");
+  };
+
+  // NEW: Tính tổng tiền mua
+  const getTotalBuyPrice = (): number => {
+    return getBuyItems().reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0
+    );
+  };
+
+  // NEW: Tính tổng tiền thuê
+  const getTotalRentPrice = (): number => {
+    return getRentItems().reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0
+    );
+  };
+
   return (
     <CartContext.Provider
       value={{
         items,
         addToCart,
+        addToRent, // NEW
         removeFromCart,
         updateQuantity,
         clearCart,
         getTotalItems,
+        getBuyItems, 
+        getRentItems,
+        getTotalBuyPrice,
+        getTotalRentPrice, 
         isAuthenticated,
         isLoading,
       }}

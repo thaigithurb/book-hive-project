@@ -11,6 +11,8 @@ export default function CartPage() {
   const router = useRouter();
   const { items, removeFromCart, updateQuantity, isLoading } = useCart();
 
+  console.log(items);
+
   if (isLoading) {
     return <Loading fullScreen={true} size="lg" text="Đang tải giỏ hàng..." />;
   }
@@ -97,7 +99,7 @@ export default function CartPage() {
                   <button
                     onClick={(e) => {
                       e.preventDefault();
-                      removeFromCart(item.bookId);
+                      removeFromCart(item.bookId, item.type);
                       toast.info("Đã xóa khỏi giỏ hàng");
                     }}
                     className="flex-shrink-0 cursor-pointer px-4 py-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg transition-colors duration-200 font-semibold"
@@ -112,6 +114,7 @@ export default function CartPage() {
                         updateQuantity(
                           item.bookId,
                           Math.max(1, item.quantity - 1),
+                          item.type
                         );
                       }}
                       className="w-8 h-8 flex items-center justify-center bg-gray-200 hover:bg-gray-300 rounded-md transition-colors duration-200 font-bold text-slate-700"
@@ -125,7 +128,7 @@ export default function CartPage() {
                       onChange={(e) => {
                         const value = parseInt(e.target.value) || 1;
                         if (value > 0) {
-                          updateQuantity(item.bookId, value);
+                          updateQuantity(item.bookId, value, item.type);
                         }
                       }}
                       className="w-12 h-8 text-center border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
@@ -133,7 +136,7 @@ export default function CartPage() {
                     <button
                       onClick={(e) => {
                         e.preventDefault();
-                        updateQuantity(item.bookId, item.quantity + 1);
+                        updateQuantity(item.bookId, item.quantity + 1, item.type);
                       }}
                       className="w-8 h-8 flex items-center justify-center bg-gray-200 hover:bg-gray-300 rounded-md transition-colors duration-200 font-bold text-slate-700"
                     >

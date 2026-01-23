@@ -112,3 +112,51 @@ module.exports.clear = async (req, res) => {
     res.status(500).json({ error: "Xóa toàn bộ cart thất bại" });
   }
 };
+
+// [POST] /api/v1/cart/add-rental
+module.exports.addRental = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { bookId, quantity, title, price, image, slug, rentalType, rentalDays } = req.body;
+
+    if (!rentalType || !rentalDays) {
+      return res.status(400).json({ error: "Chọn loại thuê (ngày/tuần) và số lượng" });
+    }
+
+    let cart = await Cart.findOne({ userId });
+    if (!cart) {
+      cart = new Cart({ userId, items: [] });
+    }
+
+    const existing = cart.items.find(
+      (item) =>
+        item.bookId.toString() === bookId &&
+        item.type === "rent" &&
+        item.rentalType === rentalType &&
+        item.rentalDays === rentalDays
+    );
+
+    if (existing) {
+      existing.quantity += quantity;
+    } else {
+      cart.items.push({
+        bookId,
+        quantity,
+        title,
+        price,
+        image,
+        slug,
+        type: "rent",
+        rentalType,
+        rentalDays,
+      });
+    }
+
+    await cart.save();
+    res.json({ items: cart.items });
+  } catch (error) {
+    res.status(500).json({ error: "Thêm rental vào cart thất bại" });
+  }
+};
+
+export {};

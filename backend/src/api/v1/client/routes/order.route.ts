@@ -12,6 +12,8 @@ router.get("/detail/:orderCode", controller.detail);
 
 router.get("/user/:email", controller.getOrdersByUser);
 
+router.post("/rentals/create", validateCheckout, controller.createRental);
+
 module.exports = router;
 
 export {};

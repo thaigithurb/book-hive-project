@@ -26,6 +26,20 @@ const cartSchema = new mongoose.Schema(
         price: Number,
         image: String,
         slug: String,
+        type: {
+          type: String,
+          enum: ["buy", "rent"],
+          default: "buy",
+        },
+        rentalType: {
+          type: String,
+          enum: ["day", "week"],
+          default: null,
+        },
+        rentalDays: {
+          type: Number,
+          default: null,
+        },
       },
     ],
     deleted: {
@@ -35,7 +49,7 @@ const cartSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 const Cart = mongoose.model("Cart", cartSchema, "carts");

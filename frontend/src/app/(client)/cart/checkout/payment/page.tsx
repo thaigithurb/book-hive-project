@@ -28,13 +28,17 @@ export default function PaymentPage() {
   const checkStatusInterval = useRef<any>(null);
   const countdownInterval = useRef<any>(null);
 
+  console.log(data);
+
   useEffect(() => {
     if (initialized.current) return;
     initialized.current = true;
 
     const init = async () => {
       const orderCode = sessionStorage.getItem("orderCode");
-      if (!orderCode) return router.replace("/cart");
+      if (!orderCode) {
+        return router.replace("/cart");
+      }
 
       try {
         const { data: res } = await axios.get(
@@ -77,8 +81,11 @@ export default function PaymentPage() {
         const timeRemaining = Math.floor(
           (expired.getTime() - now.getTime()) / 1000,
         );
+        
+        const code = order.orderCode || order.rentalCode;
+        
         setData({
-          orderCode: order.orderCode,
+          orderCode: code,
           checkoutUrl: order.checkoutUrl || "",
           totalAmount: order.totalAmount,
           timeLeft: Math.max(0, timeRemaining),
@@ -87,25 +94,40 @@ export default function PaymentPage() {
         });
 
         if (!order.checkoutUrl) {
-          const { data: payment } = await axios.post(
-            `${API_URL}/api/v1/payment/create`,
-            {
-              orderCode: Number(orderCode),
-              amount: order.totalAmount,
-              description: `${orderCode}`,
-              items: order.items.map((item: any) => ({
-                name: item.title,
-                quantity: item.quantity,
-                price: item.price,
-              })),
-            },
-          );
+          try {
+            const { data: payment } = await axios.post(
+              `${API_URL}/api/v1/payment/create`,
+              {
+                code: orderCode,
+                amount: order.totalAmount,
+                description: `${orderCode}`,
+                items: order.items.map((item: any) => ({
+                  name: item.title,
+                  quantity: item.quantity,
+                  price: item.price,
+                })),
+              },
+            );
 
-          if (payment.data?.checkoutUrl) {
-            setData((prev) => ({
-              ...prev,
-              checkoutUrl: payment.data.checkoutUrl,
-            }));
+            console.log("🔗 Payment response:", payment);
+
+            if (payment?.data?.checkoutUrl) {
+              console.log("✅ Found checkoutUrl in payment.data.checkoutUrl");
+              setData((prev) => ({
+                ...prev,
+                checkoutUrl: payment.data.checkoutUrl,
+              }));
+            } else if (payment?.checkoutUrl) {
+              console.log("✅ Found checkoutUrl in payment.checkoutUrl");
+              setData((prev) => ({
+                ...prev,
+                checkoutUrl: payment.checkoutUrl,
+              }));
+            } else {
+              console.log("❌ No checkoutUrl found in response:", JSON.stringify(payment, null, 2));
+            }
+          } catch (err) {
+            console.error("❌ Lỗi tạo payment link:", err);
           }
         }
 

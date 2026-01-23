@@ -40,7 +40,7 @@ export const BookCard = ({ book, featured, newest }: BookCardProps) => {
         <div className="flex justify-between items-center mt-4">
           <div>
             <p className="text-[17.6px] font-bold text-secondary1 m-0">
-              {book.priceBuy ? book.priceBuy.toLocaleString("vi-VN") + "đ" : "N/A"}
+              {book.priceBuy ? book.priceBuy.toLocaleString("vi-VN") + "đ" : "Liên hệ"}
             </p>
             <p className="text-[13.6px] text-secondary2 mt-1 mb-0">
               Thuê:{" "}
@@ -49,7 +49,7 @@ export const BookCard = ({ book, featured, newest }: BookCardProps) => {
                 ? book.priceRentOptions
                     .find((option) => option.type === "day")!
                     .price.toLocaleString("vi-VN") + "đ"
-                : "N/A"}
+                : "Liên hệ"}
             </p>
           </div>
           <span className="text-[24px]">→</span>

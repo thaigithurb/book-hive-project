@@ -1,3 +1,4 @@
+"use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -7,8 +8,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+Object.defineProperty(exports, "__esModule", { value: true });
 const Cart = require("../../models/cart.model");
-module.exports.index = (req, res) => __awaiter(this, void 0, void 0, function* () {
+module.exports.index = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const userId = req.user.id;
         const cart = yield Cart.findOne({ userId });
@@ -25,7 +27,7 @@ module.exports.index = (req, res) => __awaiter(this, void 0, void 0, function* (
         res.status(500).json({ error: "Lấy cart thất bại" });
     }
 });
-module.exports.add = (req, res) => __awaiter(this, void 0, void 0, function* () {
+module.exports.add = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const userId = req.user.id;
         const { bookId, quantity, title, price, image, slug } = req.body;
@@ -54,7 +56,7 @@ module.exports.add = (req, res) => __awaiter(this, void 0, void 0, function* () 
         res.status(500).json({ error: "Thêm vào cart thất bại" });
     }
 });
-module.exports.editItem = (req, res) => __awaiter(this, void 0, void 0, function* () {
+module.exports.editItem = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const userId = req.user.id;
         const { id } = req.params;
@@ -78,7 +80,7 @@ module.exports.editItem = (req, res) => __awaiter(this, void 0, void 0, function
         res.status(500).json({ error: "Cập nhật cart thất bại" });
     }
 });
-module.exports.deleteItem = (req, res) => __awaiter(this, void 0, void 0, function* () {
+module.exports.deleteItem = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const userId = req.user.id;
         const { id } = req.params;
@@ -93,7 +95,7 @@ module.exports.deleteItem = (req, res) => __awaiter(this, void 0, void 0, functi
         res.status(500).json({ error: "Xóa sản phẩm thất bại" });
     }
 });
-module.exports.clear = (req, res) => __awaiter(this, void 0, void 0, function* () {
+module.exports.clear = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const userId = req.user.id;
         const cart = yield Cart.findOne({ userId });
@@ -105,5 +107,43 @@ module.exports.clear = (req, res) => __awaiter(this, void 0, void 0, function* (
     }
     catch (error) {
         res.status(500).json({ error: "Xóa toàn bộ cart thất bại" });
+    }
+});
+module.exports.addRental = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const userId = req.user.id;
+        const { bookId, quantity, title, price, image, slug, rentalType, rentalDays } = req.body;
+        if (!rentalType || !rentalDays) {
+            return res.status(400).json({ error: "Chọn loại thuê (ngày/tuần) và số lượng" });
+        }
+        let cart = yield Cart.findOne({ userId });
+        if (!cart) {
+            cart = new Cart({ userId, items: [] });
+        }
+        const existing = cart.items.find((item) => item.bookId.toString() === bookId &&
+            item.type === "rent" &&
+            item.rentalType === rentalType &&
+            item.rentalDays === rentalDays);
+        if (existing) {
+            existing.quantity += quantity;
+        }
+        else {
+            cart.items.push({
+                bookId,
+                quantity,
+                title,
+                price,
+                image,
+                slug,
+                type: "rent",
+                rentalType,
+                rentalDays,
+            });
+        }
+        yield cart.save();
+        res.json({ items: cart.items });
+    }
+    catch (error) {
+        res.status(500).json({ error: "Thêm rental vào cart thất bại" });
     }
 });

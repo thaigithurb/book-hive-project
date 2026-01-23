@@ -6,7 +6,7 @@ router.post("/create", controller.createPaymentLink);
 
 router.post("/webhook", express.json(), controller.webhook);
 
-router.post("/cancel/:orderCode", controller.cancelPaymentLink); 
+router.post("/cancel/:code", controller.cancelPaymentLink);
 
 module.exports = router;
 

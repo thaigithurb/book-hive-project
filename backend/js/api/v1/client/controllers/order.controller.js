@@ -10,11 +10,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const Order = require("../../models/order.model");
+const Rental = require("../../models/rental.model");
 const generateHelper = require("../../../../helpers/generate");
 module.exports.index = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 10;
+        const limit = parseInt(req.query.limit);
         const skip = (page - 1) * limit;
         const orders = yield Order.find()
             .skip(skip)
@@ -68,24 +69,25 @@ module.exports.create = (req, res) => __awaiter(void 0, void 0, void 0, function
 });
 module.exports.detail = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const order = yield Order.findOne({ orderCode: req.params.orderCode });
-        if (!order) {
-            return res.status(404).json({ message: "Không tìm thấy đơn hàng!" });
+        const { orderCode } = req.params;
+        const code = orderCode;
+        let document = yield Order.findOne({ orderCode: String(code) });
+        if (!document) {
+            document = yield Rental.findOne({ rentalCode: String(code) });
         }
-        const now = new Date();
-        if (order.expiredAt &&
-            now > order.expiredAt &&
-            order.status === "pending") {
-            order.status = "cancelled";
-            order.isExpired = true;
-            yield order.save();
+        if (!document) {
+            return res.status(404).json({
+                message: "Không tìm thấy đơn hàng!",
+                debug: { code, searchedFor: String(code) }
+            });
         }
         return res.status(200).json({
             message: "Lấy thông tin đơn hàng thành công!",
-            order,
+            order: document,
         });
     }
     catch (error) {
+        console.error("❌ Detail error:", error);
         return res.status(500).json({
             message: "Lỗi lấy thông tin đơn hàng!",
             error: error.message,
@@ -113,6 +115,47 @@ module.exports.getOrdersByUser = (req, res) => __awaiter(void 0, void 0, void 0,
     catch (error) {
         return res.status(500).json({
             message: "Lỗi lấy danh sách đơn hàng!",
+            error: error.message,
+        });
+    }
+});
+module.exports.createRental = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { userInfo, items, totalAmount, paymentMethod } = req.body;
+        if (!userInfo || !items || items.length === 0 || !totalAmount) {
+            return res.status(400).json({
+                message: "Thông tin đơn thuê không đầy đủ!",
+            });
+        }
+        const rentalCode = generateHelper.generateOrderCode();
+        const dueAt = new Date();
+        items.forEach((item) => {
+            if (item.rentalType === "day") {
+                dueAt.setDate(dueAt.getDate() + item.rentalDays);
+            }
+            else if (item.rentalType === "week") {
+                dueAt.setDate(dueAt.getDate() + item.rentalDays * 7);
+            }
+        });
+        const rental = new Rental({
+            rentalCode,
+            userInfo,
+            items,
+            totalAmount,
+            paymentMethod,
+            dueAt,
+        });
+        yield rental.save();
+        return res.status(201).json({
+            message: "Tạo đơn thuê thành công!",
+            rental,
+            rentalCode,
+        });
+    }
+    catch (error) {
+        console.error("❌ Lỗi tạo đơn thuê:", error);
+        return res.status(500).json({
+            message: "Lỗi tạo đơn thuê!",
             error: error.message,
         });
     }

@@ -84,7 +84,7 @@ export default function Dashboard() {
   useEffect(() => {
     const interval = setInterval(() => {
       setRefreshTrigger((prev) => prev + 1);
-    }, 10000);
+    }, 15000);
 
     return () => clearInterval(interval);
   }, []);
@@ -104,7 +104,7 @@ export default function Dashboard() {
           <h1 className="text-3xl font-bold mb-8">Trang tổng quan</h1>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <StatCard
-              label="Tổng sách"
+              label="Tổng sách đang hoạt động"
               value={stats.totalBooks}
               color="bg-blue-500"
             />
@@ -144,9 +144,11 @@ export default function Dashboard() {
                         {order.orderCode}
                       </td>
                       <td className="p-2">
-                        {order.userInfo?.fullName || "N/A"}
+                        {order.userInfo?.fullName || "Liên hệ"}
                       </td>
-                      <td className="p-2">{order.userInfo?.phone || "N/A"}</td>
+                      <td className="p-2">
+                        {order.userInfo?.phone || "Liên hệ"}
+                      </td>
                       <td className="p-2 font-semibold">
                         {order.totalAmount?.toLocaleString()}đ
                       </td>

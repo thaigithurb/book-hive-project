@@ -17,8 +17,7 @@ export default function Detail() {
   const [loading, setLoading] = useState(true);
   const [rentType, setRentType] = useState("day");
   const [rentQuantity, setRentQuantity] = useState<number | string>(1);
-  const { addToCart } = useCart();
-
+  const { addToCart, addToRent } = useCart(); // ADDED addToRent
 
   useEffect(() => {
     const fetchBook = async () => {
@@ -41,7 +40,7 @@ export default function Detail() {
   const getRentPrice = () => {
     if (!book?.priceRentOptions) return null;
     const option = book.priceRentOptions.find(
-      (opt: any) => opt.type === rentType
+      (opt: any) => opt.type === rentType,
     );
     if (!option) return null;
     return option.price * Number(rentQuantity);
@@ -57,9 +56,38 @@ export default function Detail() {
       quantity: 1,
       image: book.image,
       slug: book.slug,
-    });
+      type: "buy", // ADDED
+    } as any);
 
     toast.success("Đã thêm vào giỏ hàng!");
+  };
+
+  // ADDED: Hàm mượn sách
+  const handleRentNow = () => {
+    if (!book) return;
+
+    const rentOption = book.priceRentOptions.find(
+      (opt: any) => opt.type === rentType,
+    );
+
+    if (!rentOption) {
+      toast.error("❌ Loại thuê không hợp lệ!");
+      return;
+    }
+
+    addToRent({
+      bookId: book._id,
+      title: book.title,
+      price: rentOption.price,
+      quantity: 1,
+      image: book.image,
+      slug: book.slug,
+      type: "rent", // ADDED
+      rentalType: rentType as "day" | "week", // ADDED
+      rentalDays: Number(rentQuantity), // ADDED
+    } as any);
+
+    toast.success("Đã thêm vào giỏ thuê!");
   };
 
   if (loading) {
@@ -97,7 +125,7 @@ export default function Detail() {
               <div className="flex items-center justify-center gap-2 mb-4">
                 <span className="text-yellow-400 text-2xl">⭐</span>
                 <span className="text-xl font-bold text-slate-800">
-                  {book.rating ?? "N/A"}
+                  {book.rating ?? "Liên hệ"}
                 </span>
                 <span className="text-base text-slate-400">
                   ({book.reviews ?? 0} đánh giá)
@@ -150,7 +178,7 @@ export default function Detail() {
                   <input
                     type="number"
                     min={1}
-                    max={rentType === "ngày" ? 6 : 4}
+                    max={rentType === "day" ? 6 : 4}
                     className="border rounded-lg px-2 py-1 w-20 text-base"
                     value={rentQuantity}
                     onChange={(e) => {
@@ -170,8 +198,8 @@ export default function Detail() {
                     {rentType === "day"
                       ? "ngày"
                       : rentType === "week"
-                      ? "tuần"
-                      : ""}
+                        ? "tuần"
+                        : ""}
                   </span>
                 </div>
               </div>
@@ -182,7 +210,10 @@ export default function Detail() {
                 >
                   🛒 Mua ngay
                 </button>
-                <button className="flex-1 py-4 font-semibold bg-white text-secondary1 border-2 border-secondary1 rounded-xl cursor-pointer text-base hover:bg-blue-50 transition-colors duration-200">
+                <button
+                  onClick={handleRentNow}
+                  className="flex-1 py-4 font-semibold bg-white text-secondary1 border-2 border-secondary1 rounded-xl cursor-pointer text-base hover:bg-blue-50 transition-colors duration-200"
+                >
                   📖 Mượn sách
                 </button>
               </div>

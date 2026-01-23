@@ -35,7 +35,7 @@ export default function ClientAuthGuard({
   const refreshAccessToken = async () => {
     try {
       const res = await axios.post(
-        `http://localhost:3001/api/v1/auth/refresh`,
+        `${API_URL}/api/v1/auth/refresh`,
         {},
         { withCredentials: true },
       );
@@ -57,7 +57,7 @@ export default function ClientAuthGuard({
   const verifyToken = async (token: string) => {
     try {
       await axios.post(
-        `http://localhost:3001/api/v1/auth/verify`,
+        `${API_URL}/api/v1/auth/verify`,
         {},
         {
           headers: {
