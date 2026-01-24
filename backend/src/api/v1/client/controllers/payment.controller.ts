@@ -10,16 +10,13 @@ const payOS = new PayOS({
   checksumKey: process.env.PAYOS_CHECKSUM_KEY,
 });
 
-// Helper: Tìm document bằng code (kiểm tra cả Order và Rental)
+// Tìm document bằng code
 const findDocumentByCode = async (code) => {
-  console.log("🔍 Tìm document với code:", code);
 
   let document = await Order.findOne({ orderCode: String(code) });
-  console.log("✅ Order findOne:", document ? "Tìm được" : "Không tìm được");
   if (document) return { document, type: "order" };
 
   document = await Rental.findOne({ rentalCode: String(code) });
-  console.log("✅ Rental findOne:", document ? "Tìm được" : "Không tìm được");
   if (document) return { document, type: "rent" };
 
   return { document: null, type: null };
@@ -29,7 +26,6 @@ const findDocumentByCode = async (code) => {
 module.exports.createPaymentLink = async (req, res) => {
   try {
     const { code, amount, description, items } = req.body;
-    console.log("📤 Nhận request với code:", code);
 
     const { document, type } = await findDocumentByCode(code);
 
@@ -51,7 +47,6 @@ module.exports.createPaymentLink = async (req, res) => {
       });
     }
 
-    console.log("✅ Tìm được document:", type, document._id);
 
     if (
       document.isExpired ||
