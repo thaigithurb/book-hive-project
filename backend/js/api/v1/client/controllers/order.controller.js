@@ -56,7 +56,6 @@ module.exports.create = (req, res) => __awaiter(void 0, void 0, void 0, function
         return res.status(201).json({
             message: "Tạo đơn hàng thành công!",
             order,
-            orderCode,
         });
     }
     catch (error) {
@@ -69,21 +68,16 @@ module.exports.create = (req, res) => __awaiter(void 0, void 0, void 0, function
 });
 module.exports.detail = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { orderCode } = req.params;
-        const code = orderCode;
-        let document = yield Order.findOne({ orderCode: String(code) });
-        if (!document) {
-            document = yield Rental.findOne({ rentalCode: String(code) });
-        }
-        if (!document) {
+        const { code } = req.params;
+        const order = yield Order.findOne({ orderCode: String(code) });
+        if (!order) {
             return res.status(404).json({
                 message: "Không tìm thấy đơn hàng!",
-                debug: { code, searchedFor: String(code) }
             });
         }
         return res.status(200).json({
             message: "Lấy thông tin đơn hàng thành công!",
-            order: document,
+            order: order,
         });
     }
     catch (error) {
@@ -115,47 +109,6 @@ module.exports.getOrdersByUser = (req, res) => __awaiter(void 0, void 0, void 0,
     catch (error) {
         return res.status(500).json({
             message: "Lỗi lấy danh sách đơn hàng!",
-            error: error.message,
-        });
-    }
-});
-module.exports.createRental = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const { userInfo, items, totalAmount, paymentMethod } = req.body;
-        if (!userInfo || !items || items.length === 0 || !totalAmount) {
-            return res.status(400).json({
-                message: "Thông tin đơn thuê không đầy đủ!",
-            });
-        }
-        const rentalCode = generateHelper.generateOrderCode();
-        const dueAt = new Date();
-        items.forEach((item) => {
-            if (item.rentalType === "day") {
-                dueAt.setDate(dueAt.getDate() + item.rentalDays);
-            }
-            else if (item.rentalType === "week") {
-                dueAt.setDate(dueAt.getDate() + item.rentalDays * 7);
-            }
-        });
-        const rental = new Rental({
-            rentalCode,
-            userInfo,
-            items,
-            totalAmount,
-            paymentMethod,
-            dueAt,
-        });
-        yield rental.save();
-        return res.status(201).json({
-            message: "Tạo đơn thuê thành công!",
-            rental,
-            rentalCode,
-        });
-    }
-    catch (error) {
-        console.error("❌ Lỗi tạo đơn thuê:", error);
-        return res.status(500).json({
-            message: "Lỗi tạo đơn thuê!",
             error: error.message,
         });
     }

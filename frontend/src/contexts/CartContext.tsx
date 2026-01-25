@@ -13,9 +13,9 @@ interface CartItem {
   quantity: number;
   image?: string;
   slug: string;
-  type: "buy" | "rent"; // NEW
-  rentalType?: "day" | "week"; // NEW
-  rentalDays?: number; // NEW
+  type: "buy" | "rent";
+  rentalType?: "day" | "week"; 
+  rentalDays?: number; 
 }
 
 interface CartContextType {
@@ -26,10 +26,10 @@ interface CartContextType {
   updateQuantity: (id: string, quantity: number, type?: "buy" | "rent") => void; 
   clearCart: () => void;
   getTotalItems: () => number;
-  getBuyItems: () => CartItem[]; // NEW
-  getRentItems: () => CartItem[]; // NEW
-  getTotalBuyPrice: () => number; // NEW
-  getTotalRentPrice: () => number; // NEW
+  getBuyItems: () => CartItem[]; 
+  getRentItems: () => CartItem[]; 
+  getTotalBuyPrice: () => number; 
+  getTotalRentPrice: () => number; 
   isAuthenticated: boolean;
   isLoading: boolean;
 }

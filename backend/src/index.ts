@@ -12,10 +12,11 @@ database.connect();
 
 const app = express();
 const port = process.env.PORT;
+const FRONTEND_URL = process.env.FRONTEND_URL;
 
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: `${FRONTEND_URL}`,
     credentials: true,
   })
 );

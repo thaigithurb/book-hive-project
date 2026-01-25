@@ -30,7 +30,7 @@ const sendOrderConfirmationEmail = (order) => __awaiter(this, void 0, void 0, fu
       </tr>
     `)
             .join("");
-        const trackingLink = `${process.env.FRONTEND_URL || "http://localhost:3000"}/order-tracking/${orderCode}`;
+        const trackingLink = `${process.env.FRONTEND_URL}/order-tracking/${orderCode}`;
         const htmlContent = `
       <div style="font-family: Arial, sans-serif; background-color: #f5f5f5; padding: 20px;">
         <div style="max-width: 600px; margin: 0 auto; background-color: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">

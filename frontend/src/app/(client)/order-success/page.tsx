@@ -15,7 +15,9 @@ export default function OrderSuccessPage() {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    const code = searchParams.get("orderCode");
+    const code = searchParams.get("code");
+
+    console.log(code);
 
     if (code) {
       setOrderCode(parseInt(code, 10));

@@ -50,3 +50,25 @@ module.exports.createRental = (req, res) => __awaiter(this, void 0, void 0, func
         });
     }
 });
+module.exports.detail = (req, res) => __awaiter(this, void 0, void 0, function* () {
+    try {
+        const { code } = req.params;
+        const rental = yield Rental.findOne({ rentalCode: String(code) });
+        if (!rental) {
+            return res.status(404).json({
+                message: "Không tìm thấy đơn thuê!",
+            });
+        }
+        return res.status(200).json({
+            message: "Lấy thông tin đơn thuê thành công!",
+            order: rental,
+        });
+    }
+    catch (error) {
+        console.error("❌ Detail error:", error);
+        return res.status(500).json({
+            message: "Lỗi lấy thông tin đơn thuê!",
+            error: error.message,
+        });
+    }
+});

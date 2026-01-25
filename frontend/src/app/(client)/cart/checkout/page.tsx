@@ -96,50 +96,72 @@ export default function CheckoutPage() {
     setIsProcessing(true);
 
     try {
-      const hasRentItems = displayItems.some((item) => item.type === "rent");
-      const endpoint = hasRentItems
-        ? `${API_URL}/api/v1/orders/rentals/create`
-        : `${API_URL}/api/v1/orders/create`;
+      let createdCodes: string[] = [];
 
-      const cleanItems = displayItems.map((item) => {
-        if (hasRentItems) {
-          return {
-            bookId: item.bookId,
-            title: item.title,
-            price: item.price,
-            quantity: item.quantity,
-            slug: item.slug,
-            image: item.image,
-            rentalType: item.rentalType,
-            rentalDays: item.rentalDays,
+      if (cartType === "all" || cartType === "buy") {
+        const buyItemsToCreate = items.filter((item) => item.type !== "rent");
+
+        if (buyItemsToCreate.length > 0) {
+          const buyOrderData = {
+            userInfo,
+            items: buyItemsToCreate.map((item) => ({
+              id: item.bookId,
+              title: item.title,
+              price: item.price,
+              quantity: item.quantity,
+              slug: item.slug,
+              image: item.image,
+            })),
+            totalAmount: buyItemsToCreate.reduce(
+              (sum, item) => sum + item.price * item.quantity,
+              0,
+            ),
+            paymentMethod,
           };
-        } else {
-          return {
-            title: item.title,
-            price: item.price,
-            quantity: item.quantity,
-            slug: item.slug,
-            image: item.image,
-          };
+
+          const buyResponse = await axios.post(
+            `${API_URL}/api/v1/orders/create`,
+            buyOrderData,
+          );
+          createdCodes.push(buyResponse.data.order.orderCode);
         }
-      });
+      }
 
-      const orderData = {
-        userInfo,
-        items: cleanItems,
-        totalAmount,
-        paymentMethod,
-      };
+      if (cartType === "all" || cartType === "rent") {
+        const rentItemsToCreate = items.filter((item) => item.type === "rent");
 
-      const response = await axios.post(endpoint, orderData);
+        if (rentItemsToCreate.length > 0) {
+          const rentOrderData = {
+            userInfo,
+            items: rentItemsToCreate.map((item) => ({
+              id: item.bookId,
+              title: item.title,
+              price: item.price,
+              quantity: item.quantity,
+              slug: item.slug,
+              image: item.image,
+              rentalType: item.rentalType,
+              rentalDays: item.rentalDays,
+            })),
+            totalAmount: rentItemsToCreate.reduce(
+              (sum, item) => sum + item.price * item.quantity,
+              0,
+            ),
+            paymentMethod,
+          };
 
-      let code: string;
-      if (response.data.orderCode) {
-        code = String(response.data.orderCode);
-      } else if (response.data.rental?.rentalCode) {
-        code = response.data.rental.rentalCode;
-      } else {
-        throw new Error("No code in response");
+          const rentResponse = await axios.post(
+            `${API_URL}/api/v1/rentals/create`,
+            rentOrderData,
+          );
+          createdCodes.push(rentResponse.data.rental.rentalCode);
+        }
+      }
+
+      if (createdCodes.length === 0) {
+        toast.error("❌ Không có sản phẩm để tạo đơn!");
+        setIsProcessing(false);
+        return;
       }
 
       if (paymentMethod === "cod") {
@@ -161,10 +183,10 @@ export default function CheckoutPage() {
         setIsRedirecting(true);
 
         setTimeout(() => {
-          router.push(`/order-success?orderCode=${code}`);
+          router.push(`/order-success?codes=${createdCodes.join(",")}`);
         }, 1500);
       } else {
-        sessionStorage.setItem("orderCode", code);
+        sessionStorage.setItem("codes", JSON.stringify(createdCodes));
         sessionStorage.setItem("paymentMethod", paymentMethod);
 
         toast.success("Đơn hàng đã được tạo!");

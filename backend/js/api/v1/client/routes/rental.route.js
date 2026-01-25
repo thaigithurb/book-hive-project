@@ -1,0 +1,9 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express = require("express");
+const router = express.Router();
+const controller = require("../controllers/rental.controller");
+const { validateCheckout } = require("../../../../middleware/validate.middleware");
+router.post("/create", validateCheckout, controller.createRental);
+router.post("/detail/:rentalCode", validateCheckout, controller.createRental);
+module.exports = router;

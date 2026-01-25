@@ -15,11 +15,7 @@ const rentalSchema = new mongoose.Schema(
     },
     items: [
       {
-        bookId: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "Book",
-          required: true,
-        },
+        id: String,
         title: String,
         price: Number, 
         quantity: Number,

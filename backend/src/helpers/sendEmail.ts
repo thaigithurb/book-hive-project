@@ -35,7 +35,7 @@ const sendOrderConfirmationEmail = async (order) => {
       .join("");
 
     const trackingLink = `${
-      process.env.FRONTEND_URL || "http://localhost:3000"
+      process.env.FRONTEND_URL
     }/order-tracking/${orderCode}`;
 
     const htmlContent = `
