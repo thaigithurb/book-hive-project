@@ -4,51 +4,39 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { toast, ToastContainer } from "react-toastify";
-import axios from "axios";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+import { useCart } from "@/contexts/CartContext";
 
 export default function OrderSuccessPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const [orderCode, setOrderCode] = useState<number | null>(null);
+  const { clearCart } = useCart();
+  const [orderCode, setOrderCode] = useState<string | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    const code = searchParams.get("code");
+    const singleCode = searchParams.get("code");
+    const multipleCodes = searchParams.get("codes");
 
-    console.log(code);
+    const displayCode = multipleCodes || singleCode;
 
-    if (code) {
-      setOrderCode(parseInt(code, 10));
+    if (displayCode) {
+      setOrderCode(displayCode);
       setIsLoaded(true);
       toast.success("✅ Đặt hàng thành công!");
 
-       const clearUserCart = async () => {
-        try {
-          const accessToken = localStorage.getItem("accessToken_user");
-          if (accessToken) {
-            await axios.delete(`${API_URL}/api/v1/cart/delete-all`, {
-              headers: {
-                Authorization: `Bearer ${accessToken}`,
-              },
-            });
-          }
-        } catch (error) {
-          console.error("Lỗi xóa cart:", error);
-        }
-      };
-
-      clearUserCart();
+      clearCart();
 
       sessionStorage.removeItem("orderCode");
+      sessionStorage.removeItem("codes");
       sessionStorage.removeItem("paymentMethod");
+      sessionStorage.removeItem("totalAmount");
+
       localStorage.removeItem("guest_cart");
     } else {
       toast.error("Không tìm thấy thông tin đơn hàng!");
       router.replace("/home");
     }
-  }, [searchParams, router]);
+  }, [searchParams, router, clearCart]);
 
   if (!isLoaded) {
     return (
@@ -78,7 +66,7 @@ export default function OrderSuccessPage() {
                 Mã đơn hàng của bạn:
               </p>
               <div className="flex items-center justify-center gap-3">
-                <p className="text-3xl font-bold text-green-600 font-mono">
+                <p className="text-3xl font-bold text-green-600 font-mono break-all">
                   {orderCode}
                 </p>
                 <button

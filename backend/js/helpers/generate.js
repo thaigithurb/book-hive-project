@@ -18,3 +18,7 @@ module.exports.generateOrderCode = () => {
         .padStart(2, "0");
     return parseInt(`${timestamp}${random}`);
 };
+module.exports.generateDescriptionCode = () => {
+    return Math.random().toString(36).slice(2, 8);
+    ;
+};

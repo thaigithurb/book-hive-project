@@ -3,6 +3,7 @@ const Order = require("../../models/order.model");
 const Rental = require("../../models/rental.model");
 const Transaction = require("../../models/transaction.model");
 const { sendOrderConfirmationEmail } = require("../../../../helpers/sendEmail");
+const { generateDescriptionCode } = require("../../../../helpers/generate");
 
 const payOS = new PayOS({
   clientId: process.env.PAYOS_CLIENT_ID,
@@ -33,7 +34,6 @@ module.exports.createCombinedPaymentLink = async (req, res) => {
       });
     }
 
-    // Load tất cả documents
     const documents = [];
     for (const code of codes) {
       const { document, type } = await findDocumentByCode(code);
@@ -49,7 +49,6 @@ module.exports.createCombinedPaymentLink = async (req, res) => {
       });
     }
 
-    // Kiểm tra hết hạn
     for (const doc of documents) {
       if (
         doc.document.isExpired ||
@@ -67,29 +66,26 @@ module.exports.createCombinedPaymentLink = async (req, res) => {
       }
     }
 
-    // Tạo payment link với tổng tiền
-    const mainCode = codes[0]; // Dùng code đầu tiên làm mã chính
-    const cancelUrl = `${process.env.FRONTEND_URL || "http://localhost:3000"}/cart`;
-    const returnUrl = `${process.env.FRONTEND_URL || "http://localhost:3000"}/order-success`;
+  const mainCode = codes[0];
+  const cancelUrl = `${process.env.FRONTEND_URL || "http://localhost:3000"}/cart`;
+  const returnUrl = `${baseUrl}/order-success?codes=${encodeURIComponent(
+      codes.join(","),
 
-    const paymentLink = await payOS.paymentRequests.create({
+const descriptionCode = generateDescriptionCode();
+
+const paymentLink = await payOS.paymentRequests.create({
       orderCode: Number(String(mainCode).replace(/\D/g, "")),
       amount: Number(amount),
-      description: `Thanh toán ${documents.length} đơn hàng`,
+      description: descriptionCode,
       items: items || [],
       cancelUrl,
       returnUrl,
     });
 
-    // Lưu checkout URL cho tất cả documents
     for (const doc of documents) {
       doc.document.checkoutUrl = paymentLink.checkoutUrl;
       await doc.document.save();
     }
-
-    console.log(
-      `✅ Tạo combined payment link thành công cho ${codes.length} đơn`,
-    );
 
     return res.json({
       error: 0,
@@ -154,7 +150,6 @@ module.exports.createPaymentLink = async (req, res) => {
       });
     }
 
-    // Tạo payment link
     const cancelUrl = `${process.env.FRONTEND_URL || "http://localhost:3000"}/cart/checkout/payment`;
     const returnUrl = `${process.env.FRONTEND_URL || "http://localhost:3000"}/order-success?code=${code}`;
 
@@ -167,11 +162,8 @@ module.exports.createPaymentLink = async (req, res) => {
       returnUrl,
     });
 
-    // Lưu checkout URL vào document
     document.checkoutUrl = paymentLink.checkoutUrl;
     await document.save();
-
-    console.log(`✅ Tạo payment link thành công cho ${type}: ${code}`);
 
     return res.json({
       error: 0,
@@ -196,17 +188,14 @@ module.exports.createPaymentLink = async (req, res) => {
 module.exports.webhook = async (req, res) => {
   try {
     const { code, desc, data } = req.body;
-    console.log("🔔 Webhook nhận:", { code, desc, orderCode: data.orderCode });
-
     if (code === "00" && desc === "success") {
-      // Xử lý combined payment (multiple codes)
       const orderCode = String(data.orderCode);
 
-      // Tìm tất cả documents liên quan
       const allOrders = await Order.find({});
       const allRentals = await Rental.find({});
 
       let paidCount = 0;
+      const paidDocuments: { doc: any; type: "order" | "rental" }[] = [];
 
       for (const order of allOrders) {
         if (
@@ -217,6 +206,7 @@ module.exports.webhook = async (req, res) => {
             order.status = "paid";
             await order.save();
             paidCount++;
+            paidDocuments.push({ doc: order, type: "order" });
 
             await new Transaction({
               orderCode: String(order.orderCode),
@@ -230,15 +220,6 @@ module.exports.webhook = async (req, res) => {
               status: "success",
               verifiedAt: new Date(),
             }).save();
-
-            try {
-              await sendOrderConfirmationEmail(
-                order.userInfo.email,
-                order.orderCode,
-              );
-            } catch (emailErr) {
-              console.error("⚠️ Lỗi gửi email:", emailErr);
-            }
           }
         }
       }
@@ -253,6 +234,7 @@ module.exports.webhook = async (req, res) => {
             rental.rentedAt = new Date();
             await rental.save();
             paidCount++;
+            paidDocuments.push({ doc: rental, type: "rental" });
 
             await new Transaction({
               orderCode: String(rental.rentalCode),
@@ -266,34 +248,64 @@ module.exports.webhook = async (req, res) => {
               status: "success",
               verifiedAt: new Date(),
             }).save();
-
-            try {
-              await sendOrderConfirmationEmail(
-                rental.userInfo.email,
-                rental.rentalCode,
-              );
-            } catch (emailErr) {
-              console.error("⚠️ Lỗi gửi email:", emailErr);
-            }
           }
         }
       }
 
-      console.log(`✅ Đã cập nhật ${paidCount} đơn hàng`);
+      try {
+        if (paidDocuments.length === 1) {
+          const { doc, type } = paidDocuments[0];
+
+          const emailOrder = {
+            userInfo: doc.userInfo,
+            orderCode: type === "order" ? doc.orderCode : doc.rentalCode,
+            items: doc.items || [],
+            totalAmount: doc.totalAmount || 0,
+          };
+
+          await sendOrderConfirmationEmail(emailOrder);
+        } else if (paidDocuments.length > 1) {
+          const firstDoc = paidDocuments[0].doc;
+          const userInfo = firstDoc.userInfo;
+
+          const combinedCode = paidDocuments
+            .map((d) =>
+              d.type === "order" ? d.doc.orderCode : d.doc.rentalCode,
+            )
+            .join(", ");
+
+          const combinedItems = paidDocuments.flatMap((d) => d.doc.items || []);
+
+          const combinedTotal = paidDocuments.reduce(
+            (sum, d) => sum + (d.doc.totalAmount || 0),
+            0,
+          );
+
+          const combinedOrder = {
+            userInfo,
+            orderCode: combinedCode,
+            items: combinedItems,
+            totalAmount: combinedTotal,
+          };
+
+          await sendOrderConfirmationEmail(combinedOrder);
+        }
+      } catch (emailErr) {
+        console.error("Lỗi gửi email xác nhận đơn:", emailErr);
+      }
     }
 
     return res.json({ message: "OK" });
   } catch (err) {
-    console.error("❌ Lỗi webhook:", err);
+    console.error("Lỗi webhook:", err);
     return res.status(500).json({ message: "Lỗi xử lý webhook" });
   }
 };
 
-// [POST] /api/v1/payment/cancel/:code
 module.exports.cancelPaymentLink = async (req, res) => {
   try {
     const { code } = req.params;
-    console.log("❌ Cancel request với code:", code);
+    console.log("Cancel request với code:", code);
 
     const { document, type } = await findDocumentByCode(code);
 
@@ -318,12 +330,9 @@ module.exports.cancelPaymentLink = async (req, res) => {
     try {
       const orderCode = Number(String(code).replace(/\D/g, ""));
       await payOS.paymentRequests.cancel(orderCode);
-      console.log(`✅ Hủy payment link thành công: ${code}`);
     } catch (e) {
-      console.log("⚠️ Không hủy được trên PayOS:", e.message);
+      console.log("Không hủy được trên PayOS:", e.message);
     }
-
-    console.log(`❌ Đơn ${type} ${code} đã bị hủy`);
 
     return res.json({
       error: 0,
