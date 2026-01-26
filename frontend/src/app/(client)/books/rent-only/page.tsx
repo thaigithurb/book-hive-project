@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
 import { Book } from "@/app/interfaces/book.interface";
-import { BookCard } from "@/app/components/Card/BookCard/BookCard";
+import { BookCard } from "@/app/components/Card/BookCard";
 import { Loading } from "@/app/components/Loading/Loading";
 import debounce from "lodash.debounce";
 import Pagination from "@/app/components/Pagination/Pagination";

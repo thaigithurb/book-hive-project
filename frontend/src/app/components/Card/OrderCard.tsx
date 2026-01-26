@@ -1,0 +1,174 @@
+import Link from "next/link";
+
+type Order = {
+  _id: string;
+  orderCode: string;
+  userInfo: {
+    fullName: string;
+    email: string;
+    phone: string;
+    address: string;
+  };
+  items: Array<{
+    bookId: string;
+    title: string;
+    price: number;
+    quantity: number;
+    image: string;
+  }>;
+  totalAmount: number;
+  paymentMethod: string;
+  status: "pending" | "processing" | "shipped" | "delivered" | "cancelled";
+  isExpired: boolean;
+  expiredAt: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+function getStatusColor(status: string) {
+  switch (status) {
+    case "pending":
+      return "bg-yellow-50 text-yellow-700 border border-yellow-200";
+    case "processing":
+      return "bg-blue-50 text-blue-700 border border-blue-200";
+    case "shipped":
+      return "bg-purple-50 text-purple-700 border border-purple-200";
+    case "delivered":
+      return "bg-green-50 text-green-700 border border-green-200";
+    case "cancelled":
+      return "bg-red-50 text-red-700 border border-red-200";
+    default:
+      return "bg-gray-50 text-gray-700 border border-gray-200";
+  }
+}
+
+function getStatusText(status: string) {
+  const statusMap: Record<string, string> = {
+    pending: "Chờ xác nhận",
+    processing: "Đang xử lý",
+    shipped: "Đã gửi",
+    delivered: "Đã giao",
+    cancelled: "Đã hủy",
+    paid: "Đã thanh toán",
+  };
+  return statusMap[status] || status;
+}
+
+export const OrderCard = ({ order }: { order: Order }) => (
+  <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden">
+    <Link href={`/orders/${order.orderCode}`} className="block p-6">
+      <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-4">
+        <div>
+          <p className="text-xs font-semibold text-gray-500 uppercase mb-1">
+            Mã đơn hàng
+          </p>
+          <p className="font-mono text-sm font-bold text-slate-900 break-all">
+            {order.orderCode}
+          </p>
+        </div>
+
+        <div>
+          <p className="text-xs font-semibold text-gray-500 uppercase mb-1">
+            Ngày đặt hàng
+          </p>
+          <p className="text-sm font-medium text-slate-900">
+            {new Date(order.createdAt).toLocaleDateString("vi-VN", {
+              day: "numeric",
+              month: "numeric",
+              year: "numeric",
+            })}
+          </p>
+        </div>
+
+        <div>
+          <p className="text-xs font-semibold text-gray-500 uppercase mb-1">
+            Số lượng
+          </p>
+          <p className="text-sm font-medium text-slate-900">
+            {order.items.reduce((sum, item) => sum + item.quantity, 0)} sản phẩm
+          </p>
+        </div>
+
+        <div>
+          <p className="text-xs font-semibold text-gray-500 uppercase mb-1">
+            Tổng tiền
+          </p>
+          <p className="text-sm font-bold text-primary">
+            {order.totalAmount.toLocaleString("vi-VN")} đ
+          </p>
+        </div>
+
+        <div className="col-span-2 md:col-span-1">
+          <p className="text-xs font-semibold text-gray-500 uppercase mb-1">
+            Trạng thái
+          </p>
+          <span
+            className={`inline-block px-3 py-1 rounded text-xs font-semibold ${getStatusColor(
+              order.status,
+            )}`}
+          >
+            {getStatusText(order.status)}
+          </span>
+        </div>
+      </div>
+
+      {order.items.length > 0 && (
+        <div className="pt-4 border-t border-gray-200">
+          <div className="flex items-center gap-3 overflow-hidden">
+            {order.items.slice(0, 2).map((item, idx) => (
+              <div
+                key={idx}
+                className="flex-shrink-0 w-14 h-16 bg-gray-100 rounded overflow-hidden"
+              >
+                {item.image ? (
+                  <img
+                    src={item.image}
+                    alt={item.title}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-lg">
+                    📚
+                  </div>
+                )}
+              </div>
+            ))}
+
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-slate-900 truncate">
+                {order.items[0]?.title}
+              </p>
+              {order.items.length > 2 && (
+                <p className="text-xs text-gray-500 mt-1">
+                  + {order.items.length - 2} sản phẩm khác
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </Link>
+
+    <Link
+      href={`/orders/${order.orderCode}`}
+      className="flex items-center justify-between px-6 py-3 bg-gray-50 hover:bg-blue-50 border-t border-gray-200 transition-colors duration-200 group"
+    >
+      <span className="text-sm font-medium text-gray-700 group-hover:text-primary">
+        Xem chi tiết
+      </span>
+      <svg
+        className="w-5 h-5 text-gray-400 group-hover:text-primary transition-colors duration-200"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M9 5l7 7-7 7"
+        />
+      </svg>
+    </Link>
+  </div>
+);

@@ -133,7 +133,7 @@ export default function ProfilePage() {
               <p className="text-sm text-gray-600">Xem lịch sử mua hàng</p>
             </Link>
             <Link
-              href="/wishlist"
+              href="/favorites"
               className="block bg-gradient-to-r from-pink-50 to-pink-100 rounded-lg p-4 text-center hover:shadow-lg transition"
             >
               <div className="text-2xl mb-2">❤️</div>

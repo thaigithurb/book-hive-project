@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import { useCart } from "@/contexts/CartContext";
 import { Loading } from "@/app/components/Loading/Loading";
@@ -10,8 +9,6 @@ import { Loading } from "@/app/components/Loading/Loading";
 export default function CartPage() {
   const router = useRouter();
   const { items, removeFromCart, updateQuantity, isLoading } = useCart();
-
-  console.log(items);
 
   if (isLoading) {
     return <Loading fullScreen={true} size="lg" text="Đang tải giỏ hàng..." />;

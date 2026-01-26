@@ -7,6 +7,7 @@ const authRoutes = require("./auth.route");
 const cartRoutes = require("./cart.route");
 const userRoutes = require("./user.route");
 const rentalRoutes = require("./rental.route");
+const favoriteRoutes = require("./favorite.route");
 const { clientAuth } = require("../../../../middleware/auth.middleware");
 module.exports = (app) => {
     const version = "/api/v1";
@@ -17,4 +18,5 @@ module.exports = (app) => {
     app.use(version + "/cart", clientAuth, cartRoutes);
     app.use(version + "/auth", authRoutes);
     app.use(version + "/users", userRoutes);
+    app.use(version + "/favorites", clientAuth, favoriteRoutes);
 };

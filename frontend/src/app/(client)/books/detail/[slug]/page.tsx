@@ -17,7 +17,7 @@ export default function Detail() {
   const [loading, setLoading] = useState(true);
   const [rentType, setRentType] = useState("day");
   const [rentQuantity, setRentQuantity] = useState<number | string>(1);
-  const { addToCart, addToRent } = useCart(); // ADDED addToRent
+  const { addToCart, addToRent } = useCart(); 
 
   useEffect(() => {
     const fetchBook = async () => {

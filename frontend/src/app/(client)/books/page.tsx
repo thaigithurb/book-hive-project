@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
 import { Book } from "@/app/interfaces/book.interface";
-import { BookCard } from "@/app/components/Card/BookCard/BookCard";
+import { BookCard } from "@/app/components/Card/BookCard";
 import { Loading } from "@/app/components/Loading/Loading";
 import debounce from "lodash.debounce";
 import Pagination from "@/app/components/Pagination/Pagination";
@@ -23,6 +23,7 @@ export default function Books() {
   const [sort, setSort] = useState<{ key: string; value: 1 | -1 } | null>(null);
   const limit = 12;
   const [sortValue, setSortValue] = useState("");
+  const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
   const sortOptions = [
     { value: "", label: "Sắp xếp" },
     { value: "title_asc", label: "Tên A-Z" },
@@ -32,6 +33,47 @@ export default function Books() {
     { value: "createdAt_desc", label: "Mới nhất" },
     { value: "createdAt_asc", label: "Cũ nhất" },
   ];
+
+  useEffect(() => {
+    const fetchFavorites = async () => {
+      try {
+        const token = localStorage.getItem("accessToken_user");
+        if (!token) return;
+        const res = await axios.get(`${API_URL}/api/v1/favorites`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const favorites = res.data.favorites || [];
+        setFavoriteIds(favorites.map((fav: any) => fav.bookId?._id));
+      } catch {
+        setFavoriteIds([]);
+      }
+    };
+    fetchFavorites();
+  }, []);
+
+  // Xử lý toggle favorite
+  const handleToggleFavorite = async (bookId: string, next: boolean) => {
+    const token = localStorage.getItem("accessToken_user");
+    if (!token) return;
+    try {
+      if (next) {
+        await axios.post(
+          `${API_URL}/api/v1/favorites/add`,
+          { bookId },
+          { headers: { Authorization: `Bearer ${token}` } },
+        );
+        setFavoriteIds((prev) => [...prev, bookId]);
+      } else {
+        await axios.post(
+          `${API_URL}/api/v1/favorites/remove`,
+          { bookId },
+          { headers: { Authorization: `Bearer ${token}` } },
+        );
+        setFavoriteIds((prev) => prev.filter((id) => id !== bookId));
+      }
+    } catch (err) {
+    }
+  };
 
   // xử lí load data cùng với lọc và tìm kiếm
   const fetchData = useCallback(
@@ -55,7 +97,7 @@ export default function Books() {
           setLoading(false);
         });
     }, 400),
-    [sort, keyword, page]
+    [sort, keyword, page],
   );
 
   useEffect(() => {
@@ -63,16 +105,10 @@ export default function Books() {
     return fetchData.cancel;
   }, [fetchData]);
 
-  // ĐỒNG BỘ page với URL mỗi khi searchParams thay đổi
   useSyncParams(setPage, setSortValue, setSort);
-
-  // hàm thay đổi trang
   const handlePageChange = usePageChange("books", setPage, "client");
-
-  //  Xử lý thay đổi sort từ dropdown
   const handleSortChange = useSortChange("books", "client");
 
-  // Full screen loading khi load lần đầu
   if (loading && books.length === 0) {
     return <Loading fullScreen={true} size="lg" text="Đang tải sách..." />;
   }
@@ -97,11 +133,13 @@ export default function Books() {
 
           <div className="grid grid-cols-4 gap-[24px] mb-8">
             {books.length > 0 ? (
-              books.map((book, index) => (
+              books.map((book) => (
                 <BookCard
-                  key={index}
+                  key={book._id}
                   book={book}
                   featured={book.featured ? true : false}
+                  isFavorite={favoriteIds.includes(book._id)}
+                  onToggleFavorite={handleToggleFavorite}
                 />
               ))
             ) : (
