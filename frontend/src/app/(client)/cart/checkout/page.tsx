@@ -188,6 +188,7 @@ export default function CheckoutPage() {
       } else {
         sessionStorage.setItem("codes", JSON.stringify(createdCodes));
         sessionStorage.setItem("paymentMethod", paymentMethod);
+        sessionStorage.setItem("totalAmount", totalAmount.toString());
 
         toast.success("Đơn hàng đã được tạo!");
 
