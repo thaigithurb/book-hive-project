@@ -14,29 +14,31 @@ export default function OrderSuccessPage() {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    const singleCode = searchParams.get("code");
-    const multipleCodes = searchParams.get("codes");
+    const run = async () => {
+      const singleCode = searchParams.get("code");
+      const multipleCodes = searchParams.get("codes");
+      const displayCode = multipleCodes || singleCode;
 
-    const displayCode = multipleCodes || singleCode;
+      if (displayCode) {
+        setOrderCode(displayCode);
+        setIsLoaded(true);
+        toast.success("✅ Đặt hàng thành công!");
 
-    if (displayCode) {
-      setOrderCode(displayCode);
-      setIsLoaded(true);
-      toast.success("✅ Đặt hàng thành công!");
+        await clearCart();
 
-      clearCart();
+        sessionStorage.removeItem("orderCode");
+        sessionStorage.removeItem("codes");
+        sessionStorage.removeItem("paymentMethod");
+        sessionStorage.removeItem("totalAmount");
 
-      sessionStorage.removeItem("orderCode");
-      sessionStorage.removeItem("codes");
-      sessionStorage.removeItem("paymentMethod");
-      sessionStorage.removeItem("totalAmount");
-
-      localStorage.removeItem("guest_cart");
-    } else {
-      toast.error("Không tìm thấy thông tin đơn hàng!");
-      router.replace("/home");
-    }
-  }, [searchParams, router, clearCart]);
+        localStorage.removeItem("guest_cart");
+      } else {
+        toast.error("Không tìm thấy thông tin đơn hàng!");
+        router.replace("/home");
+      }
+    };
+    run();
+  }, []);
 
   if (!isLoaded) {
     return (

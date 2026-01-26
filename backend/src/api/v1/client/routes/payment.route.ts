@@ -4,8 +4,6 @@ const controller = require("../controllers/payment.controller");
 
 router.post("/create-combined", controller.createCombinedPaymentLink);
 
-router.post("/create", controller.createPaymentLink);
-
 router.post("/webhook", express.json(), controller.webhook);
 
 router.post("/cancel/:code", controller.cancelPaymentLink);

@@ -66,7 +66,7 @@ module.exports.createCombinedPaymentLink = (req, res) => __awaiter(void 0, void 
         }
         const mainCode = codes[0];
         const cancelUrl = `${process.env.FRONTEND_URL || "http://localhost:3000"}/cart`;
-        const returnUrl = `${baseUrl}/order-success?codes=${encodeURIComponent(codes.join(","));
+        const returnUrl = `${process.env.FRONTEND_URL}/order-success?codes=${encodeURIComponent(codes.join(","))}`;
         const descriptionCode = generateDescriptionCode();
         const paymentLink = yield payOS.paymentRequests.create({
             orderCode: Number(String(mainCode).replace(/\D/g, "")),
@@ -87,70 +87,6 @@ module.exports.createCombinedPaymentLink = (req, res) => __awaiter(void 0, void 
                 checkoutUrl: paymentLink.checkoutUrl,
                 codes: codes,
                 amount: amount,
-            },
-        });
-    }
-    catch (err) {
-        console.error("❌ Lỗi tạo link:", err);
-        return res.status(500).json({
-            error: -1,
-            message: "Lỗi tạo link thanh toán",
-            details: err.message,
-        });
-    }
-});
-module.exports.createPaymentLink = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const { code, amount, description, items } = req.body;
-        const { document, type } = yield findDocumentByCode(code);
-        if (!document) {
-            console.log("❌ Không tìm được document với code:", code);
-            return res.status(404).json({
-                error: -1,
-                message: "Không tìm thấy đơn hàng!",
-            });
-        }
-        if (document.isExpired ||
-            (document.expiredAt && new Date() > document.expiredAt)) {
-            document.status = "cancelled";
-            document.isExpired = true;
-            yield document.save();
-            const typeLabel = type === "rental" ? "Đơn thuê" : "Đơn hàng";
-            return res.status(400).json({
-                error: -1,
-                message: `${typeLabel} đã hết hạn`,
-            });
-        }
-        if (document.checkoutUrl) {
-            return res.json({
-                error: 0,
-                message: "Link đã tồn tại",
-                data: {
-                    checkoutUrl: document.checkoutUrl,
-                    code: code,
-                    type: type,
-                },
-            });
-        }
-        const cancelUrl = `${process.env.FRONTEND_URL || "http://localhost:3000"}/cart/checkout/payment`;
-        const returnUrl = `${process.env.FRONTEND_URL || "http://localhost:3000"}/order-success?code=${code}`;
-        const paymentLink = yield payOS.paymentRequests.create({
-            orderCode: Number(String(code).replace(/\D/g, "")),
-            amount: Number(amount),
-            description: description || code,
-            items: items || [],
-            cancelUrl,
-            returnUrl,
-        });
-        document.checkoutUrl = paymentLink.checkoutUrl;
-        yield document.save();
-        return res.json({
-            error: 0,
-            message: "Tạo link thanh toán thành công",
-            data: {
-                checkoutUrl: paymentLink.checkoutUrl,
-                code: code,
-                type: type,
             },
         });
     }
