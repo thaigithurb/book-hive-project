@@ -108,63 +108,58 @@ module.exports.createCombinedPaymentLink = async (req, res) => {
 // [POST] /api/v1/payment/webhook
 module.exports.webhook = async (req, res) => {
   try {
-    console.log("👉 [WEBHOOK] Đã nhận được request từ PayOS");
-    console.log("👉 [WEBHOOK] Body:", JSON.stringify(req.body, null, 2));
-
     const { code, desc, data } = req.body;
     if (code === "00" && desc === "success") {
       const orderCode = String(data.orderCode);
-
-      // Tối ưu: Chỉ tìm đơn hàng khớp với orderCode thay vì load toàn bộ DB
-      const order = await Order.findOne({ orderCode: orderCode });
-      const rental = await Rental.findOne({ rentalCode: orderCode });
+      const mainOrder = await Order.findOne({ orderCode: orderCode });
+      const mainRental = await Rental.findOne({ rentalCode: orderCode });
+      const mainDoc = mainOrder || mainRental;
 
       const paidDocuments: { doc: any; type: "order" | "rental" }[] = [];
 
-      if (order) {
-        if (order.status === "pending") {
-        order.status = "paid";
-        await order.save();
-        paidDocuments.push({ doc: order, type: "order" });
+      if (mainDoc && mainDoc.checkoutUrl) {
+        const checkoutUrl = mainDoc.checkoutUrl;
 
-        await new Transaction({
-          orderCode: String(order.orderCode),
-          bankCode: data.counterAccountBankId,
-          accountNo: data.accountNumber,
-          amount: data.amount,
-          description: data.description,
-          transactionDate: data.transactionDateTime
-            ? new Date(data.transactionDateTime)
-            : new Date(),
-          status: "success",
-          verifiedAt: new Date(),
-        }).save();
-        } else {
-          console.log(`⚠️ Đơn hàng ${orderCode} đã được xử lý trước đó (Status: ${order.status}).`);
+        const pendingOrders = await Order.find({ checkoutUrl, status: "pending" });
+        const pendingRentals = await Rental.find({ checkoutUrl, status: "pending" });
+
+        for (const order of pendingOrders) {
+          order.status = "paid";
+          await order.save();
+          paidDocuments.push({ doc: order, type: "order" });
+
+          await new Transaction({
+            orderCode: String(order.orderCode),
+            bankCode: data.counterAccountBankId,
+            accountNo: data.accountNumber,
+            amount: data.amount, 
+            description: data.description,
+            transactionDate: data.transactionDateTime
+              ? new Date(data.transactionDateTime)
+              : new Date(),
+            status: "success",
+            verifiedAt: new Date(),
+          }).save();
         }
-      }
 
-      if (rental) {
-        if (rental.status === "pending") {
-        rental.status = "renting";
-        rental.rentedAt = new Date();
-        await rental.save();
-        paidDocuments.push({ doc: rental, type: "rental" });
+        for (const rental of pendingRentals) {
+          rental.status = "renting";
+          rental.rentedAt = new Date();
+          await rental.save();
+          paidDocuments.push({ doc: rental, type: "rental" });
 
-        await new Transaction({
-          orderCode: String(rental.rentalCode),
-          bankCode: data.counterAccountBankId,
-          accountNo: data.accountNumber,
-          amount: data.amount,
-          description: data.description,
-          transactionDate: data.transactionDateTime
-            ? new Date(data.transactionDateTime)
-            : new Date(),
-          status: "success",
-          verifiedAt: new Date(),
-        }).save();
-        } else {
-          console.log(`⚠️ Đơn thuê ${orderCode} đã được xử lý trước đó (Status: ${rental.status}).`);
+          await new Transaction({
+            orderCode: String(rental.rentalCode),
+            bankCode: data.counterAccountBankId,
+            accountNo: data.accountNumber,
+            amount: data.amount,
+            description: data.description,
+            transactionDate: data.transactionDateTime
+              ? new Date(data.transactionDateTime)
+              : new Date(),
+            status: "success",
+            verifiedAt: new Date(),
+          }).save();
         }
       }
 
@@ -177,7 +172,6 @@ module.exports.webhook = async (req, res) => {
             items: doc.items || [],
             totalAmount: doc.totalAmount || 0,
           };
-          console.log("[Webhook] Gửi mail với đơn 1:", emailOrder);
           await sendOrderConfirmationEmail(emailOrder);
         } else if (paidDocuments.length > 1) {
           const firstDoc = paidDocuments[0].doc;
@@ -198,10 +192,7 @@ module.exports.webhook = async (req, res) => {
             items: combinedItems,
             totalAmount: combinedTotal,
           };
-          console.log("[Webhook] Gửi mail với đơn gộp:", combinedOrder);
           await sendOrderConfirmationEmail(combinedOrder);
-        } else {
-          console.log("[Webhook] Không có đơn nào để gửi mail.");
         }
       } catch (emailErr) {
         console.error("Lỗi gửi email xác nhận đơn:", emailErr);
@@ -218,7 +209,6 @@ module.exports.webhook = async (req, res) => {
 module.exports.cancelPaymentLink = async (req, res) => {
   try {
     const { code } = req.params;
-    console.log("Cancel request với code:", code);
 
     const { document, type } = await findDocumentByCode(code);
 
@@ -244,7 +234,6 @@ module.exports.cancelPaymentLink = async (req, res) => {
       const orderCode = Number(String(code).replace(/\D/g, ""));
       await payOS.paymentRequests.cancel(orderCode);
     } catch (e) {
-      console.log("Không hủy được trên PayOS:", e.message);
     }
 
     return res.json({

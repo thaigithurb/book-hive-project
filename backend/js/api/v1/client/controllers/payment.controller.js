@@ -101,16 +101,18 @@ module.exports.createCombinedPaymentLink = (req, res) => __awaiter(void 0, void 
 });
 module.exports.webhook = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        console.log("👉 [WEBHOOK] Đã nhận được request từ PayOS");
-        console.log("👉 [WEBHOOK] Body:", JSON.stringify(req.body, null, 2));
         const { code, desc, data } = req.body;
         if (code === "00" && desc === "success") {
             const orderCode = String(data.orderCode);
-            const order = yield Order.findOne({ orderCode: orderCode });
-            const rental = yield Rental.findOne({ rentalCode: orderCode });
+            const mainOrder = yield Order.findOne({ orderCode: orderCode });
+            const mainRental = yield Rental.findOne({ rentalCode: orderCode });
+            const mainDoc = mainOrder || mainRental;
             const paidDocuments = [];
-            if (order) {
-                if (order.status === "pending") {
+            if (mainDoc && mainDoc.checkoutUrl) {
+                const checkoutUrl = mainDoc.checkoutUrl;
+                const pendingOrders = yield Order.find({ checkoutUrl, status: "pending" });
+                const pendingRentals = yield Rental.find({ checkoutUrl, status: "pending" });
+                for (const order of pendingOrders) {
                     order.status = "paid";
                     yield order.save();
                     paidDocuments.push({ doc: order, type: "order" });
@@ -127,12 +129,7 @@ module.exports.webhook = (req, res) => __awaiter(void 0, void 0, void 0, functio
                         verifiedAt: new Date(),
                     }).save();
                 }
-                else {
-                    console.log(`⚠️ Đơn hàng ${orderCode} đã được xử lý trước đó (Status: ${order.status}).`);
-                }
-            }
-            if (rental) {
-                if (rental.status === "pending") {
+                for (const rental of pendingRentals) {
                     rental.status = "renting";
                     rental.rentedAt = new Date();
                     yield rental.save();
@@ -150,9 +147,6 @@ module.exports.webhook = (req, res) => __awaiter(void 0, void 0, void 0, functio
                         verifiedAt: new Date(),
                     }).save();
                 }
-                else {
-                    console.log(`⚠️ Đơn thuê ${orderCode} đã được xử lý trước đó (Status: ${rental.status}).`);
-                }
             }
             try {
                 if (paidDocuments.length === 1) {
@@ -163,7 +157,6 @@ module.exports.webhook = (req, res) => __awaiter(void 0, void 0, void 0, functio
                         items: doc.items || [],
                         totalAmount: doc.totalAmount || 0,
                     };
-                    console.log("[Webhook] Gửi mail với đơn 1:", emailOrder);
                     yield sendOrderConfirmationEmail(emailOrder);
                 }
                 else if (paidDocuments.length > 1) {
@@ -180,11 +173,7 @@ module.exports.webhook = (req, res) => __awaiter(void 0, void 0, void 0, functio
                         items: combinedItems,
                         totalAmount: combinedTotal,
                     };
-                    console.log("[Webhook] Gửi mail với đơn gộp:", combinedOrder);
                     yield sendOrderConfirmationEmail(combinedOrder);
-                }
-                else {
-                    console.log("[Webhook] Không có đơn nào để gửi mail.");
                 }
             }
             catch (emailErr) {
@@ -201,7 +190,6 @@ module.exports.webhook = (req, res) => __awaiter(void 0, void 0, void 0, functio
 module.exports.cancelPaymentLink = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { code } = req.params;
-        console.log("Cancel request với code:", code);
         const { document, type } = yield findDocumentByCode(code);
         if (!document) {
             return res.status(404).json({
@@ -223,7 +211,6 @@ module.exports.cancelPaymentLink = (req, res) => __awaiter(void 0, void 0, void 
             yield payOS.paymentRequests.cancel(orderCode);
         }
         catch (e) {
-            console.log("Không hủy được trên PayOS:", e.message);
         }
         return res.json({
             error: 0,
