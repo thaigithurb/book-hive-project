@@ -82,14 +82,14 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   }, [items, isLoaded, isAuthenticated]);
 
   const addToCart = (newItem: CartItem) => {
-    newItem.type = "buy"; // UPDATED
+    newItem.type = "buy"; 
     setItems((prevItems) => {
       const existingItem = prevItems.find(
-        (item) => item.bookId === newItem.bookId && item.type === "buy" // UPDATED
+        (item) => item.bookId === newItem.bookId && item.type === "buy" 
       );
       if (existingItem) {
         return prevItems.map((item) =>
-          item.bookId === newItem.bookId && item.type === "buy" // UPDATED
+          item.bookId === newItem.bookId && item.type === "buy" 
             ? { ...item, quantity: item.quantity + newItem.quantity }
             : item
         );
@@ -104,10 +104,8 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
         },
       });
     }
-    console.log(newItem);
   };
 
-  // NEW: Thêm sách vào giỏ thuê
   const addToRent = (newItem: CartItem) => {
     newItem.type = "rent";
     setItems((prevItems) => {

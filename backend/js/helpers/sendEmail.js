@@ -8,12 +8,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 const brevo = require("@getbrevo/brevo");
-const apiInstance = new brevo.TransactionalEmailsApi();
-apiInstance.authentications["apiKey"].apiKey = process.env.BREVO_API_KEY;
 const sendOrderConfirmationEmail = (order) => __awaiter(this, void 0, void 0, function* () {
     var _a;
+    console.log("==> sendOrderConfirmationEmail được gọi với:", order);
     try {
         const { userInfo, orderCode, items, totalAmount } = order;
+        console.log("Đang gửi email");
+        if (!process.env.BREVO_API_KEY) {
+            console.error("❌ Missing BREVO_API_KEY in environment variables");
+            return { success: false, error: "Missing BREVO_API_KEY" };
+        }
+        const apiInstance = new brevo.TransactionalEmailsApi();
+        apiInstance.authentications["apiKey"].apiKey = process.env.BREVO_API_KEY;
         if (!(userInfo === null || userInfo === void 0 ? void 0 : userInfo.email) || !orderCode) {
             console.error("❌ Missing required email data:", {
                 email: userInfo === null || userInfo === void 0 ? void 0 : userInfo.email,

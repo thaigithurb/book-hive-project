@@ -101,58 +101,57 @@ module.exports.createCombinedPaymentLink = (req, res) => __awaiter(void 0, void 
 });
 module.exports.webhook = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        console.log("👉 [WEBHOOK] Đã nhận được request từ PayOS");
+        console.log("👉 [WEBHOOK] Body:", JSON.stringify(req.body, null, 2));
         const { code, desc, data } = req.body;
         if (code === "00" && desc === "success") {
             const orderCode = String(data.orderCode);
-            const allOrders = yield Order.find({});
-            const allRentals = yield Rental.find({});
-            let paidCount = 0;
+            const order = yield Order.findOne({ orderCode: orderCode });
+            const rental = yield Rental.findOne({ rentalCode: orderCode });
             const paidDocuments = [];
-            for (const order of allOrders) {
-                if (String(order.orderCode).includes(orderCode) ||
-                    orderCode.includes(String(order.orderCode))) {
-                    if (order.status === "pending") {
-                        order.status = "paid";
-                        yield order.save();
-                        paidCount++;
-                        paidDocuments.push({ doc: order, type: "order" });
-                        yield new Transaction({
-                            orderCode: String(order.orderCode),
-                            bankCode: data.counterAccountBankId,
-                            accountNo: data.accountNumber,
-                            amount: data.amount,
-                            description: data.description,
-                            transactionDate: data.transactionDateTime
-                                ? new Date(data.transactionDateTime)
-                                : new Date(),
-                            status: "success",
-                            verifiedAt: new Date(),
-                        }).save();
-                    }
+            if (order) {
+                if (order.status === "pending") {
+                    order.status = "paid";
+                    yield order.save();
+                    paidDocuments.push({ doc: order, type: "order" });
+                    yield new Transaction({
+                        orderCode: String(order.orderCode),
+                        bankCode: data.counterAccountBankId,
+                        accountNo: data.accountNumber,
+                        amount: data.amount,
+                        description: data.description,
+                        transactionDate: data.transactionDateTime
+                            ? new Date(data.transactionDateTime)
+                            : new Date(),
+                        status: "success",
+                        verifiedAt: new Date(),
+                    }).save();
+                }
+                else {
+                    console.log(`⚠️ Đơn hàng ${orderCode} đã được xử lý trước đó (Status: ${order.status}).`);
                 }
             }
-            for (const rental of allRentals) {
-                if (String(rental.rentalCode).includes(orderCode) ||
-                    orderCode.includes(String(rental.rentalCode))) {
-                    if (rental.status === "pending") {
-                        rental.status = "renting";
-                        rental.rentedAt = new Date();
-                        yield rental.save();
-                        paidCount++;
-                        paidDocuments.push({ doc: rental, type: "rental" });
-                        yield new Transaction({
-                            orderCode: String(rental.rentalCode),
-                            bankCode: data.counterAccountBankId,
-                            accountNo: data.accountNumber,
-                            amount: data.amount,
-                            description: data.description,
-                            transactionDate: data.transactionDateTime
-                                ? new Date(data.transactionDateTime)
-                                : new Date(),
-                            status: "success",
-                            verifiedAt: new Date(),
-                        }).save();
-                    }
+            if (rental) {
+                if (rental.status === "pending") {
+                    rental.status = "renting";
+                    rental.rentedAt = new Date();
+                    yield rental.save();
+                    paidDocuments.push({ doc: rental, type: "rental" });
+                    yield new Transaction({
+                        orderCode: String(rental.rentalCode),
+                        bankCode: data.counterAccountBankId,
+                        accountNo: data.accountNumber,
+                        amount: data.amount,
+                        description: data.description,
+                        transactionDate: data.transactionDateTime
+                            ? new Date(data.transactionDateTime)
+                            : new Date(),
+                        status: "success",
+                        verifiedAt: new Date(),
+                    }).save();
+                }
+                else {
+                    console.log(`⚠️ Đơn thuê ${orderCode} đã được xử lý trước đó (Status: ${rental.status}).`);
                 }
             }
             try {
@@ -164,6 +163,7 @@ module.exports.webhook = (req, res) => __awaiter(void 0, void 0, void 0, functio
                         items: doc.items || [],
                         totalAmount: doc.totalAmount || 0,
                     };
+                    console.log("[Webhook] Gửi mail với đơn 1:", emailOrder);
                     yield sendOrderConfirmationEmail(emailOrder);
                 }
                 else if (paidDocuments.length > 1) {
@@ -180,7 +180,11 @@ module.exports.webhook = (req, res) => __awaiter(void 0, void 0, void 0, functio
                         items: combinedItems,
                         totalAmount: combinedTotal,
                     };
+                    console.log("[Webhook] Gửi mail với đơn gộp:", combinedOrder);
                     yield sendOrderConfirmationEmail(combinedOrder);
+                }
+                else {
+                    console.log("[Webhook] Không có đơn nào để gửi mail.");
                 }
             }
             catch (emailErr) {
