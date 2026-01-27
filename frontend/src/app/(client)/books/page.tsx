@@ -33,6 +33,12 @@ export default function Books() {
     { value: "createdAt_desc", label: "Mới nhất" },
     { value: "createdAt_asc", label: "Cũ nhất" },
   ];
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken_user");
+    setIsLoggedIn(!!token);
+  }, []);
 
   useEffect(() => {
     const fetchFavorites = async () => {
@@ -71,8 +77,7 @@ export default function Books() {
         );
         setFavoriteIds((prev) => prev.filter((id) => id !== bookId));
       }
-    } catch (err) {
-    }
+    } catch (err) {}
   };
 
   // xử lí load data cùng với lọc và tìm kiếm
@@ -140,6 +145,7 @@ export default function Books() {
                   featured={book.featured ? true : false}
                   isFavorite={favoriteIds.includes(book._id)}
                   onToggleFavorite={handleToggleFavorite}
+                  isLoggedIn={isLoggedIn}
                 />
               ))
             ) : (

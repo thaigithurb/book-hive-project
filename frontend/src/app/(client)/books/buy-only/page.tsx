@@ -32,6 +32,12 @@ export default function BooksBuy() {
     { value: "createdAt_desc", label: "Mới nhất" },
     { value: "createdAt_asc", label: "Cũ nhất" },
   ];
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken_user");
+    setIsLoggedIn(!!token);
+  }, []);
 
   const fetchData = useCallback(
     debounce(() => {
@@ -54,7 +60,7 @@ export default function BooksBuy() {
           setLoading(false);
         });
     }, 400),
-    [sort, keyword, page]
+    [sort, keyword, page],
   );
 
   useEffect(() => {
@@ -91,6 +97,7 @@ export default function BooksBuy() {
                 key={index}
                 book={book}
                 featured={book.featured ? true : false}
+                isLoggedIn={isLoggedIn}
               />
             ))}
           </div>

@@ -15,6 +15,12 @@ export default function Home() {
   const [newestBooks, setNewestBooks] = useState<Book[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken_user");
+    setIsLoggedIn(!!token);
+  }, []);
 
   useEffect(() => {
     const fetchFavorites = async () => {
@@ -97,6 +103,7 @@ export default function Home() {
                   newest={false}
                   isFavorite={favoriteIds.includes(book._id)}
                   onToggleFavorite={handleToggleFavorite}
+                  isLoggedIn={isLoggedIn}
                 />
               ))}
             </div>
@@ -112,6 +119,7 @@ export default function Home() {
                   newest={true}
                   isFavorite={favoriteIds.includes(book._id)}
                   onToggleFavorite={handleToggleFavorite}
+                  isLoggedIn={isLoggedIn}
                 />
               ))}
             </div>

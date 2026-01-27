@@ -8,6 +8,7 @@ interface BookCardProps {
   newest?: boolean;
   isFavorite?: boolean;
   onToggleFavorite?: (bookId: string, next: boolean) => void;
+  isLoggedIn: boolean;
 }
 
 export const BookCard = ({
@@ -15,6 +16,7 @@ export const BookCard = ({
   featured,
   newest,
   isFavorite = false,
+  isLoggedIn,
   onToggleFavorite,
 }: BookCardProps) => {
   return (
@@ -68,28 +70,30 @@ export const BookCard = ({
           </div>
         </div>
       </Link>
-      <button
-        className="absolute cursor-pointer top-6 left-6 z-20 bg-white/80 rounded-full p-1 hover:scale-110 transition-all"
-        type="button"
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          onToggleFavorite?.(book._id, !isFavorite);
-        }}
-        aria-label="Yêu thích"
-      >
-        {isFavorite ? (
-          <AiFillHeart
-            size={28}
-            className="text-red-500 transition-all duration-200"
-          />
-        ) : (
-          <AiOutlineHeart
-            size={28}
-            className="text-gray-400 transition-all duration-200"
-          />
-        )}
-      </button>
+      {isLoggedIn && (
+        <button
+          className="absolute cursor-pointer top-6 left-6 z-20 bg-white/80 rounded-full p-1 hover:scale-110 transition-all"
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onToggleFavorite?.(book._id, !isFavorite);
+          }}
+          aria-label="Yêu thích"
+        >
+          {isFavorite ? (
+            <AiFillHeart
+              size={28}
+              className="text-red-500 transition-all duration-200"
+            />
+          ) : (
+            <AiOutlineHeart
+              size={28}
+              className="text-gray-400 transition-all duration-200"
+            />
+          )}
+        </button>
+      )}
     </div>
   );
 };
