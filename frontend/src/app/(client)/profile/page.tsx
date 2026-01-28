@@ -64,7 +64,7 @@ export default function ProfilePage() {
 
   return (
     <>
-      <div className="container mx-auto py-20 px-4">
+      <div className="container mx-auto py-24 px-4">
         <div className="max-w-2xl mx-auto">
           <h1 className="text-3xl font-bold mb-8">Hồ sơ cá nhân</h1>
 
@@ -130,7 +130,7 @@ export default function ProfilePage() {
             >
               <div className="text-2xl mb-2">📦</div>
               <h3 className="font-semibold">Đơn hàng</h3>
-              <p className="text-sm text-gray-600">Xem lịch sử mua hàng</p>
+              <p className="text-sm text-gray-600">Xem lịch sử mua hàng và thuê</p>
             </Link>
             <Link
               href="/favorites"

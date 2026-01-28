@@ -1,6 +1,8 @@
 import { Book } from "@/app/interfaces/book.interface";
 import Link from "next/link";
 import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
+import { FaStar } from "react-icons/fa";
+import { FaArrowRightLong } from "react-icons/fa6";
 
 interface BookCardProps {
   book: Book;
@@ -46,7 +48,7 @@ export const BookCard = ({
             {book.author}
           </p>
           <div className="flex items-center gap-2 mb-3">
-            <span className="text-yellow-400 text-[16px]">⭐</span>
+            <span className="text-yellow-400 text-[16px]"><FaStar /></span>
             <span className="text-[14.4px] text-primary">Chưa có đánh giá</span>
           </div>
           <div className="flex justify-between items-center mt-4">
@@ -66,7 +68,7 @@ export const BookCard = ({
                   : "Liên hệ"}
               </p>
             </div>
-            <span className="text-[24px]">→</span>
+            <span className="text-[20px] text-primary"><FaArrowRightLong /></span>
           </div>
         </div>
       </Link>

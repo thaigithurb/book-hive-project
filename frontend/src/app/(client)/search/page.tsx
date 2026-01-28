@@ -21,6 +21,13 @@ export default function SearchPage() {
   const [books, setBooks] = useState<Book[]>([]);
   const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken_user");
+    setIsLoggedIn(!!token);
+  }, []);
 
   useEffect(() => {
     const fetchBooks = async () => {
@@ -60,6 +67,28 @@ export default function SearchPage() {
     return <Loading fullScreen={true} size="lg" text="Đang tìm kiếm..." />;
   }
 
+  // Xử lý toggle favorite
+  const handleToggleFavorite = async (bookId: string, next: boolean) => {
+    const token = localStorage.getItem("accessToken_user");
+    if (!token) return;
+    try {
+      if (next) {
+        await axios.post(
+          `${API_URL}/api/v1/favorites/add`,
+          { bookId },
+          { headers: { Authorization: `Bearer ${token}` } },
+        );
+        setFavoriteIds((prev) => [...prev, bookId]);
+      } else {
+        await axios.delete(`${API_URL}/api/v1/favorites/remove`, {
+          data: { bookId },
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setFavoriteIds((prev) => prev.filter((id) => id !== bookId));
+      }
+    } catch (err) {}
+  };
+
   return (
     <div className="py-[32px] px-[24px]">
       <div className="container">
@@ -84,6 +113,9 @@ export default function SearchPage() {
                   book={book}
                   featured={false}
                   newest={false}
+                  isFavorite={favoriteIds.includes(book._id)}
+                  onToggleFavorite={handleToggleFavorite}
+                  isLoggedIn={isLoggedIn}
                 />
               ))}
             </div>

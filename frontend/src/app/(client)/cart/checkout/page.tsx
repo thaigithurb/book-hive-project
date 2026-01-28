@@ -159,7 +159,7 @@ export default function CheckoutPage() {
       }
 
       if (createdCodes.length === 0) {
-        toast.error("❌ Không có sản phẩm để tạo đơn!");
+        toast.error("Không có sản phẩm để tạo đơn!");
         setIsProcessing(false);
         return;
       }
@@ -179,7 +179,7 @@ export default function CheckoutPage() {
         }
 
         clearCart();
-        toast.success("✅ Đơn hàng đã được tạo!");
+        toast.success("Đơn hàng đã được tạo!");
         setIsRedirecting(true);
 
         setTimeout(() => {

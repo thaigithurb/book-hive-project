@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import DOMPurify from "dompurify";
 import { useCart } from "@/contexts/CartContext";
+import { FaStar } from "react-icons/fa";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -17,7 +18,7 @@ export default function Detail() {
   const [loading, setLoading] = useState(true);
   const [rentType, setRentType] = useState("day");
   const [rentQuantity, setRentQuantity] = useState<number | string>(1);
-  const { addToCart, addToRent } = useCart(); 
+  const { addToCart, addToRent } = useCart();
 
   useEffect(() => {
     const fetchBook = async () => {
@@ -56,13 +57,12 @@ export default function Detail() {
       quantity: 1,
       image: book.image,
       slug: book.slug,
-      type: "buy", // ADDED
+      type: "buy",
     } as any);
 
     toast.success("Đã thêm vào giỏ hàng!");
   };
 
-  // ADDED: Hàm mượn sách
   const handleRentNow = () => {
     if (!book) return;
 
@@ -71,7 +71,7 @@ export default function Detail() {
     );
 
     if (!rentOption) {
-      toast.error("❌ Loại thuê không hợp lệ!");
+      toast.error("Loại thuê không hợp lệ!");
       return;
     }
 
@@ -82,9 +82,9 @@ export default function Detail() {
       quantity: 1,
       image: book.image,
       slug: book.slug,
-      type: "rent", // ADDED
-      rentalType: rentType as "day" | "week", // ADDED
-      rentalDays: Number(rentQuantity), // ADDED
+      type: "rent",
+      rentalType: rentType as "day" | "week",
+      rentalDays: Number(rentQuantity),
     } as any);
 
     toast.success("Đã thêm vào giỏ thuê!");
@@ -108,7 +108,7 @@ export default function Detail() {
 
   return (
     <>
-      <div className="min-h-screen py-12 relative">
+      <div className=" py-12 relative">
         <BackButton className="absolute -top-4 left-20 flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 transition cursor-pointer" />
         <div className="max-w-4xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-12">
@@ -123,7 +123,9 @@ export default function Detail() {
                 <div className="text-[128px] mb-6">📚</div>
               )}
               <div className="flex items-center justify-center gap-2 mb-4">
-                <span className="text-yellow-400 text-2xl">⭐</span>
+                <span className="text-yellow-400 text-2xl">
+                  <FaStar />
+                </span>
                 <span className="text-xl font-bold text-slate-800">
                   {book.rating ?? "Liên hệ"}
                 </span>
@@ -214,7 +216,7 @@ export default function Detail() {
                   onClick={handleRentNow}
                   className="flex-1 py-4 font-semibold bg-white text-secondary1 border-2 border-secondary1 rounded-xl cursor-pointer text-base hover:bg-blue-50 transition-colors duration-200"
                 >
-                  📖 Mượn sách
+                  📖 Thuê sách
                 </button>
               </div>
             </div>

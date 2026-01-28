@@ -74,7 +74,7 @@ export const Header = () => {
               />
               <button
                 type="submit"
-                className="px-4 py-1 bg-primary text-white text-sm font-semibold rounded-full transition-all duration-300 hover:bg-blue-600 hover:shadow-[0_4px_12px_rgba(59,130,246,0.3)] active:scale-95 whitespace-nowrap"
+                className="px-4 cursor-pointer py-1 bg-primary text-white text-sm font-semibold rounded-full transition-all duration-300 hover:bg-blue-600 hover:shadow-[0_4px_12px_rgba(59,130,246,0.3)] active:scale-95 whitespace-nowrap"
               >
                 Tìm
               </button>

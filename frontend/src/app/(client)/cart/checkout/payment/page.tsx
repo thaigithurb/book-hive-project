@@ -23,7 +23,7 @@ export default function PaymentPage() {
         const paymentMethod = sessionStorage.getItem("paymentMethod");
 
         if (!storedCodes || paymentMethod !== "transfer") {
-          toast.error("❌ Không có thông tin thanh toán!");
+          toast.error("Không có thông tin thanh toán!");
           setTimeout(() => router.push("/cart"), 2000);
           return;
         }
@@ -33,7 +33,7 @@ export default function PaymentPage() {
 
         const storedTotal = sessionStorage.getItem("totalAmount");
         if (!storedTotal) {
-          toast.error("❌ Không tìm thấy tổng tiền đơn hàng!");
+          toast.error("Không tìm thấy tổng tiền đơn hàng!");
           setTimeout(() => router.push("/cart"), 2000);
           return;
         }
@@ -41,7 +41,7 @@ export default function PaymentPage() {
         setTotalAmount(parsedTotal);
         setIsLoading(false);
       } catch (error) {
-        toast.error("❌ Có lỗi xảy ra!");
+        toast.error("Có lỗi xảy ra!");
         setTimeout(() => router.push("/cart"), 2000);
       }
     };
@@ -51,7 +51,7 @@ export default function PaymentPage() {
 
   const handleCreatePaymentLink = async () => {
     if (codes.length === 0) {
-      toast.error("❌ Không có đơn hàng để thanh toán!");
+      toast.error("Không có đơn hàng để thanh toán!");
       return;
     }
 
@@ -73,15 +73,14 @@ export default function PaymentPage() {
 
       if (response.data.error === 0 && response.data.data.checkoutUrl) {
         setPaymentLink(response.data.data.checkoutUrl);
-        toast.success("✅ Tạo link thanh toán thành công!");
+        toast.success("Tạo link thanh toán thành công!");
       } else {
-        toast.error("❌ " + response.data.message);
+        toast.error(response.data.message);
       }
     } catch (error: any) {
       const errorMsg =
         error.response?.data?.message || "Lỗi tạo link thanh toán!";
-      toast.error("❌ " + errorMsg);
-      console.error("Chi tiết lỗi:", error);
+      toast.error(errorMsg);
     } finally {
       setIsCreatingLink(false);
     }

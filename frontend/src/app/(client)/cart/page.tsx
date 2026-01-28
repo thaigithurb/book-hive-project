@@ -75,7 +75,7 @@ export default function CartPage() {
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-3xl">
-                      📚
+                      Không tìm thấy ảnh
                     </div>
                   )}
                 </Link>
