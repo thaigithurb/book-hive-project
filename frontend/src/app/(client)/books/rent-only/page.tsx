@@ -11,6 +11,7 @@ import SortSelect from "@/app/components/SortSelect/SortSelect";
 import { useSyncParams } from "@/app/utils/useSyncParams";
 import { usePageChange } from "@/app/utils/usePageChange";
 import { useSortChange } from "@/app/utils/useSortChange";
+import { BookCardSkeleton } from "@/app/components/Skeleton/BookCardSkeleton";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -18,6 +19,7 @@ export default function BooksRent() {
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
   const [keyword, setKeyword] = useState("");
+  const [firstLoad, setFirstLoad] = useState(true);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [sort, setSort] = useState<{ key: string; value: 1 | -1 } | null>(null);
@@ -41,6 +43,7 @@ export default function BooksRent() {
 
   const fetchData = useCallback(
     debounce(() => {
+      setBooks([]);
       setLoading(true);
       axios
         .get(`${API_URL}/api/v1/books/rent-only`, {
@@ -58,6 +61,7 @@ export default function BooksRent() {
         .catch((errors) => setBooks([]))
         .finally(() => {
           setLoading(false);
+          setFirstLoad(false);
         });
     }, 400),
     [sort, keyword, page],
@@ -72,9 +76,20 @@ export default function BooksRent() {
   const handlePageChange = usePageChange("books/rent-only", setPage, "client");
   const handleSortChange = useSortChange("books/rent-only", "client");
 
-  if (loading) {
+  if (firstLoad && loading) {
+    return <Loading fullScreen={true} size="lg" text="Đang tải sách..." />;
+  }
+  if (loading && books.length === 0) {
     return (
-      <Loading fullScreen={true} size="lg" text="Đang tải sách cho thuê..." />
+      <div className="py-[32px] px-[24px]">
+        <div className="container">
+          <div className="grid grid-cols-4 gap-[24px] mb-8">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <BookCardSkeleton key={i} />
+            ))}
+          </div>
+        </div>
+      </div>
     );
   }
 

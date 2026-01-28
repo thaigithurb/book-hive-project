@@ -11,10 +11,12 @@ import SortSelect from "@/app/components/SortSelect/SortSelect";
 import { useSyncParams } from "@/app/utils/useSyncParams";
 import { usePageChange } from "@/app/utils/usePageChange";
 import { useSortChange } from "@/app/utils/useSortChange";
+import { BookCardSkeleton } from "@/app/components/Skeleton/BookCardSkeleton";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function Books() {
+  const [firstLoad, setFirstLoad] = useState(true);
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
   const [keyword, setKeyword] = useState("");
@@ -84,6 +86,8 @@ export default function Books() {
   const fetchData = useCallback(
     debounce(() => {
       setLoading(true);
+      setBooks([]);
+      setLoading(true);
       axios
         .get(`${API_URL}/api/v1/books`, {
           params: {
@@ -100,6 +104,7 @@ export default function Books() {
         .catch((errors) => setBooks([]))
         .finally(() => {
           setLoading(false);
+          setFirstLoad(false);
         });
     }, 400),
     [sort, keyword, page],
@@ -114,8 +119,21 @@ export default function Books() {
   const handlePageChange = usePageChange("books", setPage, "client");
   const handleSortChange = useSortChange("books", "client");
 
-  if (loading && books.length === 0) {
+  if (firstLoad && loading) {
     return <Loading fullScreen={true} size="lg" text="Đang tải sách..." />;
+  }
+  if (loading && books.length === 0) {
+    return (
+      <div className="py-[32px] px-[24px]">
+        <div className="container">
+          <div className="grid grid-cols-4 gap-[24px] mb-8">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <BookCardSkeleton key={i} />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
