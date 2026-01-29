@@ -35,7 +35,7 @@ type Order = {
   updatedAt: string;
 };
 
-export default function OrdersPage() {
+export default function HistoryPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
@@ -65,7 +65,7 @@ export default function OrdersPage() {
     try {
       setLoading(true);
       const res = await axios.get(
-        `http://localhost:3001/api/v1/orders/user/${user.email}`,
+        `${API_URL}/api/v1/orders/user/${user.email}`,
         {
           params: { page: currentPage, limit },
           headers: {
@@ -78,7 +78,6 @@ export default function OrdersPage() {
       setTotal(res.data.total);
       setPage(currentPage);
     } catch (error: any) {
-      console.error("Error fetching orders:", error);
       toast.error("Không thể tải danh sách đơn hàng");
     } finally {
       setLoading(false);
@@ -97,7 +96,7 @@ export default function OrdersPage() {
       setLoading(true);
       setHasSearched(true);
       const res = await axios.get(
-        `http://localhost:3001/api/v1/orders/user/${searchEmail.trim()}`,
+        `${API_URL}/api/v1/orders/user/${searchEmail.trim()}`,
         {
           params: { page: searchPage, limit },
         },
