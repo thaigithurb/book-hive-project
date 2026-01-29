@@ -61,7 +61,7 @@ export default function SearchPage() {
   }, [keyword, page, limit]);
 
   // hàm thay đổi trang
-  const handlePageChange = usePageChange("books", setPage, "client");
+  const handlePageChange = usePageChange("search", setPage, "client");
 
   if (isLoading) {
     return <Loading fullScreen={true} size="lg" text="Đang tìm kiếm..." />;

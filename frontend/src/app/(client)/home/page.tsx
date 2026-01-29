@@ -1,4 +1,5 @@
-import HomeClient from "@/app/components/HomeClient/HomeClient";
+import HomeClient from "./HomeClient";
+
 
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
