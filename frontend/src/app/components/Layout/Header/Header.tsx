@@ -1,6 +1,7 @@
 "use client";
 
 import { useCart } from "@/contexts/CartContext";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -33,7 +34,13 @@ export const Header = () => {
         <nav className="container flex items-center justify-between">
           <Link href={"/home"} className="flex gap-[12px] items-center">
             <span className="text-[32px]">
-              <img src="/book-hive.jpg" className="w-20 h-20" alt="logo" />
+              <Image
+                width={400}
+                height={400}
+                src="/book-hive.jpg"
+                className="w-20 h-20"
+                alt="logo"
+              />
             </span>
             <div>
               <h1

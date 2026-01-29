@@ -60,10 +60,11 @@ export default function FavoritesPage() {
     const token = localStorage.getItem("accessToken_user");
     if (!token) return;
     try {
-      await axios.delete(`${API_URL}/api/v1/favorites/remove`, {
-        data: { bookId },
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await axios.post(
+        `${API_URL}/api/v1/favorites/remove`,
+        { bookId },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
       toast.success("Đã xóa khỏi mục yêu thích");
       setTimeout(() => {
         fetchFavorites();

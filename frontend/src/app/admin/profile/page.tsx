@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import axios from "axios";
+import Image from "next/image";
 
 const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -21,7 +22,7 @@ export default function Profile() {
             headers: {
               Authorization: `Bearer ${accessToken}`,
             },
-          }
+          },
         );
         setUser(res.data.account);
       } catch (err) {
@@ -33,7 +34,8 @@ export default function Profile() {
     fetchProfile();
   }, []);
 
-  if (loading) return <div className="text-center text-gray-500 mt-50">Đang tải...</div>;
+  if (loading)
+    return <div className="text-center text-gray-500 mt-50">Đang tải...</div>;
   if (!user)
     return (
       <div className="text-center mt-50 text-red-500">
@@ -49,9 +51,11 @@ export default function Profile() {
       className="max-w-xl mx-auto mt-30 bg-white rounded-xl shadow-md p-8"
     >
       <div className="flex items-center space-x-6 mb-6">
-        <img
+        <Image
           src={user.avatar}
           alt="Avatar"
+          width={400}
+          height={400}
           className="w-24 h-24 rounded-full border-2 border-primary object-cover"
         />
         <div>

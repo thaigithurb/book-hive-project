@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 type Order = {
@@ -121,10 +122,12 @@ export const OrderCard = ({ order }: { order: Order }) => (
                 className="flex-shrink-0 w-14 h-16 bg-gray-100 rounded overflow-hidden"
               >
                 {item.image ? (
-                  <img
+                  <Image
                     src={item.image}
                     alt={item.title}
                     className="w-full h-full object-cover"
+                    width={400}
+                    height={400}
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-lg">

@@ -1,4 +1,5 @@
 import { Book } from "@/app/interfaces/book.interface";
+import Image from "next/image";
 import Link from "next/link";
 import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
 import { FaStar } from "react-icons/fa";
@@ -35,10 +36,12 @@ export const BookCard = ({
             </span>
           ) : null}
           <div className="mb-2 h-[190px] object-cover ">
-            <img
+            <Image
               src={book.image}
               className="w-full h-full object-cover rounded-[10px]"
               alt={book.title}
+              width={400}
+              height={400}
             />
           </div>
           <h3 className="text-[17px] line-clamp-1 min-h-[28px] font-[700] mb-[8px] text-primary">
@@ -48,7 +51,9 @@ export const BookCard = ({
             {book.author}
           </p>
           <div className="flex items-center gap-2 mb-3">
-            <span className="text-yellow-400 text-[16px]"><FaStar /></span>
+            <span className="text-yellow-400 text-[16px]">
+              <FaStar />
+            </span>
             <span className="text-[14.4px] text-primary">Chưa có đánh giá</span>
           </div>
           <div className="flex justify-between items-center mt-4">
@@ -68,7 +73,9 @@ export const BookCard = ({
                   : "Liên hệ"}
               </p>
             </div>
-            <span className="text-[20px] text-primary"><FaArrowRightLong /></span>
+            <span className="text-[20px] text-primary">
+              <FaArrowRightLong />
+            </span>
           </div>
         </div>
       </Link>

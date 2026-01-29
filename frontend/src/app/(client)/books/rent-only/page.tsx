@@ -4,7 +4,6 @@ import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
 import { Book } from "@/app/interfaces/book.interface";
 import { BookCard } from "@/app/components/Card/BookCard";
-import { Loading } from "@/app/components/Loading/Loading";
 import debounce from "lodash.debounce";
 import Pagination from "@/app/components/Pagination/Pagination";
 import SortSelect from "@/app/components/SortSelect/SortSelect";
@@ -12,6 +11,7 @@ import { useSyncParams } from "@/app/utils/useSyncParams";
 import { usePageChange } from "@/app/utils/usePageChange";
 import { useSortChange } from "@/app/utils/useSortChange";
 import { BookCardSkeleton } from "@/app/components/Skeleton/BookCardSkeleton";
+import { useFetchFavorites } from "@/app/utils/useFetchFavorites";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -19,7 +19,6 @@ export default function BooksRent() {
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
   const [keyword, setKeyword] = useState("");
-  const [firstLoad, setFirstLoad] = useState(true);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [sort, setSort] = useState<{ key: string; value: 1 | -1 } | null>(null);
@@ -34,12 +33,31 @@ export default function BooksRent() {
     { value: "createdAt_desc", label: "Mới nhất" },
     { value: "createdAt_asc", label: "Cũ nhất" },
   ];
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  useEffect(() => {
+  const { favoriteIds, setFavoriteIds, isLoggedIn } = useFetchFavorites();
+
+  // Xử lý toggle favorite
+  const handleToggleFavorite = async (bookId: string, next: boolean) => {
     const token = localStorage.getItem("accessToken_user");
-    setIsLoggedIn(!!token);
-  }, []);
+    if (!token) return;
+    try {
+      if (next) {
+        await axios.post(
+          `${API_URL}/api/v1/favorites/add`,
+          { bookId },
+          { headers: { Authorization: `Bearer ${token}` } },
+        );
+        setFavoriteIds((prev) => [...prev, bookId]);
+      } else {
+        await axios.post(
+          `${API_URL}/api/v1/favorites/remove`,
+          { bookId },
+          { headers: { Authorization: `Bearer ${token}` } },
+        );
+        setFavoriteIds((prev) => prev.filter((id) => id !== bookId));
+      }
+    } catch (err) {}
+  };
 
   const fetchData = useCallback(
     debounce(() => {
@@ -58,10 +76,9 @@ export default function BooksRent() {
           setBooks(res.data.books || []);
           setTotal(res.data.total || 0);
         })
-        .catch((errors) => setBooks([]))
+        .catch(() => setBooks([]))
         .finally(() => {
           setLoading(false);
-          setFirstLoad(false);
         });
     }, 400),
     [sort, keyword, page],
@@ -76,30 +93,13 @@ export default function BooksRent() {
   const handlePageChange = usePageChange("books/rent-only", setPage, "client");
   const handleSortChange = useSortChange("books/rent-only", "client");
 
-  if (firstLoad && loading) {
-    return <Loading fullScreen={true} size="lg" text="Đang tải sách..." />;
-  }
-  if (loading && books.length === 0) {
-    return (
-      <div className="py-[32px] px-[24px]">
-        <div className="container">
-          <div className="grid grid-cols-4 gap-[24px] mb-8">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <BookCardSkeleton key={i} />
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <>
       <div className="py-[32px] px-[24px]">
         <div className="container">
           <div className="mb-6 flex justify-between items-center">
             <h2 className="text-2xl font-bold mb-4 text-primary">
-              Sách cho thuê
+              Sách chỉ thuê
             </h2>
             <SortSelect
               onChange={(e) => {
@@ -111,21 +111,35 @@ export default function BooksRent() {
             />
           </div>
           <div className="grid grid-cols-4 gap-[24px] mb-8">
-            {books.map((book, index) => (
-              <BookCard
-                key={index}
-                book={book}
-                featured={book.featured ? true : false}
-                isLoggedIn={isLoggedIn}
-              />
-            ))}
+            {loading ? (
+              Array.from({ length: 8 }).map((_, i) => (
+                <BookCardSkeleton key={i} />
+              ))
+            ) : books.length > 0 ? (
+              books.map((book, index) => (
+                <BookCard
+                  key={index}
+                  book={book}
+                  featured={book.featured ? true : false}
+                  onToggleFavorite={handleToggleFavorite}
+                  isLoggedIn={isLoggedIn}
+                  isFavorite={favoriteIds.includes(book._id)}
+                />
+              ))
+            ) : (
+              <div className="col-span-4 flex items-center justify-center min-h-[400px] text-gray-500 text-center">
+                <p className="text-xl">Không tìm thấy sách nào</p>
+              </div>
+            )}
           </div>
-          <Pagination
-            page={page}
-            total={total}
-            limit={limit}
-            onPageChange={handlePageChange}
-          />
+          {books.length > 0 && (
+            <Pagination
+              page={page}
+              total={total}
+              limit={limit}
+              onPageChange={handlePageChange}
+            />
+          )}
         </div>
       </div>
     </>

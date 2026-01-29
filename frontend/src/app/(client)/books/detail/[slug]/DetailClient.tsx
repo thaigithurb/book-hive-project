@@ -7,6 +7,7 @@ import { useCart } from "@/contexts/CartContext";
 import { FaStar } from "react-icons/fa";
 import { useState } from "react";
 import { Book } from "@/app/interfaces/book.interface";
+import Image from "next/image";
 
 type DetailClientProps = {
   book: Book;
@@ -19,7 +20,9 @@ export default function DetailClient({ book }: DetailClientProps) {
 
   const getRentPrice = () => {
     if (!book?.priceRentOptions) return null;
-    const option = book.priceRentOptions.find((opt: any) => opt.type === rentType);
+    const option = book.priceRentOptions.find(
+      (opt: any) => opt.type === rentType,
+    );
     if (!option) return null;
     return option.price * Number(rentQuantity);
   };
@@ -40,7 +43,9 @@ export default function DetailClient({ book }: DetailClientProps) {
 
   const handleRentNow = () => {
     if (!book) return;
-    const rentOption = book.priceRentOptions.find((opt: any) => opt.type === rentType);
+    const rentOption = book.priceRentOptions.find(
+      (opt: any) => opt.type === rentType,
+    );
     if (!rentOption) {
       toast.error("Loại thuê không hợp lệ!");
       return;
@@ -61,16 +66,18 @@ export default function DetailClient({ book }: DetailClientProps) {
 
   return (
     <>
-     <div className=" py-12 relative">
+      <div className=" py-12 relative">
         <BackButton className="absolute -top-4 left-20 flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 transition cursor-pointer" />
         <div className="max-w-4xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-12">
             <div className="bg-white rounded-2xl p-10 text-center shadow flex flex-col items-center justify-center">
               {book.image ? (
-                <img
+                <Image
                   src={book.image}
                   alt={book.title}
-                  className="w-full h-full max-h-[400px] object-cover rounded-lg mb-6"
+                  width={400} 
+                  height={400}
+                  className="w-full h-full object-cover rounded-lg mb-6"
                 />
               ) : (
                 <div className="text-[128px] mb-6">📚</div>
@@ -125,7 +132,9 @@ export default function DetailClient({ book }: DetailClientProps) {
                   <select
                     className="border rounded-lg px-2 py-1 text-base"
                     value={rentType}
-                    onChange={(e) => setRentType(e.target.value as "day" | "week")}
+                    onChange={(e) =>
+                      setRentType(e.target.value as "day" | "week")
+                    }
                   >
                     <option value="day">Ngày</option>
                     <option value="week">Tuần</option>
@@ -220,7 +229,11 @@ export default function DetailClient({ book }: DetailClientProps) {
           </div>
         </div>
       </div>
-      <ToastContainer autoClose={1500} hideProgressBar={true} pauseOnHover={false} />
+      <ToastContainer
+        autoClose={1500}
+        hideProgressBar={true}
+        pauseOnHover={false}
+      />
     </>
   );
 }

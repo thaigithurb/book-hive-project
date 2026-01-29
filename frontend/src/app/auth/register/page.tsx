@@ -7,6 +7,7 @@ import { toast, ToastContainer } from "react-toastify";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import Image from "next/image";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -77,10 +78,12 @@ export default function RegisterPage() {
           <div className="bg-white rounded-lg shadow-xl overflow-hidden">
             <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-8 text-center">
               <div className="flex items-center gap-5">
-                <img
+                <Image
                   src="/book-hive.jpg"
                   className="w-15 h-15 rounded-[10px]"
                   alt="logo"
+                  width={400}
+                  height={400}
                 />
                 <h1 className="text-3xl font-bold text-white mb-2">BookHive</h1>
               </div>

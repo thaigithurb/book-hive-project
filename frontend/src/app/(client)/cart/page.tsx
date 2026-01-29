@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast, ToastContainer } from "react-toastify";
 import { useCart } from "@/contexts/CartContext";
 import { Loading } from "@/app/components/Loading/Loading";
+import Image from "next/image";
 
 export default function CartPage() {
   const router = useRouter();
@@ -68,9 +69,11 @@ export default function CartPage() {
                   className="flex-shrink-0 w-24 h-32 bg-gray-100 rounded-lg overflow-hidden hover:opacity-80 transition-opacity duration-200"
                 >
                   {item.image ? (
-                    <img
+                    <Image
                       src={item.image}
                       alt={item.title}
+                      width={400}
+                      height={400}
                       className="w-full h-full object-cover"
                     />
                   ) : (
@@ -111,7 +114,7 @@ export default function CartPage() {
                         updateQuantity(
                           item.bookId,
                           Math.max(1, item.quantity - 1),
-                          item.type
+                          item.type,
                         );
                       }}
                       className="w-8 h-8 flex items-center justify-center bg-gray-200 hover:bg-gray-300 rounded-md transition-colors duration-200 font-bold text-slate-700"
@@ -133,7 +136,11 @@ export default function CartPage() {
                     <button
                       onClick={(e) => {
                         e.preventDefault();
-                        updateQuantity(item.bookId, item.quantity + 1, item.type);
+                        updateQuantity(
+                          item.bookId,
+                          item.quantity + 1,
+                          item.type,
+                        );
                       }}
                       className="w-8 h-8 flex items-center justify-center bg-gray-200 hover:bg-gray-300 rounded-md transition-colors duration-200 font-bold text-slate-700"
                     >

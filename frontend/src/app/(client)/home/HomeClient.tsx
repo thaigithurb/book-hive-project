@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { Book } from "@/app/interfaces/book.interface";
 import { BookCard } from "@/app/components/Card/BookCard";
-import { Loading } from "@/app/components/Loading/Loading";
+import { BookCardSkeleton } from "@/app/components/Skeleton/BookCardSkeleton";
 import { ToastContainer } from "react-toastify";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -18,13 +18,15 @@ export default function HomeClient({
 }) {
   const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken_user");
     setIsLoggedIn(!!token);
-    if (!token) return;
-    setIsLoading(true);
+    if (!token) {
+      setIsLoading(false);
+      return;
+    }
     axios
       .get(`${API_URL}/api/v1/favorites`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -49,18 +51,15 @@ export default function HomeClient({
         );
         setFavoriteIds((prev) => [...prev, bookId]);
       } else {
-        await axios.delete(`${API_URL}/api/v1/favorites/remove`, {
-          data: { bookId },
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        await axios.post(
+          `${API_URL}/api/v1/favorites/remove`,
+          { bookId },
+          { headers: { Authorization: `Bearer ${token}` } },
+        );
         setFavoriteIds((prev) => prev.filter((id) => id !== bookId));
       }
     } catch (err) {}
   };
-
-  if (isLoading) {
-    return <Loading fullScreen={true} size="lg" text="Đang tải..." />;
-  }
 
   return (
     <>
@@ -71,33 +70,45 @@ export default function HomeClient({
               Sách nổi bật
             </h2>
             <div className="grid grid-cols-4 gap-[24px] mb-10">
-              {featuredBooks.slice(0, 8).map((book, index) => (
-                <BookCard
-                  key={index}
-                  book={book}
-                  featured={true}
-                  newest={false}
-                  isFavorite={favoriteIds.includes(book._id)}
-                  onToggleFavorite={handleToggleFavorite}
-                  isLoggedIn={isLoggedIn}
-                />
-              ))}
+              {isLoading
+                ? Array.from({ length: 8 }).map((_, i) => (
+                    <BookCardSkeleton key={i} />
+                  ))
+                : featuredBooks
+                    .slice(0, 8)
+                    .map((book, index) => (
+                      <BookCard
+                        key={index}
+                        book={book}
+                        featured={true}
+                        newest={false}
+                        isFavorite={favoriteIds.includes(book._id)}
+                        onToggleFavorite={handleToggleFavorite}
+                        isLoggedIn={isLoggedIn}
+                      />
+                    ))}
             </div>
           </div>
           <div>
             <h2 className="text-2xl font-bold mb-4 text-primary">Sách mới</h2>
             <div className="grid grid-cols-4 gap-[24px] mb-10">
-              {newestBooks.slice(0, 8).map((book, index) => (
-                <BookCard
-                  key={index}
-                  book={book}
-                  featured={false}
-                  newest={true}
-                  isFavorite={favoriteIds.includes(book._id)}
-                  onToggleFavorite={handleToggleFavorite}
-                  isLoggedIn={isLoggedIn}
-                />
-              ))}
+              {isLoading
+                ? Array.from({ length: 8 }).map((_, i) => (
+                    <BookCardSkeleton key={i} />
+                  ))
+                : newestBooks
+                    .slice(0, 8)
+                    .map((book, index) => (
+                      <BookCard
+                        key={index}
+                        book={book}
+                        featured={false}
+                        newest={true}
+                        isFavorite={favoriteIds.includes(book._id)}
+                        onToggleFavorite={handleToggleFavorite}
+                        isLoggedIn={isLoggedIn}
+                      />
+                    ))}
             </div>
           </div>
         </div>

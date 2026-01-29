@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Book } from "@/app/interfaces/book.interface";
+import Image from "next/image";
 
 interface FavoriteCardProps {
   book: Book;
@@ -13,7 +14,9 @@ export const FavoriteCard = ({ book }: FavoriteCardProps) => (
     <div className="flex flex-col md:flex-row gap-4 p-4">
       <div className="flex-shrink-0 w-24 h-32 bg-gray-100 rounded overflow-hidden flex items-center justify-center">
         {book.image ? (
-          <img
+          <Image
+            width={400}
+            height={400}
             src={book.image}
             alt={book.title}
             className="w-full h-full object-cover"

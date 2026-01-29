@@ -4,7 +4,6 @@ import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
 import { Book } from "@/app/interfaces/book.interface";
 import { BookCard } from "@/app/components/Card/BookCard";
-import { Loading } from "@/app/components/Loading/Loading";
 import debounce from "lodash.debounce";
 import Pagination from "@/app/components/Pagination/Pagination";
 import SortSelect from "@/app/components/SortSelect/SortSelect";
@@ -12,11 +11,11 @@ import { useSyncParams } from "@/app/utils/useSyncParams";
 import { usePageChange } from "@/app/utils/usePageChange";
 import { useSortChange } from "@/app/utils/useSortChange";
 import { BookCardSkeleton } from "@/app/components/Skeleton/BookCardSkeleton";
+import { useFetchFavorites } from "@/app/utils/useFetchFavorites";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function Books() {
-  const [firstLoad, setFirstLoad] = useState(true);
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
   const [keyword, setKeyword] = useState("");
@@ -25,7 +24,6 @@ export default function Books() {
   const [sort, setSort] = useState<{ key: string; value: 1 | -1 } | null>(null);
   const limit = 12;
   const [sortValue, setSortValue] = useState("");
-  const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
   const sortOptions = [
     { value: "", label: "Sắp xếp" },
     { value: "title_asc", label: "Tên A-Z" },
@@ -35,29 +33,9 @@ export default function Books() {
     { value: "createdAt_desc", label: "Mới nhất" },
     { value: "createdAt_asc", label: "Cũ nhất" },
   ];
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  useEffect(() => {
-    const token = localStorage.getItem("accessToken_user");
-    setIsLoggedIn(!!token);
-  }, []);
 
-  useEffect(() => {
-    const fetchFavorites = async () => {
-      try {
-        const token = localStorage.getItem("accessToken_user");
-        if (!token) return;
-        const res = await axios.get(`${API_URL}/api/v1/favorites`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const favorites = res.data.favorites || [];
-        setFavoriteIds(favorites.map((fav: any) => fav.bookId?._id));
-      } catch {
-        setFavoriteIds([]);
-      }
-    };
-    fetchFavorites();
-  }, []);
+  const { favoriteIds, setFavoriteIds, isLoggedIn } = useFetchFavorites();
 
   // Xử lý toggle favorite
   const handleToggleFavorite = async (bookId: string, next: boolean) => {
@@ -87,7 +65,6 @@ export default function Books() {
     debounce(() => {
       setLoading(true);
       setBooks([]);
-      setLoading(true);
       axios
         .get(`${API_URL}/api/v1/books`, {
           params: {
@@ -101,10 +78,9 @@ export default function Books() {
           setBooks(res.data.books || []);
           setTotal(res.data.total || 0);
         })
-        .catch((errors) => setBooks([]))
+        .catch(() => setBooks([]))
         .finally(() => {
           setLoading(false);
-          setFirstLoad(false);
         });
     }, 400),
     [sort, keyword, page],
@@ -118,23 +94,6 @@ export default function Books() {
   useSyncParams(setPage, setSortValue, setSort);
   const handlePageChange = usePageChange("books", setPage, "client");
   const handleSortChange = useSortChange("books", "client");
-
-  if (firstLoad && loading) {
-    return <Loading fullScreen={true} size="lg" text="Đang tải sách..." />;
-  }
-  if (loading && books.length === 0) {
-    return (
-      <div className="py-[32px] px-[24px]">
-        <div className="container">
-          <div className="grid grid-cols-4 gap-[24px] mb-8">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <BookCardSkeleton key={i} />
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <>
@@ -155,7 +114,11 @@ export default function Books() {
           </div>
 
           <div className="grid grid-cols-4 gap-[24px] mb-8">
-            {books.length > 0 ? (
+            {loading ? (
+              Array.from({ length: 8 }).map((_, i) => (
+                <BookCardSkeleton key={i} />
+              ))
+            ) : books.length > 0 ? (
               books.map((book) => (
                 <BookCard
                   key={book._id}
