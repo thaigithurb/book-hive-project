@@ -5,24 +5,39 @@ import axios from "axios";
 import Link from "next/link";
 import { toast, ToastContainer } from "react-toastify";
 import { GoogleLogin } from "@react-oauth/google";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
+const loginSchema = z.object({
+  email: z.string().email("Email không hợp lệ"),
+  password: z.string().min(6, "Mật khẩu tối thiểu 6 ký tự"),
+});
+
+type LoginForm = z.infer<typeof loginSchema>;
+
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
 
-  const handleLogin = async (e: any) => {
-    e.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginForm>({
+    resolver: zodResolver(loginSchema),
+  });
+
+  const handleLogin = async (data: LoginForm) => {
     setLoading(true);
 
     try {
       const res = await axios.post(
         `${API_URL}/api/v1/auth/loginWithPassword`,
-        { email, password },
+        data,
         { withCredentials: true },
       );
 
@@ -101,7 +116,10 @@ export default function LoginPage() {
               <p className="text-blue-100">Tạo tài khoản mới</p>
             </div>
 
-            <form onSubmit={handleLogin} className="px-6 py-8 space-y-6">
+            <form
+              onSubmit={handleSubmit(handleLogin)}
+              className="px-6 py-8 space-y-6"
+            >
               <div>
                 <label
                   htmlFor="email"
@@ -112,12 +130,16 @@ export default function LoginPage() {
                 <input
                   id="email"
                   type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  {...register("email")}
                   placeholder="Nhập email của bạn"
-                  required
                   className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                  disabled={loading}
                 />
+                {errors.email && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {errors.email.message}
+                  </p>
+                )}
               </div>
 
               <div>
@@ -131,11 +153,10 @@ export default function LoginPage() {
                   <input
                     id="password"
                     type={showPassword ? "text" : "password"}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    {...register("password")}
                     placeholder="Nhập mật khẩu"
-                    required
                     className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                    disabled={loading}
                   />
                   <button
                     type="button"
@@ -145,6 +166,11 @@ export default function LoginPage() {
                     {showPassword ? "👁️" : "👁️‍🗨️"}
                   </button>
                 </div>
+                {errors.password && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {errors.password.message}
+                  </p>
+                )}
               </div>
 
               <div className="flex items-center justify-between">

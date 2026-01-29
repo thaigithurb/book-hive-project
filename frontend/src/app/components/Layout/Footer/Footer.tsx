@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {
   FaFacebookF,
   FaInstagram,
@@ -24,29 +25,29 @@ export default function Footer() {
           <h4 className="font-semibold mb-2 text-yellow-300">Liên kết nhanh</h4>
           <ul className="space-y-1 text-sm opacity-90">
             <li>
-              <a href="/home" className="hover:text-yellow-400">
+              <Link href="/home" className="hover:text-yellow-400">
                 Trang chủ
-              </a>
+              </Link>
             </li>
             <li>
-              <a href="/books" className="hover:text-yellow-400">
+              <Link href="/books" className="hover:text-yellow-400">
                 Sách
-              </a>
+              </Link>
             </li>
             <li>
-              <a href="/cart" className="hover:text-yellow-400">
+              <Link href="/cart" className="hover:text-yellow-400">
                 Giỏ hàng
-              </a>
+              </Link>
             </li>
             <li>
-              <a href="/history" className="hover:text-yellow-400">
+              <Link href="/look-up" className="hover:text-yellow-400">
                 Tra cứu
-              </a>
+              </Link>
             </li>
             <li>
-              <a href="/profile" className="hover:text-yellow-400">
+              <Link href="/profile" className="hover:text-yellow-400">
                 Tài khoản
-              </a>
+              </Link>
             </li>
           </ul>
         </div>

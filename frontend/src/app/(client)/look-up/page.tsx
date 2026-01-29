@@ -7,8 +7,16 @@ import { toast, ToastContainer } from "react-toastify";
 import { Loading } from "@/app/components/Loading/Loading";
 import Pagination from "@/app/components/Pagination/Pagination";
 import { OrderCard } from "@/app/components/Card/OrderCard";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+const emailSchema = z.object({
+  email: z.string().email("Email không hợp lệ"),
+});
+type EmailForm = z.infer<typeof emailSchema>;
 
 type Order = {
   _id: string;
@@ -35,16 +43,26 @@ type Order = {
   updatedAt: string;
 };
 
-export default function HistoryPage() {
+export default function LookUpPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [searchEmail, setSearchEmail] = useState("");
   const [searchMode, setSearchMode] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const limit = 10;
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setValue,
+    getValues,
+  } = useForm<EmailForm>({
+    resolver: zodResolver(emailSchema),
+    defaultValues: { email: "" },
+  });
 
   const user =
     typeof window !== "undefined"
@@ -84,19 +102,13 @@ export default function HistoryPage() {
     }
   };
 
-  const handleSearchOrders = async (e: React.FormEvent, searchPage: number = 1) => {
-    e.preventDefault();
-
-    if (!searchEmail.trim()) {
-      toast.warning("Vui lòng nhập email");
-      return;
-    }
+  const handleSearchOrders = async (form: EmailForm, searchPage: number = 1) => {
 
     try {
       setLoading(true);
       setHasSearched(true);
       const res = await axios.get(
-        `${API_URL}/api/v1/orders/user/${searchEmail.trim()}`,
+        `${API_URL}/api/v1/orders/user/${form.email.trim()}`,
         {
           params: { page: searchPage, limit },
         },
@@ -110,7 +122,6 @@ export default function HistoryPage() {
         toast.info("Không tìm thấy đơn hàng nào cho email này");
       }
     } catch (error: any) {
-      console.error("Error searching orders:", error);
       toast.error(
         error.response?.data?.message ||
           "Email không tồn tại hoặc không có đơn hàng",
@@ -164,7 +175,7 @@ export default function HistoryPage() {
             </p>
 
             <form
-              onSubmit={(e) => handleSearchOrders(e, 1)}
+              onSubmit={handleSubmit((data) => handleSearchOrders(data, 1))}
               className="space-y-4"
             >
               <div>
@@ -173,12 +184,13 @@ export default function HistoryPage() {
                 </label>
                 <input
                   type="email"
-                  value={searchEmail}
-                  onChange={(e) => setSearchEmail(e.target.value)}
+                  {...register("email")}
                   placeholder="Nhập email đặt hàng..."
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                  required
                 />
+                {errors.email && (
+                  <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>
+                )}
               </div>
 
               <button
@@ -221,7 +233,7 @@ export default function HistoryPage() {
                     total={total}
                     limit={limit}
                     onPageChange={(newPage) =>
-                      handleSearchOrders(new Event("submit") as any, newPage)
+                      handleSubmit((data) => handleSearchOrders(data, newPage))()
                     }
                   />
                 </div>
@@ -244,7 +256,7 @@ export default function HistoryPage() {
           <button
             onClick={() => {
               setSearchMode(false);
-              setSearchEmail("");
+              setValue("email", "");
               setPage(1);
               setHasSearched(false);
               setOrders([]);
@@ -260,7 +272,7 @@ export default function HistoryPage() {
           <button
             onClick={() => {
               setSearchMode(true);
-              setSearchEmail("");
+              setValue("email", "");
               setOrders([]);
               setTotal(0);
               setPage(1);
@@ -323,7 +335,7 @@ export default function HistoryPage() {
 
             <div className="max-w-md mb-8">
               <form
-                onSubmit={(e) => handleSearchOrders(e, 1)}
+                onSubmit={handleSubmit((data) => handleSearchOrders(data, 1))}
                 className="space-y-4"
               >
                 <div>
@@ -332,12 +344,14 @@ export default function HistoryPage() {
                   </label>
                   <input
                     type="email"
-                    value={searchEmail}
-                    onChange={(e) => setSearchEmail(e.target.value)}
+                    {...register("email")}
                     placeholder="Nhập email..."
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                     required
                   />
+                  {errors.email && (
+                    <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>
+                  )}
                 </div>
 
                 <button
@@ -369,7 +383,7 @@ export default function HistoryPage() {
                       total={total}
                       limit={limit}
                       onPageChange={(newPage) =>
-                        handleSearchOrders(new Event("submit") as any, newPage)
+                        handleSubmit((data) => handleSearchOrders(data, newPage))()
                       }
                     />
                   </>
