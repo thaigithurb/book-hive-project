@@ -78,13 +78,27 @@ export default function LoginPage() {
   return (
     <>
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4">
+        <div className="absolute top-6 left-6">
+          <Link
+            href="/home"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-50 text-blue-600 font-semibold transition"
+          >
+            <span>🏠</span>
+            Về trang chủ
+          </Link>
+        </div>
         <div className="w-full max-w-md">
           <div className="bg-white rounded-lg shadow-xl overflow-hidden">
             <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-8 text-center">
-              <h1 className="text-3xl font-bold text-white mb-2">
-                📚 BookHive
-              </h1>
-              <p className="text-blue-100">Nơi tri thức hội tụ</p>
+              <div className="flex items-center gap-5">
+                <img
+                  src="/book-hive.jpg"
+                  className="w-15 h-15 rounded-[10px]"
+                  alt="logo"
+                />
+                <h1 className="text-3xl font-bold text-white mb-2">BookHive</h1>
+              </div>
+              <p className="text-blue-100">Tạo tài khoản mới</p>
             </div>
 
             <form onSubmit={handleLogin} className="px-6 py-8 space-y-6">
@@ -126,7 +140,7 @@ export default function LoginPage() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                    className="absolute cursor-pointer right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
                   >
                     {showPassword ? "👁️" : "👁️‍🗨️"}
                   </button>
@@ -180,14 +194,6 @@ export default function LoginPage() {
                 onSuccess={handleGoogleSuccess}
                 onError={handleGoogleError}
               />
-
-              <button
-                type="button"
-                className="w-full border-2 border-gray-300 hover:border-gray-400 text-gray-700 font-semibold py-2.5 rounded-lg transition flex items-center justify-center gap-2"
-              >
-                <span>📘</span>
-                Đăng nhập với Facebook
-              </button>
             </form>
 
             <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 text-center">

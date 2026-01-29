@@ -39,8 +39,8 @@ export default function Footer() {
               </a>
             </li>
             <li>
-              <a href="/orders" className="hover:text-yellow-400">
-                Đơn hàng
+              <a href="/history" className="hover:text-yellow-400">
+                Tra cứu
               </a>
             </li>
             <li>
