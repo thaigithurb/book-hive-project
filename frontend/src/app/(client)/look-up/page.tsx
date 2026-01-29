@@ -102,8 +102,10 @@ export default function LookUpPage() {
     }
   };
 
-  const handleSearchOrders = async (form: EmailForm, searchPage: number = 1) => {
-
+  const handleSearchOrders = async (
+    form: EmailForm,
+    searchPage: number = 1,
+  ) => {
     try {
       setLoading(true);
       setHasSearched(true);
@@ -164,13 +166,13 @@ export default function LookUpPage() {
 
   if (!isLoggedIn) {
     return (
-      <div className="min-h-screen bg-gray-50 py-16">
-        <div className="container max-w-md">
-          <div className="bg-white rounded-2xl shadow p-8 mb-8">
-            <h1 className="text-3xl font-bold text-slate-900 mb-2">
+      <div className="min-h-screen bg-gray-50 py-8 md:py-16">
+        <div className="container mx-auto px-4 max-w-md">
+          <div className="bg-white rounded-2xl shadow p-6 md:p-8 mb-8">
+            <h1 className="text-2xl md:text-3xl font-bold text-slate-900 mb-2 text-center md:text-left">
               Tra cứu đơn hàng
             </h1>
-            <p className="text-gray-600 mb-6">
+            <p className="text-sm md:text-base text-gray-600 mb-6 text-center md:text-left">
               Nhập email để xem lịch sử đơn hàng của bạn
             </p>
 
@@ -186,29 +188,31 @@ export default function LookUpPage() {
                   type="email"
                   {...register("email")}
                   placeholder="Nhập email đặt hàng..."
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm md:text-base"
                 />
                 {errors.email && (
-                  <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>
+                  <p className="text-red-500 text-xs mt-1">
+                    {errors.email.message}
+                  </p>
                 )}
               </div>
 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-2 bg-primary text-white font-bold rounded-lg hover:bg-blue-700 transition-colors duration-200 disabled:opacity-50"
+                className="w-full py-2.5 bg-primary text-white font-bold rounded-lg hover:bg-blue-700 transition-colors duration-200 disabled:opacity-50 text-sm md:text-base"
               >
                 {loading ? "Đang tìm..." : "Tra cứu"}
               </button>
             </form>
 
             <div className="mt-6 pt-6 border-t border-gray-200">
-              <p className="text-sm text-gray-600 mb-3">
+              <p className="text-sm text-gray-600 mb-3 text-center">
                 Bạn là khách hàng đã đăng ký?
               </p>
               <Link
                 href="/auth/login"
-                className="block w-full py-2 bg-blue-50 text-center text-primary font-bold rounded-lg hover:bg-blue-100 transition-colors duration-200"
+                className="block w-full py-2.5 bg-blue-50 text-center text-primary font-bold rounded-lg hover:bg-blue-100 transition-colors duration-200 text-sm md:text-base"
               >
                 Đăng nhập
               </Link>
@@ -233,7 +237,9 @@ export default function LookUpPage() {
                     total={total}
                     limit={limit}
                     onPageChange={(newPage) =>
-                      handleSubmit((data) => handleSearchOrders(data, newPage))()
+                      handleSubmit((data) =>
+                        handleSearchOrders(data, newPage),
+                      )()
                     }
                   />
                 </div>
@@ -250,9 +256,9 @@ export default function LookUpPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-16">
-      <div className="container">
-        <div className="mb-8 flex gap-4">
+    <div className="min-h-screen bg-gray-50 py-8 md:py-16">
+      <div className="container mx-auto px-4">
+        <div className="mb-6 md:mb-8 flex flex-col sm:flex-row gap-3 md:gap-4">
           <button
             onClick={() => {
               setSearchMode(false);
@@ -261,7 +267,7 @@ export default function LookUpPage() {
               setHasSearched(false);
               setOrders([]);
             }}
-            className={`px-6 py-3 font-semibold rounded-lg transition-all duration-200 ${
+            className={`px-4 py-2.5 md:px-6 md:py-3 font-semibold rounded-lg transition-all duration-200 text-sm md:text-base w-full sm:w-auto ${
               !searchMode
                 ? "bg-primary text-white shadow-md"
                 : "bg-white text-primary border border-gray-300 hover:bg-gray-50"
@@ -278,7 +284,7 @@ export default function LookUpPage() {
               setPage(1);
               setHasSearched(false);
             }}
-            className={`px-6 py-3 font-semibold rounded-lg transition-all duration-200 ${
+            className={`px-4 py-2.5 md:px-6 md:py-3 font-semibold rounded-lg transition-all duration-200 text-sm md:text-base w-full sm:w-auto ${
               searchMode
                 ? "bg-primary text-white shadow-md"
                 : "bg-white text-primary border border-gray-300 hover:bg-gray-50"
@@ -290,22 +296,22 @@ export default function LookUpPage() {
 
         {!searchMode ? (
           <>
-            <h1 className="text-4xl font-bold text-slate-900 mb-12">
+            <h1 className="text-2xl md:text-4xl font-bold text-slate-900 mb-8 md:mb-12">
               Đơn hàng của tôi
             </h1>
 
             {orders.length === 0 ? (
-              <div className="bg-white rounded-2xl p-16 shadow-sm text-center">
-                <div className="text-6xl mb-4">📦</div>
-                <h2 className="text-3xl font-bold text-slate-800 mb-2">
+              <div className="bg-white rounded-2xl p-8 md:p-16 shadow-sm text-center">
+                <div className="text-4xl md:text-6xl mb-4">📦</div>
+                <h2 className="text-xl md:text-3xl font-bold text-slate-800 mb-2">
                   Chưa có đơn hàng
                 </h2>
-                <p className="text-slate-500 mb-8">
+                <p className="text-sm md:text-base text-slate-500 mb-8">
                   Bạn chưa mua sản phẩm nào. Hãy bắt đầu mua sắm ngay!
                 </p>
                 <Link
                   href="/home"
-                  className="inline-block px-6 py-3 bg-primary text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-200"
+                  className="inline-block px-6 py-3 bg-primary text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-200 text-sm md:text-base"
                 >
                   ← Tiếp tục mua sắm
                 </Link>
@@ -329,7 +335,7 @@ export default function LookUpPage() {
           </>
         ) : (
           <>
-            <h1 className="text-4xl font-bold text-slate-900 mb-8">
+            <h1 className="text-2xl md:text-4xl font-bold text-slate-900 mb-6 md:mb-8">
               Tra cứu đơn hàng
             </h1>
 
@@ -346,18 +352,20 @@ export default function LookUpPage() {
                     type="email"
                     {...register("email")}
                     placeholder="Nhập email..."
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm md:text-base"
                     required
                   />
                   {errors.email && (
-                    <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.email.message}
+                    </p>
                   )}
                 </div>
 
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-2 bg-primary text-white font-bold rounded-lg hover:bg-blue-700 transition-colors duration-200 disabled:opacity-50"
+                  className="w-full py-2.5 bg-primary text-white font-bold rounded-lg hover:bg-blue-700 transition-colors duration-200 disabled:opacity-50 text-sm md:text-base"
                 >
                   {loading ? "Đang tìm..." : "Tra cứu"}
                 </button>
@@ -369,7 +377,7 @@ export default function LookUpPage() {
                   <Loading fullScreen={false} size="md" text="Đang tìm..." />
                 ) : orders.length > 0 ? (
                   <>
-                    <h2 className="text-lg font-bold text-slate-900 mb-6">
+                    <h2 className="text-lg font-bold text-slate-900 mb-4 md:mb-6">
                       Tìm thấy {total} đơn hàng
                     </h2>
                     <div className="space-y-3">
@@ -383,7 +391,9 @@ export default function LookUpPage() {
                       total={total}
                       limit={limit}
                       onPageChange={(newPage) =>
-                        handleSubmit((data) => handleSearchOrders(data, newPage))()
+                        handleSubmit((data) =>
+                          handleSearchOrders(data, newPage),
+                        )()
                       }
                     />
                   </>

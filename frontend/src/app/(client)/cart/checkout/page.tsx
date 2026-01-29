@@ -66,15 +66,15 @@ export default function CheckoutPage() {
 
   if (items.length === 0) {
     return (
-      <div className="min-h-screen py-12">
-        <div className="container">
-          <div className="bg-white rounded-2xl p-12 shadow text-center">
-            <h1 className="text-3xl font-bold text-slate-800 mb-4">
+      <div className="min-h-screen py-8 md:py-12">
+        <div className="container mx-auto px-4">
+          <div className="bg-white rounded-2xl p-6 md:p-12 shadow text-center">
+            <h1 className="text-2xl md:text-3xl font-bold text-slate-800 mb-4">
               Giỏ hàng trống
             </h1>
             <Link
               href="/home"
-              className="inline-block px-6 py-3 bg-primary text-white rounded-lg font-semibold hover:bg-blue-700"
+              className="inline-block px-6 py-3 bg-primary text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors text-sm md:text-base"
             >
               Quay lại mua sắm
             </Link>
@@ -91,15 +91,15 @@ export default function CheckoutPage() {
 
   if (displayItems.length === 0) {
     return (
-      <div className="min-h-screen py-12">
-        <div className="container">
-          <div className="bg-white rounded-2xl p-12 shadow text-center">
-            <h1 className="text-3xl font-bold text-slate-800 mb-4">
+      <div className="min-h-screen py-8 md:py-12">
+        <div className="container mx-auto px-4">
+          <div className="bg-white rounded-2xl p-6 md:p-12 shadow text-center">
+            <h1 className="text-2xl md:text-3xl font-bold text-slate-800 mb-4">
               Không có sản phẩm
             </h1>
             <Link
               href="/home"
-              className="inline-block px-6 py-3 bg-primary text-white rounded-lg font-semibold hover:bg-blue-700"
+              className="inline-block px-6 py-3 bg-primary text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors text-sm md:text-base"
             >
               Quay lại mua sắm
             </Link>
@@ -227,14 +227,16 @@ export default function CheckoutPage() {
   };
 
   return (
-    <div className="min-h-screen py-12 bg-gray-50">
-      <div className="container">
-        <h1 className="text-4xl font-bold text-slate-800 mb-8">Thanh toán</h1>
+    <div className="min-h-screen py-6 md:py-12 bg-gray-50">
+      <div className="container mx-auto px-4">
+        <h1 className="text-2xl md:text-4xl font-bold text-slate-800 mb-6 md:mb-8">
+          Thanh toán
+        </h1>
 
-        <div className="mb-8 flex gap-4 border-b border-gray-300">
+        <div className="mb-6 md:mb-8 flex gap-2 md:gap-4 border-b border-gray-300 overflow-x-auto whitespace-nowrap pb-1 md:pb-0">
           <button
             onClick={() => setCartType("all")}
-            className={`px-6 py-3 font-semibold transition-colors ${
+            className={`px-4 py-2 md:px-6 md:py-3 text-sm md:text-base font-semibold transition-colors ${
               cartType === "all"
                 ? "text-primary border-b-2 border-primary"
                 : "text-slate-600 hover:text-slate-800"
@@ -244,7 +246,7 @@ export default function CheckoutPage() {
           </button>
           <button
             onClick={() => setCartType("buy")}
-            className={`px-6 py-3 font-semibold transition-colors ${
+            className={`px-4 py-2 md:px-6 md:py-3 text-sm md:text-base font-semibold transition-colors ${
               cartType === "buy"
                 ? "text-primary border-b-2 border-primary"
                 : "text-slate-600 hover:text-slate-800"
@@ -254,7 +256,7 @@ export default function CheckoutPage() {
           </button>
           <button
             onClick={() => setCartType("rent")}
-            className={`px-6 py-3 font-semibold transition-colors ${
+            className={`px-4 py-2 md:px-6 md:py-3 text-sm md:text-base font-semibold transition-colors ${
               cartType === "rent"
                 ? "text-primary border-b-2 border-primary"
                 : "text-slate-600 hover:text-slate-800"
@@ -265,10 +267,10 @@ export default function CheckoutPage() {
         </div>
 
         <form onSubmit={handleSubmit(handleContinue)}>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2 space-y-8">
-              <div className="bg-white rounded-lg shadow p-6">
-                <h2 className="text-2xl font-bold text-slate-800 mb-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
+            <div className="lg:col-span-2 space-y-6 md:space-y-8">
+              <div className="bg-white rounded-lg shadow p-4 md:p-6">
+                <h2 className="text-xl md:text-2xl font-bold text-slate-800 mb-4 md:mb-6">
                   Thông tin giao hàng
                 </h2>
 
@@ -281,7 +283,7 @@ export default function CheckoutPage() {
                       type="text"
                       {...register("fullName")}
                       placeholder="Nhập họ tên"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm md:text-base"
                       disabled={isProcessing}
                     />
                     {errors.fullName && (
@@ -291,7 +293,7 @@ export default function CheckoutPage() {
                     )}
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-semibold text-slate-700 mb-2">
                         Email
@@ -300,7 +302,7 @@ export default function CheckoutPage() {
                         type="email"
                         {...register("email")}
                         placeholder="Nhập email"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm md:text-base"
                         disabled={isProcessing}
                       />
                       {errors.email && (
@@ -318,7 +320,7 @@ export default function CheckoutPage() {
                         type="tel"
                         {...register("phone")}
                         placeholder="Nhập số điện thoại"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm md:text-base"
                         disabled={isProcessing}
                       />
                       {errors.phone && (
@@ -337,7 +339,7 @@ export default function CheckoutPage() {
                       {...register("address")}
                       placeholder="Nhập địa chỉ nhận hàng"
                       rows={3}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary resize-none text-sm md:text-base"
                       disabled={isProcessing}
                     />
                     {errors.address && (
@@ -349,14 +351,14 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
-              <div className="bg-white rounded-lg shadow p-6">
-                <h2 className="text-2xl font-bold text-slate-800 mb-6">
+              <div className="bg-white rounded-lg shadow p-4 md:p-6">
+                <h2 className="text-xl md:text-2xl font-bold text-slate-800 mb-4 md:mb-6">
                   Phương thức thanh toán
                 </h2>
 
                 <div className="space-y-4">
                   <label
-                    className="flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all duration-200"
+                    className="flex items-center p-3 md:p-4 border-2 rounded-lg cursor-pointer transition-all duration-200"
                     style={{
                       borderColor:
                         paymentMethod === "transfer" ? "#3b82f6" : "#e5e7eb",
@@ -372,20 +374,20 @@ export default function CheckoutPage() {
                       onChange={(e) =>
                         setPaymentMethod(e.target.value as "transfer" | "cod")
                       }
-                      className="w-4 h-4 text-primary"
+                      className="w-4 h-4 text-primary shrink-0"
                     />
-                    <div className="ml-4">
-                      <p className="font-semibold text-slate-800">
+                    <div className="ml-3 md:ml-4">
+                      <p className="font-semibold text-slate-800 text-sm md:text-base">
                         💳 Chuyển khoản ngân hàng
                       </p>
-                      <p className="text-sm text-slate-500">
+                      <p className="text-xs md:text-sm text-slate-500">
                         Quét mã QR hoặc chuyển khoản thủ công
                       </p>
                     </div>
                   </label>
 
                   <label
-                    className="flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all duration-200"
+                    className="flex items-center p-3 md:p-4 border-2 rounded-lg cursor-pointer transition-all duration-200"
                     style={{
                       borderColor:
                         paymentMethod === "cod" ? "#3b82f6" : "#e5e7eb",
@@ -401,13 +403,13 @@ export default function CheckoutPage() {
                       onChange={(e) =>
                         setPaymentMethod(e.target.value as "transfer" | "cod")
                       }
-                      className="w-4 h-4 text-primary"
+                      className="w-4 h-4 text-primary shrink-0"
                     />
-                    <div className="ml-4">
-                      <p className="font-semibold text-slate-800">
+                    <div className="ml-3 md:ml-4">
+                      <p className="font-semibold text-slate-800 text-sm md:text-base">
                         🚚 Thanh toán khi nhận hàng
                       </p>
-                      <p className="text-sm text-slate-500">
+                      <p className="text-xs md:text-sm text-slate-500">
                         Thanh toán tiền mặt khi nhận sách
                       </p>
                     </div>
@@ -415,8 +417,8 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
-              <div className="bg-white rounded-lg shadow p-6">
-                <h2 className="text-2xl font-bold text-slate-800 mb-6">
+              <div className="bg-white rounded-lg shadow p-4 md:p-6">
+                <h2 className="text-xl md:text-2xl font-bold text-slate-800 mb-4 md:mb-6">
                   Chi tiết đơn hàng
                 </h2>
 
@@ -424,27 +426,27 @@ export default function CheckoutPage() {
                   {items.map((item, index) => (
                     <div
                       key={index}
-                      className="flex justify-between items-center pb-3 border-b border-gray-200"
+                      className="flex justify-between items-start pb-3 border-b border-gray-200"
                     >
-                      <div className="flex-1">
-                        <p className="font-semibold text-slate-800">
+                      <div className="flex-1 pr-4">
+                        <p className="font-semibold text-slate-800 text-sm md:text-base">
                           {item.title}
                         </p>
-                        <p className="text-sm text-slate-500">
+                        <p className="text-xs md:text-sm text-slate-500">
                           x{item.quantity}
                         </p>
                       </div>
-                      <p className="font-semibold text-primary">
+                      <p className="font-semibold text-primary text-sm md:text-base whitespace-nowrap">
                         {(item.price * item.quantity).toLocaleString("vi-VN")} đ
                       </p>
                     </div>
                   ))}
 
                   <div className="flex justify-between pt-3">
-                    <span className="font-bold text-lg text-slate-800">
+                    <span className="font-bold text-base md:text-lg text-slate-800">
                       Tổng cộng:
                     </span>
-                    <span className="text-2xl font-bold text-primary">
+                    <span className="text-xl md:text-2xl font-bold text-primary">
                       {totalAmount.toLocaleString("vi-VN")} đ
                     </span>
                   </div>
@@ -453,12 +455,12 @@ export default function CheckoutPage() {
             </div>
 
             <div className="lg:col-span-1">
-              <div className="bg-white rounded-lg shadow p-6 sticky top-40">
-                <h3 className="text-xl font-bold text-slate-800 mb-6">
+              <div className="bg-white rounded-lg shadow p-4 md:p-6 sticky top-[80px] md:top-40">
+                <h3 className="text-lg md:text-xl font-bold text-slate-800 mb-4 md:mb-6">
                   Tóm tắt
                 </h3>
 
-                <div className="space-y-3 mb-6 pb-6 border-b border-gray-200">
+                <div className="space-y-2 md:space-y-3 mb-4 md:mb-6 pb-4 md:pb-6 border-b border-gray-200 text-sm md:text-base">
                   <div className="flex justify-between text-slate-600">
                     <span>Tạm tính:</span>
                     <span className="font-semibold">
@@ -473,11 +475,11 @@ export default function CheckoutPage() {
                   </div>
                 </div>
 
-                <div className="flex justify-between mb-6">
-                  <span className="text-lg font-bold text-slate-800">
+                <div className="flex justify-between mb-4 md:mb-6">
+                  <span className="text-base md:text-lg font-bold text-slate-800">
                     Tổng:
                   </span>
-                  <span className="text-2xl font-bold text-primary">
+                  <span className="text-xl md:text-2xl font-bold text-primary">
                     {totalAmount.toLocaleString("vi-VN")} đ
                   </span>
                 </div>
@@ -485,19 +487,19 @@ export default function CheckoutPage() {
                 <button
                   type="submit"
                   disabled={isProcessing}
-                  className="w-full py-3 bg-primary text-white font-bold rounded-lg hover:bg-blue-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
+                  className="w-full py-3 bg-primary text-white font-bold rounded-lg hover:bg-blue-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 text-sm md:text-base"
                 >
                   {isProcessing ? "Đang xử lý..." : "✓ Tiếp tục"}
                 </button>
 
                 <Link
                   href="/cart"
-                  className="block w-full py-3 bg-gray-100 text-slate-800 font-bold rounded-lg hover:bg-gray-200 transition-colors duration-200 text-center mt-3"
+                  className="block w-full py-3 bg-gray-100 text-slate-800 font-bold rounded-lg hover:bg-gray-200 transition-colors duration-200 text-center mt-3 text-sm md:text-base"
                 >
                   ← Quay lại giỏ hàng
                 </Link>
 
-                <div className="mt-6 pt-6 border-t border-gray-200 text-sm text-slate-500 space-y-2">
+                <div className="mt-4 md:mt-6 pt-4 md:pt-6 border-t border-gray-200 text-xs md:text-sm text-slate-500 space-y-2">
                   <p>✓ Giao hàng toàn quốc</p>
                   <p>✓ Đổi trả trong 30 ngày</p>
                   <p>✓ Thanh toán an toàn</p>

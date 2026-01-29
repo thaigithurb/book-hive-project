@@ -36,7 +36,6 @@ export default function BooksRent() {
 
   const { favoriteIds, setFavoriteIds, isLoggedIn } = useFetchFavorites();
 
-  // Xử lý toggle favorite
   const handleToggleFavorite = async (bookId: string, next: boolean) => {
     const token = localStorage.getItem("accessToken_user");
     if (!token) return;
@@ -95,30 +94,32 @@ export default function BooksRent() {
 
   return (
     <>
-      <div className="py-[32px] px-[24px]">
-        <div className="container">
-          <div className="mb-6 flex justify-between items-center">
-            <h2 className="text-2xl font-bold mb-4 text-primary">
+      <div className="py-4 px-4 md:py-[32px] md:px-[24px]">
+        <div className="container mx-auto">
+          <div className="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <h2 className="text-xl md:text-2xl font-bold text-primary">
               Sách chỉ thuê
             </h2>
-            <SortSelect
-              onChange={(e) => {
-                setSortValue(e.target.value);
-                handleSortChange(e, setSort);
-              }}
-              options={sortOptions}
-              sortValue={sortValue}
-            />
+            <div className="w-full md:w-auto">
+              <SortSelect
+                onChange={(e) => {
+                  setSortValue(e.target.value);
+                  handleSortChange(e, setSort);
+                }}
+                options={sortOptions}
+                sortValue={sortValue}
+              />
+            </div>
           </div>
-          <div className="grid grid-cols-4 gap-[24px] mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-[24px] mb-8">
             {loading ? (
               Array.from({ length: 8 }).map((_, i) => (
                 <BookCardSkeleton key={i} />
               ))
             ) : books.length > 0 ? (
-              books.map((book, index) => (
+              books.map((book) => (
                 <BookCard
-                  key={index}
+                  key={book._id}
                   book={book}
                   featured={book.featured ? true : false}
                   onToggleFavorite={handleToggleFavorite}
@@ -127,18 +128,20 @@ export default function BooksRent() {
                 />
               ))
             ) : (
-              <div className="col-span-4 flex items-center justify-center min-h-[400px] text-gray-500 text-center">
-                <p className="text-xl">Không tìm thấy sách nào</p>
+              <div className="col-span-full flex items-center justify-center min-h-[300px] md:min-h-[400px] text-gray-500 text-center">
+                <p className="text-lg md:text-xl">Không tìm thấy sách nào</p>
               </div>
             )}
           </div>
           {books.length > 0 && (
-            <Pagination
-              page={page}
-              total={total}
-              limit={limit}
-              onPageChange={handlePageChange}
-            />
+            <div className="flex justify-center">
+              <Pagination
+                page={page}
+                total={total}
+                limit={limit}
+                onPageChange={handlePageChange}
+              />
+            </div>
           )}
         </div>
       </div>

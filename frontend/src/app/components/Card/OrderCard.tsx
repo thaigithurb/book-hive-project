@@ -57,22 +57,22 @@ function getStatusText(status: string) {
 
 export const OrderCard = ({ order }: { order: Order }) => (
   <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden">
-    <Link href={`/orders/${order.orderCode}`} className="block p-6">
-      <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-4">
-        <div>
-          <p className="text-xs font-semibold text-gray-500 uppercase mb-1">
+    <Link href={`/orders/${order.orderCode}`} className="block p-4 md:p-6">
+      <div className="grid grid-cols-2 md:grid-cols-6 gap-x-2 gap-y-4 md:gap-4 mb-4">
+        <div className="md:col-span-2">
+          <p className="text-[10px] md:text-xs font-semibold text-gray-500 uppercase mb-1">
             Mã đơn hàng
           </p>
-          <p className="font-mono text-sm font-bold text-slate-900 break-all">
+          <p className="font-mono text-xs md:text-sm font-bold text-slate-900 break-all">
             {order.orderCode}
           </p>
         </div>
 
         <div>
-          <p className="text-xs font-semibold text-gray-500 uppercase mb-1">
+          <p className="text-[10px] md:text-xs font-semibold text-gray-500 uppercase mb-1">
             Ngày đặt hàng
           </p>
-          <p className="text-sm font-medium text-slate-900">
+          <p className="text-xs md:text-sm font-medium text-slate-900">
             {new Date(order.createdAt).toLocaleDateString("vi-VN", {
               day: "numeric",
               month: "numeric",
@@ -82,29 +82,29 @@ export const OrderCard = ({ order }: { order: Order }) => (
         </div>
 
         <div>
-          <p className="text-xs font-semibold text-gray-500 uppercase mb-1">
+          <p className="text-[10px] md:text-xs font-semibold text-gray-500 uppercase mb-1">
             Số lượng
           </p>
-          <p className="text-sm font-medium text-slate-900">
+          <p className="text-xs md:text-sm font-medium text-slate-900">
             {order.items.reduce((sum, item) => sum + item.quantity, 0)} sản phẩm
           </p>
         </div>
 
         <div>
-          <p className="text-xs font-semibold text-gray-500 uppercase mb-1">
+          <p className="text-[10px] md:text-xs font-semibold text-gray-500 uppercase mb-1">
             Tổng tiền
           </p>
-          <p className="text-sm font-bold text-primary">
+          <p className="text-xs md:text-sm font-bold text-primary">
             {order.totalAmount.toLocaleString("vi-VN")} đ
           </p>
         </div>
 
         <div className="col-span-2 md:col-span-1">
-          <p className="text-xs font-semibold text-gray-500 uppercase mb-1">
+          <p className="text-[10px] md:text-xs font-semibold text-gray-500 uppercase mb-1">
             Trạng thái
           </p>
           <span
-            className={`inline-block px-3 py-1 rounded text-xs font-semibold ${getStatusColor(
+            className={`inline-block px-2 py-1 md:px-3 rounded text-[10px] md:text-xs font-semibold ${getStatusColor(
               order.status,
             )}`}
           >
@@ -114,12 +114,12 @@ export const OrderCard = ({ order }: { order: Order }) => (
       </div>
 
       {order.items.length > 0 && (
-        <div className="pt-4 border-t border-gray-200">
+        <div className="pt-3 md:pt-4 border-t border-gray-200">
           <div className="flex items-center gap-3 overflow-hidden">
             {order.items.slice(0, 2).map((item, idx) => (
               <div
                 key={idx}
-                className="flex-shrink-0 w-14 h-16 bg-gray-100 rounded overflow-hidden"
+                className="flex-shrink-0 w-12 h-14 md:w-14 md:h-16 bg-gray-100 rounded overflow-hidden"
               >
                 {item.image ? (
                   <Image
@@ -130,7 +130,7 @@ export const OrderCard = ({ order }: { order: Order }) => (
                     height={400}
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-lg">
+                  <div className="w-full h-full flex items-center justify-center text-base md:text-lg">
                     📚
                   </div>
                 )}
@@ -138,11 +138,11 @@ export const OrderCard = ({ order }: { order: Order }) => (
             ))}
 
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-slate-900 truncate">
+              <p className="text-xs md:text-sm font-medium text-slate-900 truncate">
                 {order.items[0]?.title}
               </p>
               {order.items.length > 2 && (
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-[10px] md:text-xs text-gray-500 mt-0.5 md:mt-1">
                   + {order.items.length - 2} sản phẩm khác
                 </p>
               )}
@@ -154,13 +154,13 @@ export const OrderCard = ({ order }: { order: Order }) => (
 
     <Link
       href={`/orders/${order.orderCode}`}
-      className="flex items-center justify-between px-6 py-3 bg-gray-50 hover:bg-blue-50 border-t border-gray-200 transition-colors duration-200 group"
+      className="flex items-center justify-between px-4 py-2.5 md:px-6 md:py-3 bg-gray-50 hover:bg-blue-50 border-t border-gray-200 transition-colors duration-200 group"
     >
-      <span className="text-sm font-medium text-gray-700 group-hover:text-primary">
+      <span className="text-xs md:text-sm font-medium text-gray-700 group-hover:text-primary">
         Xem chi tiết
       </span>
       <svg
-        className="w-5 h-5 text-gray-400 group-hover:text-primary transition-colors duration-200"
+        className="w-4 h-4 md:w-5 md:h-5 text-gray-400 group-hover:text-primary transition-colors duration-200"
         fill="none"
         stroke="currentColor"
         viewBox="0 0 24 24"

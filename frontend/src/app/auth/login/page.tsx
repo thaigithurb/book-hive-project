@@ -93,40 +93,45 @@ export default function LoginPage() {
 
   return (
     <>
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4">
-        <div className="absolute top-6 left-6">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4 py-12 relative">
+        <div className="absolute top-4 left-4 md:top-6 md:left-6 z-10">
           <Link
             href="/home"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-50 text-blue-600 font-semibold transition"
+            className="inline-flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-50 text-blue-600 font-semibold transition text-sm md:text-base"
           >
             <span>🏠</span>
-            Về trang chủ
+            <span className="hidden sm:inline">Về trang chủ</span>
+            <span className="sm:hidden">Trang chủ</span>
           </Link>
         </div>
-        <div className="w-full max-w-md">
+        <div className="w-full max-w-md relative z-0">
           <div className="bg-white rounded-lg shadow-xl overflow-hidden">
-            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-8 text-center">
-              <div className="flex items-center gap-5">
+            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-6 md:px-6 md:py-8 text-center">
+              <div className="flex items-center justify-center gap-3 md:gap-5 mb-2">
                 <Image
                   src="/book-hive.jpg"
-                  className="w-15 h-15 rounded-[10px]"
+                  className="w-12 h-12 md:w-16 md:h-16 rounded-[10px] object-cover"
                   alt="logo"
                   width={400}
                   height={400}
                 />
-                <h1 className="text-3xl font-bold text-white mb-2">BookHive</h1>
+                <h1 className="text-2xl md:text-3xl font-bold text-white">
+                  BookHive
+                </h1>
               </div>
-              <p className="text-blue-100">Tạo tài khoản mới</p>
+              <p className="text-blue-100 text-sm md:text-base">
+                Đăng nhập tài khoản
+              </p>
             </div>
 
             <form
               onSubmit={handleSubmit(handleLogin)}
-              className="px-6 py-8 space-y-6"
+              className="px-4 py-6 md:px-6 md:py-8 space-y-4 md:space-y-6"
             >
               <div>
                 <label
                   htmlFor="email"
-                  className="block text-sm font-semibold text-gray-700 mb-2"
+                  className="block text-sm font-semibold text-gray-700 mb-1.5 md:mb-2"
                 >
                   Email
                 </label>
@@ -135,7 +140,7 @@ export default function LoginPage() {
                   type="email"
                   {...register("email")}
                   placeholder="Nhập email của bạn"
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition text-sm md:text-base"
                   disabled={loading}
                 />
                 {errors.email && (
@@ -148,7 +153,7 @@ export default function LoginPage() {
               <div>
                 <label
                   htmlFor="password"
-                  className="block text-sm font-semibold text-gray-700 mb-2"
+                  className="block text-sm font-semibold text-gray-700 mb-1.5 md:mb-2"
                 >
                   Mật Khẩu
                 </label>
@@ -158,7 +163,7 @@ export default function LoginPage() {
                     type={showPassword ? "text" : "password"}
                     {...register("password")}
                     placeholder="Nhập mật khẩu"
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition text-sm md:text-base"
                     disabled={loading}
                   />
                   <button
@@ -176,7 +181,7 @@ export default function LoginPage() {
                 )}
               </div>
 
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between flex-wrap gap-2">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="checkbox"
@@ -195,7 +200,7 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full cursor-pointer bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-2.5 rounded-lg transition duration-200 flex items-center justify-center gap-2"
+                className="w-full cursor-pointer bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-2.5 rounded-lg transition duration-200 flex items-center justify-center gap-2 text-sm md:text-base"
               >
                 {loading ? (
                   <>
@@ -219,13 +224,16 @@ export default function LoginPage() {
                 </div>
               </div>
 
-              <GoogleLogin
-                onSuccess={handleGoogleSuccess}
-                onError={handleGoogleError}
-              />
+              <div className="flex justify-center w-full">
+                <GoogleLogin
+                  onSuccess={handleGoogleSuccess}
+                  onError={handleGoogleError}
+                  width="100%"
+                />
+              </div>
             </form>
 
-            <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 text-center">
+            <div className="px-4 py-4 md:px-6 bg-gray-50 border-t border-gray-200 text-center">
               <p className="text-gray-600 text-sm">
                 Chưa có tài khoản?{" "}
                 <Link
@@ -238,7 +246,7 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <div className="mt-6 text-center text-gray-600 text-xs">
+          <div className="mt-6 text-center text-gray-600 text-xs px-2">
             <p>
               Bằng cách đăng nhập, bạn đã đồng ý với{" "}
               <Link href="/terms" className="text-blue-600 hover:underline">
