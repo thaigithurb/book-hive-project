@@ -125,7 +125,7 @@ export default function ProfilePage() {
 
           <div className="mt-8 grid grid-cols-2 gap-4">
             <Link
-              href="/orders"
+              href="/look-up"
               className="block bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-4 text-center hover:shadow-lg transition"
             >
               <div className="text-2xl mb-2">📦</div>
