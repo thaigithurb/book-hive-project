@@ -111,7 +111,7 @@ export default function BooksRent() {
               />
             </div>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-[24px] mb-8">
+          <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-[24px] mb-8">
             {loading ? (
               Array.from({ length: 8 }).map((_, i) => (
                 <BookCardSkeleton key={i} />

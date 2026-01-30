@@ -69,7 +69,7 @@ export default function HomeClient({
             <h2 className="text-2xl font-bold mb-4 text-primary">
               Sách nổi bật
             </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-[24px] mb-10">
+            <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-[24px] mb-10">
               {isLoading
                 ? Array.from({ length: 8 }).map((_, i) => (
                     <BookCardSkeleton key={i} />
@@ -91,7 +91,7 @@ export default function HomeClient({
           </div>
           <div>
             <h2 className="text-2xl font-bold mb-4 text-primary">Sách mới</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-[24px] mb-10">
+            <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-[24px] mb-10">
               {isLoading
                 ? Array.from({ length: 8 }).map((_, i) => (
                     <BookCardSkeleton key={i} />
@@ -113,11 +113,6 @@ export default function HomeClient({
           </div>
         </div>
       </div>
-      <ToastContainer
-        autoClose={1500}
-        hideProgressBar={true}
-        pauseOnHover={false}
-      />
     </>
   );
 }
