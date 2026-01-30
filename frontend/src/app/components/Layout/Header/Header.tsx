@@ -158,11 +158,11 @@ export const Header = () => {
               </div>
 
               <Link
-                href="/look-up"
+                href="/orders"
                 className="px-4 py-2 text-primary font-medium transition-all duration-300 hover:bg-blue-50 hover:text-blue-600 rounded-lg hover:shadow-[0_4px_12px_rgba(59,130,246,0.2)] whitespace-nowrap w-full lg:w-auto"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                📋 Tra cứu
+                📋 Đơn hàng
               </Link>
 
               <Link

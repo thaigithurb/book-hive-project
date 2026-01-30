@@ -72,3 +72,28 @@ module.exports.detail = (req, res) => __awaiter(this, void 0, void 0, function* 
         });
     }
 });
+module.exports.getRentalsByUser = (req, res) => __awaiter(this, void 0, void 0, function* () {
+    try {
+        const { email } = req.params;
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+        const rentals = yield Rental.find({ "userInfo.email": email })
+            .skip(skip)
+            .limit(limit)
+            .sort({ createdAt: -1 });
+        const total = yield Rental.countDocuments({ "userInfo.email": email });
+        return res.status(200).json({
+            rentals,
+            total,
+            page,
+            limit,
+        });
+    }
+    catch (error) {
+        return res.status(500).json({
+            message: "Lỗi lấy danh sách đơn hàng!",
+            error: error.message,
+        });
+    }
+});

@@ -43,7 +43,7 @@ type Order = {
   updatedAt: string;
 };
 
-export default function LookUpPage() {
+export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);

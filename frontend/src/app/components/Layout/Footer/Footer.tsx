@@ -41,7 +41,7 @@ export default function Footer() {
               </Link>
             </li>
             <li>
-              <Link href="/look-up" className="hover:text-yellow-400">
+              <Link href="/orders" className="hover:text-yellow-400">
                 Tra cứu
               </Link>
             </li>
