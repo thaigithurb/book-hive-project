@@ -120,8 +120,14 @@ module.exports.webhook = async (req, res) => {
       if (mainDoc && mainDoc.checkoutUrl) {
         const checkoutUrl = mainDoc.checkoutUrl;
 
-        const pendingOrders = await Order.find({ checkoutUrl, status: "pending" });
-        const pendingRentals = await Rental.find({ checkoutUrl, status: "pending" });
+        const pendingOrders = await Order.find({
+          checkoutUrl,
+          status: "pending",
+        });
+        const pendingRentals = await Rental.find({
+          checkoutUrl,
+          status: "pending",
+        });
 
         for (const order of pendingOrders) {
           order.status = "paid";
@@ -132,7 +138,7 @@ module.exports.webhook = async (req, res) => {
             orderCode: String(order.orderCode),
             bankCode: data.counterAccountBankId,
             accountNo: data.accountNumber,
-            amount: data.amount, 
+            amount: data.amount,
             description: data.description,
             transactionDate: data.transactionDateTime
               ? new Date(data.transactionDateTime)
@@ -206,6 +212,7 @@ module.exports.webhook = async (req, res) => {
   }
 };
 
+// [POST] /api/v1/payment/cancel/:code
 module.exports.cancelPaymentLink = async (req, res) => {
   try {
     const { code } = req.params;
@@ -219,7 +226,7 @@ module.exports.cancelPaymentLink = async (req, res) => {
       });
     }
 
-    if (document.status === "paid") {
+    if (document.status === "paid" || document.status === "renting") {
       return res.status(400).json({
         error: -1,
         message: "Đã thanh toán, không thể hủy",
@@ -233,8 +240,7 @@ module.exports.cancelPaymentLink = async (req, res) => {
     try {
       const orderCode = Number(String(code).replace(/\D/g, ""));
       await payOS.paymentRequests.cancel(orderCode);
-    } catch (e) {
-    }
+    } catch (e) {}
 
     return res.json({
       error: 0,
@@ -243,7 +249,7 @@ module.exports.cancelPaymentLink = async (req, res) => {
       code: code,
     });
   } catch (err) {
-    console.error("❌ Lỗi hủy:", err);
+    console.error("Lỗi hủy:", err);
     return res.status(500).json({
       error: -1,
       message: "Lỗi hủy",

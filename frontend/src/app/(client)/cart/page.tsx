@@ -221,7 +221,7 @@ export default function CartPage() {
 
               <button
                 onClick={handleCheckout}
-                className="w-full py-2.5 md:py-3 bg-primary text-white font-bold rounded-lg hover:bg-blue-700 transition-colors duration-200 mb-3 active:scale-95 text-sm md:text-base"
+                className="w-full cursor-pointer py-2.5 md:py-3 bg-primary text-white font-bold rounded-lg hover:bg-blue-700 transition-colors duration-200 mb-3 active:scale-95 text-sm md:text-base"
               >
                 💳 Thanh toán
               </button>

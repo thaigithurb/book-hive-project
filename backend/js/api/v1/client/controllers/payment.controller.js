@@ -110,8 +110,14 @@ module.exports.webhook = (req, res) => __awaiter(void 0, void 0, void 0, functio
             const paidDocuments = [];
             if (mainDoc && mainDoc.checkoutUrl) {
                 const checkoutUrl = mainDoc.checkoutUrl;
-                const pendingOrders = yield Order.find({ checkoutUrl, status: "pending" });
-                const pendingRentals = yield Rental.find({ checkoutUrl, status: "pending" });
+                const pendingOrders = yield Order.find({
+                    checkoutUrl,
+                    status: "pending",
+                });
+                const pendingRentals = yield Rental.find({
+                    checkoutUrl,
+                    status: "pending",
+                });
                 for (const order of pendingOrders) {
                     order.status = "paid";
                     yield order.save();
@@ -197,7 +203,7 @@ module.exports.cancelPaymentLink = (req, res) => __awaiter(void 0, void 0, void 
                 message: "Không tìm thấy đơn hàng!",
             });
         }
-        if (document.status === "paid") {
+        if (document.status === "paid" || document.status === "renting") {
             return res.status(400).json({
                 error: -1,
                 message: "Đã thanh toán, không thể hủy",
@@ -210,8 +216,7 @@ module.exports.cancelPaymentLink = (req, res) => __awaiter(void 0, void 0, void 
             const orderCode = Number(String(code).replace(/\D/g, ""));
             yield payOS.paymentRequests.cancel(orderCode);
         }
-        catch (e) {
-        }
+        catch (e) { }
         return res.json({
             error: 0,
             message: "Hủy thành công",
@@ -220,7 +225,7 @@ module.exports.cancelPaymentLink = (req, res) => __awaiter(void 0, void 0, void 
         });
     }
     catch (err) {
-        console.error("❌ Lỗi hủy:", err);
+        console.error("Lỗi hủy:", err);
         return res.status(500).json({
             error: -1,
             message: "Lỗi hủy",

@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import axios from "axios";
 import { Loading } from "@/app/components/Loading/Loading";
+import ConfirmModal from "@/app/components/ConfirmModal/ConfirmModal";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -15,6 +16,8 @@ export default function PaymentPage() {
   const [paymentLink, setPaymentLink] = useState<string | null>(null);
   const [codes, setCodes] = useState<string[]>([]);
   const [totalAmount, setTotalAmount] = useState(0);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [isCancelling, setIsCancelling] = useState(false);
 
   useEffect(() => {
     const initPayment = async () => {
@@ -89,6 +92,36 @@ export default function PaymentPage() {
   const handlePayment = () => {
     if (paymentLink) {
       window.location.href = paymentLink;
+    }
+  };
+
+  const handleBackClick = () => {
+    setShowConfirmModal(true);
+  };
+
+  const handleConfirmBack = async () => {
+    setShowConfirmModal(false);
+    setIsCancelling(true);
+
+    try {
+      for (const code of codes) {
+        try {
+          await axios.patch(`${API_URL}/api/v1/payment/cancel-payment/${code}`);
+        } catch (error) {
+          console.error(`Lỗi hủy thanh toán ${code}:`, error);
+        }
+      }
+
+      sessionStorage.removeItem("codes");
+      sessionStorage.removeItem("paymentMethod");
+      sessionStorage.removeItem("totalAmount");
+
+      toast.success("Đã hủy đơn hàng");
+      setTimeout(() => router.push("/cart"), 1500);
+    } catch (error: any) {
+      console.error("Lỗi:", error);
+      toast.error("Lỗi hủy đơn hàng");
+      setIsCancelling(false);
     }
   };
 
@@ -192,14 +225,24 @@ export default function PaymentPage() {
 
           <div className="mt-4 md:mt-6 pt-4 md:pt-6 border-t border-gray-200">
             <button
-              onClick={() => router.back()}
-              className="py-2 px-0 md:px-4 text-primary font-semibold hover:text-blue-700 text-sm md:text-base flex items-center gap-1"
+              onClick={handleBackClick}
+              disabled={isCancelling}
+              className="py-2 px-0 md:px-4 cursor-pointer text-primary font-semibold hover:text-blue-700 text-sm md:text-base flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <span>←</span> Quay lại
+              <span>←</span> {isCancelling ? "Đang hủy..." : "Quay lại"}
             </button>
           </div>
         </div>
       </div>
+
+      <ConfirmModal
+        open={showConfirmModal}
+        onCancel={() => setShowConfirmModal(false)}
+        onConfirm={handleConfirmBack}
+        message="Bạn có chắc muốn quay lại? Đơn hàng sẽ bị hủy."
+        label="Quay lại"
+        labelCancel="Tiếp tục"
+      />
 
       <ToastContainer
         autoClose={1500}
