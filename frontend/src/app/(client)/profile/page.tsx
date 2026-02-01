@@ -3,8 +3,10 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import axios from "axios";
 import Logout from "@/app/components/Auth/Logout/Logout";
-import { ToastContainer } from "react-toastify";
+import { ToastContainer, toast } from "react-toastify";
+import ProfileSkeleton from "@/app/components/Skeleton/ProfileSkeleton";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -20,17 +22,36 @@ export default function ProfilePage() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const accessToken =
+    typeof window !== "undefined"
+      ? localStorage.getItem("accessToken_user")
+      : null;
 
   useEffect(() => {
-    const userString = localStorage.getItem("client_user");
-    if (userString) {
-      setUser(JSON.parse(userString));
+    if (!accessToken) {
+      setIsLoading(false);
+      return;
     }
-    setIsLoading(false);
+    axios
+      .get(`${API_URL}/api/v1/users/me`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+        withCredentials: true,
+      })
+      .then((res) => {
+        setUser(res.data.user);
+        localStorage.setItem("client_user", JSON.stringify(res.data.user));
+      })
+      .catch(() => {
+        setUser(null);
+        toast.error(
+          "Không lấy được thông tin người dùng, vui lòng đăng nhập lại!",
+        );
+      })
+      .finally(() => setIsLoading(false));
   }, []);
 
   if (isLoading) {
-    return <div className="text-center mt-12 md:mt-20">Đang tải...</div>;
+    return <ProfileSkeleton />;
   }
 
   if (!user) {
@@ -66,7 +87,7 @@ export default function ProfilePage() {
 
   return (
     <>
-      <div className="container mx-auto py-8 md:py-12 lg:py-24 px-4">
+      <div className="container mx-auto py-8 md:py-5 lg:py-10 px-4">
         <div className="max-w-2xl mx-auto">
           <h1 className="text-2xl md:text-3xl font-bold mb-6 md:mb-8 text-center md:text-left">
             Hồ sơ cá nhân

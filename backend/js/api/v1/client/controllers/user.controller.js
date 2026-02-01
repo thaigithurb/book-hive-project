@@ -34,3 +34,60 @@ module.exports.index = (req, res) => __awaiter(void 0, void 0, void 0, function*
         });
     }
 });
+module.exports.getUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const userId = req.user.userId;
+        const user = yield User.findOne({ _id: userId }).select("fullName phone email");
+        if (!user) {
+            return res.status(404).json({
+                message: "Không tìm thấy người dùng!",
+            });
+        }
+        return res.status(200).json({
+            message: "Lấy thông tin người dùng thành công!",
+            user: {
+                id: user._id,
+                fullName: user.fullName,
+                email: user.email,
+                phone: user.phone,
+            },
+        });
+    }
+    catch (error) {
+        return res.status(500).json({
+            message: "Lỗi lấy thông tin người dùng!",
+            error: error.message,
+        });
+    }
+});
+module.exports.edit = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const userId = req.user.userId;
+        const user = yield User.findOne({ _id: userId }).select("fullName phone ");
+        if (!user) {
+            return res.status(404).json({
+                message: "Không tìm thấy người dùng!",
+            });
+        }
+        const { fullName, phone } = req.body;
+        if (fullName !== undefined)
+            user.fullName = fullName;
+        if (phone !== undefined)
+            user.phone = phone || "";
+        yield user.save();
+        return res.status(200).json({
+            message: "Cập nhật thông tin thành công!",
+            user: {
+                fullName: user.fullName,
+                email: user.email,
+                phone: user.phone,
+            },
+        });
+    }
+    catch (error) {
+        return res.status(500).json({
+            message: "Lỗi cập nhật thông tin người dùng!",
+            error: error.message,
+        });
+    }
+});

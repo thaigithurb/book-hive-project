@@ -1,6 +1,6 @@
 const User = require("../../models/user.model");
 
-// [GET] /api/v1/orders
+// [GET] /api/v1/users
 module.exports.index = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -28,5 +28,70 @@ module.exports.index = async (req, res) => {
   }
 };
 
+// [Get] /api/v1/users/me
+module.exports.getUser = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const user = await User.findOne({ _id: userId }).select(
+      "fullName phone email",
+    );
+
+    if (!user) {
+      return res.status(404).json({
+        message: "Không tìm thấy người dùng!",
+      });
+    }
+
+    return res.status(200).json({
+      message: "Lấy thông tin người dùng thành công!",
+      user: {
+        id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+        phone: user.phone,
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Lỗi lấy thông tin người dùng!",
+      error: error.message,
+    });
+  }
+};
+
+// [PATCH] /api/v1/users/edit
+module.exports.edit = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const user = await User.findOne({ _id: userId }).select("fullName phone ");
+
+    if (!user) {
+      return res.status(404).json({
+        message: "Không tìm thấy người dùng!",
+      });
+    }
+
+    const { fullName, phone } = req.body;
+
+    if (fullName !== undefined) user.fullName = fullName;
+    if (phone !== undefined) user.phone = phone || "";
+
+    await user.save();
+
+    return res.status(200).json({
+      message: "Cập nhật thông tin thành công!",
+      user: {
+        fullName: user.fullName,
+        email: user.email,
+        phone: user.phone,
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Lỗi cập nhật thông tin người dùng!",
+      error: error.message,
+    });
+  }
+};
 
 export {};
