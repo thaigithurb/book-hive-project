@@ -10,6 +10,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import OrderCardSkeleton from "@/app/components/Skeleton/OrderCardSkeleton";
+import { Order } from "@/app/interfaces/order.interface";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -17,31 +18,6 @@ const emailSchema = z.object({
   email: z.string().email("Email không hợp lệ"),
 });
 type EmailForm = z.infer<typeof emailSchema>;
-
-type Order = {
-  _id: string;
-  orderCode: string;
-  userInfo: {
-    fullName: string;
-    email: string;
-    phone: string;
-    address: string;
-  };
-  items: Array<{
-    bookId: string;
-    title: string;
-    price: number;
-    quantity: number;
-    image: string;
-  }>;
-  totalAmount: number;
-  paymentMethod: string;
-  status: "pending" | "processing" | "shipped" | "delivered" | "cancelled";
-  isExpired: boolean;
-  expiredAt: string;
-  createdAt: string;
-  updatedAt: string;
-};
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
