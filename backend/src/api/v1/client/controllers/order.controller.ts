@@ -1,6 +1,6 @@
 const Order = require("../../models/order.model");
-const Rental = require("../../models/rental.model");
 const generateHelper = require("../../../../helpers/generate");
+const { sendOrderConfirmationEmail } = require("../../../../helpers/sendEmail");
 
 // [GET] /api/v1/orders
 module.exports.index = async (req, res) => {
@@ -52,6 +52,19 @@ module.exports.create = async (req, res) => {
     });
 
     await order.save();
+
+    if (paymentMethod === "cod") {
+      try {
+        await sendOrderConfirmationEmail({
+          userInfo,
+          orderCode,
+          items,
+          totalAmount,
+        });
+      } catch (emailErr) {
+        console.error("Lỗi gửi email:", emailErr);
+      }
+    }
 
     return res.status(201).json({
       message: "Tạo đơn hàng thành công!",
@@ -119,7 +132,5 @@ module.exports.getOrdersByUser = async (req, res) => {
     });
   }
 };
-
-
 
 export {};

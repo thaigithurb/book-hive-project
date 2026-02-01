@@ -10,8 +10,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const Order = require("../../models/order.model");
-const Rental = require("../../models/rental.model");
 const generateHelper = require("../../../../helpers/generate");
+const { sendOrderConfirmationEmail } = require("../../../../helpers/sendEmail");
 module.exports.index = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const page = parseInt(req.query.page) || 1;
@@ -53,6 +53,19 @@ module.exports.create = (req, res) => __awaiter(void 0, void 0, void 0, function
             paymentMethod,
         });
         yield order.save();
+        if (paymentMethod === "cod") {
+            try {
+                yield sendOrderConfirmationEmail({
+                    userInfo,
+                    orderCode,
+                    items,
+                    totalAmount,
+                });
+            }
+            catch (emailErr) {
+                console.error("Lỗi gửi email:", emailErr);
+            }
+        }
         return res.status(201).json({
             message: "Tạo đơn hàng thành công!",
             order,
