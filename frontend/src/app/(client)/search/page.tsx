@@ -104,7 +104,7 @@ export default function SearchPage() {
 
         {books.length > 0 ? (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 mb-8 md:mb-10">
+            <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-[24px] mb-8">
               {books.map((book, index) => (
                 <BookCard
                   key={index}
@@ -129,7 +129,7 @@ export default function SearchPage() {
           </>
         ) : (
           <div className="text-center py-12 md:py-16">
-            <p className="text-lg md:text-xl text-gray-500">
+            <p className="sm:text-lg md:text-xl text-gray-500">
               Không tìm thấy sách nào phù hợp với từ khóa "{keyword}"
             </p>
             <div className="min-h-[300px] md:min-h-[400px]"></div>

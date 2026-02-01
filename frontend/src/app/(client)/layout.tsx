@@ -21,7 +21,7 @@ export default function RootLayout({
       <CartProvider>
         <ClientAuthGuard>
           <Header />
-          <main className="pt-[85px] md:pt-[120px] lg:pt-[144px] min-h-screen">
+          <main className="pt-[85px] md:pt-[120px] lg:pt-[144px]">
             {children}
           </main>
           <Footer />

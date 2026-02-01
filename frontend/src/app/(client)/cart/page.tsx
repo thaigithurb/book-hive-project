@@ -17,7 +17,7 @@ export default function CartPage() {
 
   if (items.length === 0) {
     return (
-      <div className="min-h-screen py-8 md:py-12">
+      <div className="py-10 min-h-[500px] md:py-20">
         <div className="container mx-auto px-4">
           <div className="bg-white rounded-2xl p-8 md:p-12 shadow text-center">
             <div className="text-5xl md:text-6xl mb-4">🛒</div>
