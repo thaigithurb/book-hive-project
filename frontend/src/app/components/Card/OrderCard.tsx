@@ -129,7 +129,7 @@ export const OrderCard = ({ order }: { order: Order }) => (
     </Link>
 
     <Link
-      href={`/orders/${order.orderCode}`}
+      href={`/orders/detail/${order.orderCode}`}
       className="flex items-center justify-between px-4 py-2.5 md:px-6 md:py-3 bg-gray-50 hover:bg-blue-50 border-t border-gray-200 transition-colors duration-200 group"
     >
       <span className="text-xs md:text-sm font-medium text-gray-700 group-hover:text-primary">
