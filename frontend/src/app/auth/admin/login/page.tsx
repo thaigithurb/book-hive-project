@@ -4,22 +4,37 @@ import { useState } from "react";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
+const loginSchema = z.object({
+  email: z.string().email("Email không hợp lệ"),
+  password: z.string().min(6, "Mật khẩu tối thiểu 6 ký tự"),
+});
+type LoginForm = z.infer<typeof loginSchema>;
+
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const inputClass =
     "border bg-[#ffff] border-gray-300 rounded-lg px-4 py-2 text-[15px] outline-none focus:ring-2 focus:ring-secondary1 hover:border-secondary1 focus:border-secondary1 transition duration-200 w-full";
 
-  const handleSubmit = (e: any) => {
-    e.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm<LoginForm>({
+    resolver: zodResolver(loginSchema),
+  });
+
+  const onSubmit = (data: LoginForm) => {
     setLoading(true);
 
     toast
@@ -27,19 +42,24 @@ export default function Login() {
         axios.post(
           `${API_URL}/api/v1/${ADMIN_PREFIX}/auth/login`,
           {
-            email,
-            password,
+            email: data.email,
+            password: data.password,
           },
-          { withCredentials: true }
+          { withCredentials: true },
         ),
         {
           pending: "Đang đăng nhập...",
           success: {
             render({ data }) {
-              localStorage.setItem("accessToken_admin", data?.data?.accessToken);
-              localStorage.setItem("admin_user", JSON.stringify(data?.data?.user));
-              setEmail("");
-              setPassword("");
+              localStorage.setItem(
+                "accessToken_admin",
+                data?.data?.accessToken,
+              );
+              localStorage.setItem(
+                "admin_user",
+                JSON.stringify(data?.data?.user),
+              );
+              reset();
               router.push("/admin/dashboard");
               return data?.data?.message;
             },
@@ -52,7 +72,7 @@ export default function Login() {
               return "Đăng nhập thất bại";
             },
           },
-        }
+        },
       )
       .finally(() => {
         setLoading(false);
@@ -64,7 +84,7 @@ export default function Login() {
       <div className="flex mt-[150px] justify-center">
         <form
           className="bg-white px-10 py-12 rounded-lg shadow-lg w-full max-w-md flex flex-col gap-4"
-          onSubmit={handleSubmit}
+          onSubmit={handleSubmit(onSubmit)}
         >
           <div className="flex gap-[12px] items-center">
             <span className="text-[32px]">📚</span>
@@ -85,9 +105,14 @@ export default function Login() {
               type="email"
               placeholder="Nhập email"
               className={inputClass}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              {...register("email")}
+              disabled={loading}
             />
+            {errors.email && (
+              <p className="text-red-500 text-xs mt-1">
+                {errors.email.message}
+              </p>
+            )}
           </div>
           <div className="flex flex-col gap-1">
             <label className="mb-1 font-medium text-primary">Mật khẩu</label>
@@ -97,8 +122,8 @@ export default function Login() {
                 type={showPassword ? "text" : "password"}
                 placeholder="Nhập mật khẩu"
                 className={inputClass + " pr-16"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                {...register("password")}
+                disabled={loading}
               />
               <button
                 type="button"
@@ -109,6 +134,11 @@ export default function Login() {
                 {showPassword ? "Ẩn" : "Hiện"}
               </button>
             </div>
+            {errors.password && (
+              <p className="text-red-500 text-xs mt-1">
+                {errors.password.message}
+              </p>
+            )}
           </div>
           <button
             type="submit"

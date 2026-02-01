@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "concurrently \"tsc -w\" \"nodemon --inspect js/index.js\"",
     "build": "tsc",
-    "start": "npm run build && node js/index.js",
+    "start": "node js/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {

@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import DOMPurify from "dompurify";
 import PrivateRoute from "@/app/components/Auth/PrivateRoute/PrivateRoute";
 import ConditionalRender from "@/app/components/Auth/ConditionalRender/ConditionalRender";
+import Image from "next/image";
 
 const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -29,7 +30,7 @@ export default function BookDetail() {
               Authorization: `Bearer ${accessToken}`,
             },
             withCredentials: true,
-          }
+          },
         );
         setBook(res.data.book);
       } catch (err) {
@@ -85,11 +86,12 @@ export default function BookDetail() {
                 transition={{ duration: 0.6, delay: 0.2 }}
                 className="bg-white rounded-2xl p-10 text-center shadow-md flex flex-col items-center justify-center"
               >
-                <img
+                <Image
                   src={book.image}
                   alt={book.title}
                   className="w-full h-full object-cover rounded-lg"
-                  style={{ maxHeight: 400, width: "auto" }}
+                  width={400}
+                  height={400}
                 />
               </motion.div>
               <motion.div
@@ -150,7 +152,7 @@ export default function BookDetail() {
                     <div className="flex flex-col items-end">
                       <span className="text-[17px] text-secondary1 font-semibold">
                         {book.priceRentOptions?.find(
-                          (opt: any) => opt.type === "day"
+                          (opt: any) => opt.type === "day",
                         )
                           ? `${book.priceRentOptions
                               .find((opt: any) => opt.type === "day")
@@ -159,7 +161,7 @@ export default function BookDetail() {
                       </span>
                       <span className="text-[17px] text-secondary1 font-semibold">
                         {book.priceRentOptions?.find(
-                          (opt: any) => opt.type === "week"
+                          (opt: any) => opt.type === "week",
                         )
                           ? `${book.priceRentOptions
                               .find((opt: any) => opt.type === "week")

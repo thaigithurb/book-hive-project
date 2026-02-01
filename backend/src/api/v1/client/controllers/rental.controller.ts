@@ -71,3 +71,32 @@ module.exports.detail = async (req, res) => {
     });
   }
 };
+
+// [GET] /api/v1/rentals/user/:email
+module.exports.getRentalsByUser = async (req, res) => {
+  try {
+    const { email } = req.params;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const rentals = await Rental.find({ "userInfo.email": email })
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 });
+
+    const total = await Rental.countDocuments({ "userInfo.email": email });
+
+    return res.status(200).json({
+      rentals,
+      total,
+      page,
+      limit,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Lỗi lấy danh sách đơn hàng!",
+      error: error.message,
+    });
+  }
+};

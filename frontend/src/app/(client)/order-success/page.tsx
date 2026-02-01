@@ -22,7 +22,7 @@ export default function OrderSuccessPage() {
       if (displayCode) {
         setOrderCode(displayCode);
         setIsLoaded(true);
-        toast.success("✅ Đặt hàng thành công!");
+        toast.success("Đặt hàng thành công!");
 
         await clearCart();
 
@@ -49,26 +49,28 @@ export default function OrderSuccessPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center py-12 px-4">
-      <div className="container max-w-2xl">
-        <div className="bg-white rounded-lg shadow-2xl p-8 text-center">
-          <div className="text-7xl mb-6 animate-bounce">✅</div>
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center py-8 px-4 md:py-12">
+      <div className="container max-w-2xl mx-auto">
+        <div className="bg-white rounded-lg shadow-2xl p-6 md:p-8 text-center">
+          <div className="text-5xl md:text-7xl mb-4 md:mb-6 animate-bounce">
+            ✅
+          </div>
 
-          <h1 className="text-4xl font-bold text-green-600 mb-4">
+          <h1 className="text-2xl md:text-4xl font-bold text-green-600 mb-2 md:mb-4">
             Đặt Hàng Thành Công!
           </h1>
 
-          <p className="text-xl text-slate-600 mb-8">
+          <p className="text-base md:text-xl text-slate-600 mb-6 md:mb-8">
             Cảm ơn bạn đã mua sắm tại BookHive 📚
           </p>
 
           {orderCode && (
-            <div className="bg-green-50 border-2 border-green-300 rounded-lg p-6 mb-8">
-              <p className="text-sm text-slate-600 mb-3">
+            <div className="bg-green-50 border-2 border-green-300 rounded-lg p-4 md:p-6 mb-6 md:mb-8">
+              <p className="text-xs md:text-sm text-slate-600 mb-2 md:mb-3">
                 Mã đơn hàng của bạn:
               </p>
-              <div className="flex items-center justify-center gap-3">
-                <p className="text-3xl font-bold text-green-600 font-mono break-all">
+              <div className="flex items-center justify-center gap-2 md:gap-3 flex-wrap">
+                <p className="text-xl md:text-3xl font-bold text-green-600 font-mono break-all">
                   {orderCode}
                 </p>
                 <button
@@ -76,7 +78,7 @@ export default function OrderSuccessPage() {
                     navigator.clipboard.writeText(orderCode.toString());
                     toast.success("Đã sao chép mã đơn hàng!");
                   }}
-                  className="text-green-700 cursor-pointer hover:text-green-900 text-2xl transition-colors"
+                  className="text-green-700 cursor-pointer hover:text-green-900 text-xl md:text-2xl transition-colors flex-shrink-0"
                   title="Sao chép"
                 >
                   📋
@@ -85,54 +87,55 @@ export default function OrderSuccessPage() {
             </div>
           )}
 
-          <div className="bg-blue-50 border-l-4 border-blue-500 p-6 rounded-lg mb-8 text-left">
-            <h3 className="font-bold text-blue-900 mb-4 text-lg">
+          <div className="bg-blue-50 border-l-4 border-blue-500 p-4 md:p-6 rounded-lg mb-6 md:mb-8 text-left">
+            <h3 className="font-bold text-blue-900 mb-3 md:mb-4 text-base md:text-lg">
               📋 Thông tin đơn hàng:
             </h3>
-            <ul className="text-sm text-blue-800 space-y-3">
-              <li className="flex items-start gap-3">
-                <span className="text-lg">✓</span>
+            <ul className="text-sm text-blue-800 space-y-2 md:space-y-3">
+              <li className="flex items-start gap-2 md:gap-3">
+                <span className="text-base md:text-lg shrink-0">✓</span>
                 <span>Đơn hàng đã được tạo và thanh toán thành công</span>
               </li>
-              <li className="flex items-start gap-3">
-                <span className="text-lg">✓</span>
+              <li className="flex items-start gap-2 md:gap-3">
+                <span className="text-base md:text-lg shrink-0">✓</span>
                 <span>Chúng tôi sẽ xác nhận đơn hàng trong 24 giờ</span>
               </li>
-              <li className="flex items-start gap-3">
-                <span className="text-lg">✓</span>
+              <li className="flex items-start gap-2 md:gap-3">
+                <span className="text-base md:text-lg shrink-0">✓</span>
                 <span>Hàng sẽ được gửi trong 3-5 ngày làm việc</span>
               </li>
-              <li className="flex items-start gap-3">
-                <span className="text-lg">✓</span>
+              <li className="flex items-start gap-2 md:gap-3">
+                <span className="text-base md:text-lg shrink-0">✓</span>
                 <span>Bạn sẽ nhận email xác nhận và mã vận chuyển</span>
               </li>
             </ul>
           </div>
 
-          <div className="bg-yellow-50 border-l-4 border-yellow-400 p-6 rounded-lg mb-8">
-            <p className="text-sm text-yellow-800">
+          <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 md:p-6 rounded-lg mb-6 md:mb-8">
+            <p className="text-sm text-yellow-800 text-left md:text-center">
               <span className="font-bold">💡 Tip:</span> Lưu mã đơn hàng để theo
               dõi đơn hàng của bạn
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
             <Link
               href="/home"
-              className="py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition-colors text-center"
+              className="py-2.5 md:py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition-colors text-center text-sm md:text-base"
             >
               🏠 Quay về trang chủ
             </Link>
             <Link
               href="/books"
-              className="py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-colors text-center"
+              className="py-2.5 md:py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-colors text-center text-sm md:text-base"
             >
               📚 Tiếp tục mua sắm
             </Link>
           </div>
 
-          <p className="text-xs text-slate-500 mt-6 p-3 bg-gray-100 rounded">
-            Nếu có bất kỳ câu hỏi nào, vui lòng liên hệ: support@bookhive.com
+          <p className="text-xs text-slate-500 mt-6 p-3 bg-gray-100 rounded break-all">
+            Nếu có bất kỳ câu hỏi nào, vui lòng liên hệ:
+            bookhivestore161@gmail.com
           </p>
         </div>
       </div>

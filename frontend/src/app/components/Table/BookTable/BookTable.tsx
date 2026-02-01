@@ -5,6 +5,7 @@ import ChangeStatusBadge from "../../ChangeStatusBadge/ChangeStatusBadge";
 import TableActions from "../TableActions/TableActions";
 import { permission } from "process";
 import ConditionalRender from "../../Auth/ConditionalRender/ConditionalRender";
+import Image from "next/image";
 
 interface BookTableProps {
   books: Book[];
@@ -102,7 +103,9 @@ export default function BookTable({
               </td>
               <td className="py-4 px-4">
                 <div className="flex items-center gap-3">
-                  <img
+                  <Image
+                    width={400}
+                    height={400}
                     src={book.image}
                     alt={book.title}
                     className="w-16 h-16 object-cover rounded bg-gray-100"
@@ -151,8 +154,10 @@ export default function BookTable({
                     const newPosition = Number(e.target.value);
                     setEditedBooks((prev) =>
                       prev.map((b) =>
-                        b._id === book._id ? { ...b, position: newPosition } : b
-                      )
+                        b._id === book._id
+                          ? { ...b, position: newPosition }
+                          : b,
+                      ),
                     );
                   }}
                 />

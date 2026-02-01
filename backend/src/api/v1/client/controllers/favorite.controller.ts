@@ -39,7 +39,7 @@ module.exports.addFavorite = async (req, res) => {
   }
 };
 
-// [DELETE] /api/v1/favorites/remove
+// [POST] /api/v1/favorites/remove
 module.exports.removeFavorite = async (req, res) => {
   try {
     const userId = req.user.userId;

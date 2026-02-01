@@ -7,8 +7,16 @@ import { toast, ToastContainer } from "react-toastify";
 import { Loading } from "@/app/components/Loading/Loading";
 import Pagination from "@/app/components/Pagination/Pagination";
 import { OrderCard } from "@/app/components/Card/OrderCard";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+const emailSchema = z.object({
+  email: z.string().email("Email không hợp lệ"),
+});
+type EmailForm = z.infer<typeof emailSchema>;
 
 type Order = {
   _id: string;
@@ -41,10 +49,20 @@ export default function OrdersPage() {
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [searchEmail, setSearchEmail] = useState("");
   const [searchMode, setSearchMode] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const limit = 10;
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setValue,
+    getValues,
+  } = useForm<EmailForm>({
+    resolver: zodResolver(emailSchema),
+    defaultValues: { email: "" },
+  });
 
   const user =
     typeof window !== "undefined"
@@ -65,7 +83,7 @@ export default function OrdersPage() {
     try {
       setLoading(true);
       const res = await axios.get(
-        `http://localhost:3001/api/v1/orders/user/${user.email}`,
+        `${API_URL}/api/v1/orders/user/${user.email}`,
         {
           params: { page: currentPage, limit },
           headers: {
@@ -78,26 +96,21 @@ export default function OrdersPage() {
       setTotal(res.data.total);
       setPage(currentPage);
     } catch (error: any) {
-      console.error("Error fetching orders:", error);
       toast.error("Không thể tải danh sách đơn hàng");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSearchOrders = async (e: React.FormEvent, searchPage: number = 1) => {
-    e.preventDefault();
-
-    if (!searchEmail.trim()) {
-      toast.warning("Vui lòng nhập email");
-      return;
-    }
-
+  const handleSearchOrders = async (
+    form: EmailForm,
+    searchPage: number = 1,
+  ) => {
     try {
       setLoading(true);
       setHasSearched(true);
       const res = await axios.get(
-        `http://localhost:3001/api/v1/orders/user/${searchEmail.trim()}`,
+        `${API_URL}/api/v1/orders/user/${form.email.trim()}`,
         {
           params: { page: searchPage, limit },
         },
@@ -111,7 +124,6 @@ export default function OrdersPage() {
         toast.info("Không tìm thấy đơn hàng nào cho email này");
       }
     } catch (error: any) {
-      console.error("Error searching orders:", error);
       toast.error(
         error.response?.data?.message ||
           "Email không tồn tại hoặc không có đơn hàng",
@@ -154,18 +166,18 @@ export default function OrdersPage() {
 
   if (!isLoggedIn) {
     return (
-      <div className="min-h-screen bg-gray-50 py-16">
-        <div className="container max-w-md">
-          <div className="bg-white rounded-2xl shadow p-8 mb-8">
-            <h1 className="text-3xl font-bold text-slate-900 mb-2">
+      <div className="min-h-screen bg-gray-50 py-8 md:py-16">
+        <div className="container mx-auto px-4 max-w-md">
+          <div className="bg-white rounded-2xl shadow p-6 md:p-8 mb-8">
+            <h1 className="text-2xl md:text-3xl font-bold text-slate-900 mb-2 text-center md:text-left">
               Tra cứu đơn hàng
             </h1>
-            <p className="text-gray-600 mb-6">
+            <p className="text-sm md:text-base text-gray-600 mb-6 text-center md:text-left">
               Nhập email để xem lịch sử đơn hàng của bạn
             </p>
 
             <form
-              onSubmit={(e) => handleSearchOrders(e, 1)}
+              onSubmit={handleSubmit((data) => handleSearchOrders(data, 1))}
               className="space-y-4"
             >
               <div>
@@ -174,30 +186,33 @@ export default function OrdersPage() {
                 </label>
                 <input
                   type="email"
-                  value={searchEmail}
-                  onChange={(e) => setSearchEmail(e.target.value)}
+                  {...register("email")}
                   placeholder="Nhập email đặt hàng..."
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                  required
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm md:text-base"
                 />
+                {errors.email && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {errors.email.message}
+                  </p>
+                )}
               </div>
 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-2 bg-primary text-white font-bold rounded-lg hover:bg-blue-700 transition-colors duration-200 disabled:opacity-50"
+                className="w-full py-2.5 bg-primary text-white font-bold rounded-lg hover:bg-blue-700 transition-colors duration-200 disabled:opacity-50 text-sm md:text-base"
               >
                 {loading ? "Đang tìm..." : "Tra cứu"}
               </button>
             </form>
 
             <div className="mt-6 pt-6 border-t border-gray-200">
-              <p className="text-sm text-gray-600 mb-3">
+              <p className="text-sm text-gray-600 mb-3 text-center">
                 Bạn là khách hàng đã đăng ký?
               </p>
               <Link
                 href="/auth/login"
-                className="block w-full py-2 bg-blue-50 text-center text-primary font-bold rounded-lg hover:bg-blue-100 transition-colors duration-200"
+                className="block w-full py-2.5 bg-blue-50 text-center text-primary font-bold rounded-lg hover:bg-blue-100 transition-colors duration-200 text-sm md:text-base"
               >
                 Đăng nhập
               </Link>
@@ -222,7 +237,9 @@ export default function OrdersPage() {
                     total={total}
                     limit={limit}
                     onPageChange={(newPage) =>
-                      handleSearchOrders(new Event("submit") as any, newPage)
+                      handleSubmit((data) =>
+                        handleSearchOrders(data, newPage),
+                      )()
                     }
                   />
                 </div>
@@ -239,18 +256,18 @@ export default function OrdersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-16">
-      <div className="container">
-        <div className="mb-8 flex gap-4">
+    <div className="min-h-screen bg-gray-50 py-8 md:py-16">
+      <div className="container mx-auto px-4">
+        <div className="mb-6 md:mb-8 flex flex-col sm:flex-row gap-3 md:gap-4">
           <button
             onClick={() => {
               setSearchMode(false);
-              setSearchEmail("");
+              setValue("email", "");
               setPage(1);
               setHasSearched(false);
               setOrders([]);
             }}
-            className={`px-6 py-3 font-semibold rounded-lg transition-all duration-200 ${
+            className={`px-4 py-2.5 md:px-6 md:py-3 font-semibold rounded-lg transition-all duration-200 text-sm md:text-base w-full sm:w-auto ${
               !searchMode
                 ? "bg-primary text-white shadow-md"
                 : "bg-white text-primary border border-gray-300 hover:bg-gray-50"
@@ -261,13 +278,13 @@ export default function OrdersPage() {
           <button
             onClick={() => {
               setSearchMode(true);
-              setSearchEmail("");
+              setValue("email", "");
               setOrders([]);
               setTotal(0);
               setPage(1);
               setHasSearched(false);
             }}
-            className={`px-6 py-3 font-semibold rounded-lg transition-all duration-200 ${
+            className={`px-4 py-2.5 md:px-6 md:py-3 font-semibold rounded-lg transition-all duration-200 text-sm md:text-base w-full sm:w-auto ${
               searchMode
                 ? "bg-primary text-white shadow-md"
                 : "bg-white text-primary border border-gray-300 hover:bg-gray-50"
@@ -279,22 +296,22 @@ export default function OrdersPage() {
 
         {!searchMode ? (
           <>
-            <h1 className="text-4xl font-bold text-slate-900 mb-12">
+            <h1 className="text-2xl md:text-4xl font-bold text-slate-900 mb-8 md:mb-12">
               Đơn hàng của tôi
             </h1>
 
             {orders.length === 0 ? (
-              <div className="bg-white rounded-2xl p-16 shadow-sm text-center">
-                <div className="text-6xl mb-4">📦</div>
-                <h2 className="text-3xl font-bold text-slate-800 mb-2">
+              <div className="bg-white rounded-2xl p-8 md:p-16 shadow-sm text-center">
+                <div className="text-4xl md:text-6xl mb-4">📦</div>
+                <h2 className="text-xl md:text-3xl font-bold text-slate-800 mb-2">
                   Chưa có đơn hàng
                 </h2>
-                <p className="text-slate-500 mb-8">
+                <p className="text-sm md:text-base text-slate-500 mb-8">
                   Bạn chưa mua sản phẩm nào. Hãy bắt đầu mua sắm ngay!
                 </p>
                 <Link
                   href="/home"
-                  className="inline-block px-6 py-3 bg-primary text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-200"
+                  className="inline-block px-6 py-3 bg-primary text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-200 text-sm md:text-base"
                 >
                   ← Tiếp tục mua sắm
                 </Link>
@@ -318,13 +335,13 @@ export default function OrdersPage() {
           </>
         ) : (
           <>
-            <h1 className="text-4xl font-bold text-slate-900 mb-8">
+            <h1 className="text-2xl md:text-4xl font-bold text-slate-900 mb-6 md:mb-8">
               Tra cứu đơn hàng
             </h1>
 
             <div className="max-w-md mb-8">
               <form
-                onSubmit={(e) => handleSearchOrders(e, 1)}
+                onSubmit={handleSubmit((data) => handleSearchOrders(data, 1))}
                 className="space-y-4"
               >
                 <div>
@@ -333,18 +350,22 @@ export default function OrdersPage() {
                   </label>
                   <input
                     type="email"
-                    value={searchEmail}
-                    onChange={(e) => setSearchEmail(e.target.value)}
+                    {...register("email")}
                     placeholder="Nhập email..."
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm md:text-base"
                     required
                   />
+                  {errors.email && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.email.message}
+                    </p>
+                  )}
                 </div>
 
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-2 bg-primary text-white font-bold rounded-lg hover:bg-blue-700 transition-colors duration-200 disabled:opacity-50"
+                  className="w-full py-2.5 bg-primary text-white font-bold rounded-lg hover:bg-blue-700 transition-colors duration-200 disabled:opacity-50 text-sm md:text-base"
                 >
                   {loading ? "Đang tìm..." : "Tra cứu"}
                 </button>
@@ -356,7 +377,7 @@ export default function OrdersPage() {
                   <Loading fullScreen={false} size="md" text="Đang tìm..." />
                 ) : orders.length > 0 ? (
                   <>
-                    <h2 className="text-lg font-bold text-slate-900 mb-6">
+                    <h2 className="text-lg font-bold text-slate-900 mb-4 md:mb-6">
                       Tìm thấy {total} đơn hàng
                     </h2>
                     <div className="space-y-3">
@@ -370,7 +391,9 @@ export default function OrdersPage() {
                       total={total}
                       limit={limit}
                       onPageChange={(newPage) =>
-                        handleSearchOrders(new Event("submit") as any, newPage)
+                        handleSubmit((data) =>
+                          handleSearchOrders(data, newPage),
+                        )()
                       }
                     />
                   </>

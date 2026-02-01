@@ -6,6 +6,7 @@ const cartRoutes = require("./cart.route");
 const userRoutes = require("./user.route");
 const rentalRoutes = require("./rental.route");
 const favoriteRoutes = require("./favorite.route");
+const reviewRoutes = require("./review.route");
 const { clientAuth } = require("../../../../middleware/auth.middleware");
 
 module.exports = (app) => {
@@ -26,6 +27,8 @@ module.exports = (app) => {
     app.use(version + "/users", userRoutes);
 
     app.use(version + "/favorites", clientAuth, favoriteRoutes);
+
+    app.use(version + "/reviews", clientAuth, reviewRoutes);
 }
 
 export {};
