@@ -73,7 +73,7 @@ export default function PaymentPage() {
 
       if (response.data.error === 0 && response.data.data.checkoutUrl) {
         setPaymentLink(response.data.data.checkoutUrl);
-        toast.success("✅ Tạo link thanh toán thành công!");
+        toast.success("Tạo link thanh toán thành công!");
       } else {
         toast.error("❌ " + response.data.message);
       }
