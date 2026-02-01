@@ -88,7 +88,6 @@ export default function OrderDetailPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="bg-white rounded-2xl shadow p-8 text-center">
-          <div className="text-3xl mb-4">😢</div>
           <div className="text-lg font-bold mb-2">Không tìm thấy đơn hàng</div>
           <Link
             href="/orders"
