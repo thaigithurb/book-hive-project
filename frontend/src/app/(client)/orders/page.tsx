@@ -4,12 +4,12 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import Link from "next/link";
 import { toast, ToastContainer } from "react-toastify";
-import { Loading } from "@/app/components/Loading/Loading";
 import Pagination from "@/app/components/Pagination/Pagination";
 import { OrderCard } from "@/app/components/Card/OrderCard";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import OrderCardSkeleton from "@/app/components/Skeleton/OrderCardSkeleton";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -222,7 +222,7 @@ export default function OrdersPage() {
           {hasSearched && (
             <div>
               {loading ? (
-                <Loading fullScreen={false} size="md" text="Đang tìm..." />
+                <OrderCardSkeleton fullScreen={false} count={3} />
               ) : orders.length > 0 ? (
                 <div className="space-y-3">
                   <h2 className="text-lg font-bold text-slate-900 mb-4">
@@ -249,10 +249,6 @@ export default function OrdersPage() {
         </div>
       </div>
     );
-  }
-
-  if (loading && orders.length === 0 && !searchMode) {
-    return <Loading fullScreen={true} size="lg" text="Đang tải đơn hàng..." />;
   }
 
   return (
@@ -300,7 +296,9 @@ export default function OrdersPage() {
               Đơn hàng của tôi
             </h1>
 
-            {orders.length === 0 ? (
+            {loading ? (
+              <OrderCardSkeleton fullScreen={false} count={4} />
+            ) : orders.length === 0 ? (
               <div className="bg-white rounded-2xl p-8 md:p-16 shadow-sm text-center">
                 <div className="text-4xl md:text-6xl mb-4">📦</div>
                 <h2 className="text-xl md:text-3xl font-bold text-slate-800 mb-2">
@@ -328,7 +326,10 @@ export default function OrdersPage() {
                   page={page}
                   total={total}
                   limit={limit}
-                  onPageChange={fetchOrdersForLoggedInUser}
+                  onPageChange={(newPage) => {
+                    setLoading(true);
+                    fetchOrdersForLoggedInUser(newPage);
+                  }}
                 />
               </>
             )}
@@ -374,7 +375,7 @@ export default function OrdersPage() {
             {hasSearched && (
               <>
                 {loading ? (
-                  <Loading fullScreen={false} size="md" text="Đang tìm..." />
+                  <OrderCardSkeleton fullScreen={false} count={3} />
                 ) : orders.length > 0 ? (
                   <>
                     <h2 className="text-lg font-bold text-slate-900 mb-4 md:mb-6">
@@ -390,11 +391,12 @@ export default function OrdersPage() {
                       page={page}
                       total={total}
                       limit={limit}
-                      onPageChange={(newPage) =>
+                      onPageChange={(newPage) => {
+                        setLoading(true);
                         handleSubmit((data) =>
                           handleSearchOrders(data, newPage),
-                        )()
-                      }
+                        )();
+                      }}
                     />
                   </>
                 ) : null}

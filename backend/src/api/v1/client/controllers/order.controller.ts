@@ -70,7 +70,6 @@ module.exports.create = async (req, res) => {
 module.exports.detail = async (req, res) => {
   try {
     const { code } = req.params;
-
     const order = await Order.findOne({ orderCode: String(code) });
 
     if (!order) {

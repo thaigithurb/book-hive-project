@@ -57,7 +57,7 @@ function getStatusText(status: string) {
 
 export const OrderCard = ({ order }: { order: Order }) => (
   <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden">
-    <Link href={`/orders/${order.orderCode}`} className="block p-4 md:p-6">
+    <Link href={`/orders/detail/${order.orderCode}`} className="block p-4 md:p-6">
       <div className="grid grid-cols-2 md:grid-cols-6 gap-x-2 gap-y-4 md:gap-4 mb-4">
         <div className="md:col-span-2">
           <p className="text-[10px] md:text-xs font-semibold text-gray-500 uppercase mb-1">
