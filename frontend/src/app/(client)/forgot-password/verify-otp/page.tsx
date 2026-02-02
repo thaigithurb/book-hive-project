@@ -103,7 +103,7 @@ export default function VerifyOtpPage() {
         localStorage.removeItem("otpExpiresAt");
 
         setTimeout(() => {
-          router.push(`/forgot-password/reset-password`);
+          router.push(`/reset-password`);
         }, 1500);
       }
     } catch (error: any) {
@@ -154,18 +154,18 @@ export default function VerifyOtpPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-6 md:py-12 px-4">
-      <div className="container mx-auto max-w-md">
-        <div className="mb-6">
-          <BackButton className="flex items-center gap-2 hover:opacity-80 transition-opacity" />
+    <div className="w-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4 sm:px-6 lg:px-8">
+      <div className="w-full max-w-[440px] space-y-6">
+        <div className="flex justify-start">
+          <BackButton className="flex items-center gap-2 hover:opacity-80 transition-opacity text-slate-600" />
         </div>
 
-        <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8">
-          <div className="text-center mb-6 md:mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
+        <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 md:p-10 w-full">
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center w-14 h-14 md:w-16 md:h-16 bg-blue-100 rounded-full mb-4">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="w-8 h-8 text-primary"
+                className="w-7 h-7 md:w-8 md:h-8 text-primary"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -185,11 +185,13 @@ export default function VerifyOtpPage() {
               Nhập mã OTP 6 chữ số được gửi tới email của bạn
             </p>
             {email && (
-              <p className="text-xs md:text-sm text-slate-500 mt-2">{email}</p>
+              <p className="text-xs md:text-sm text-slate-500 mt-2 font-medium bg-gray-50 inline-block px-3 py-1 rounded-full border border-gray-100">
+                {email}
+              </p>
             )}
           </div>
 
-          <form onSubmit={handleSubmit(handleVerifyOtp)} className="space-y-4">
+          <form onSubmit={handleSubmit(handleVerifyOtp)} className="space-y-5">
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-2">
                 Mã OTP
@@ -199,20 +201,21 @@ export default function VerifyOtpPage() {
                 {...register("otp")}
                 placeholder="000000"
                 maxLength={6}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 text-center text-2xl tracking-widest font-mono"
+                className="w-full px-4 py-3 md:py-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 text-center text-2xl md:text-3xl tracking-[0.25em] md:tracking-[0.5em] font-mono placeholder:tracking-normal text-slate-800"
                 disabled={isLoading}
               />
               {errors.otp && (
-                <p className="text-red-500 text-xs md:text-sm mt-1">
+                <p className="text-red-500 text-xs md:text-sm mt-1.5 font-medium text-center">
                   {errors.otp.message}
                 </p>
               )}
             </div>
 
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <p className="text-sm md:text-base font-semibold text-blue-900 text-center">
-                ⏱️ Hết hạn trong:{" "}
-                <span className="text-primary">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 md:p-4">
+              <p className="text-sm md:text-base font-semibold text-blue-900 text-center flex items-center justify-center gap-2">
+                <span>⏱️</span>
+                <span>Hết hạn trong:</span>
+                <span className="text-primary font-bold min-w-[3.5rem] text-left">
                   {minutes}:{seconds.toString().padStart(2, "0")}
                 </span>
               </p>
@@ -221,30 +224,33 @@ export default function VerifyOtpPage() {
             <button
               type="submit"
               disabled={isLoading || otpValue.length !== 6}
-              className="w-full cursor-pointer py-3 bg-primary text-white font-bold rounded-lg hover:bg-blue-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 text-sm md:text-base"
+              className="w-full cursor-pointer py-3.5 bg-primary text-white font-bold rounded-lg hover:bg-blue-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] text-sm md:text-base shadow-md"
             >
               {isLoading ? "Đang xác nhận..." : "✓ Xác Nhận OTP"}
             </button>
           </form>
 
-          <div className="mt-6 pt-6 border-t border-gray-200">
+          <div className="mt-8 pt-6 border-t border-gray-100">
             <p className="text-xs md:text-sm text-slate-600 text-center mb-3">
               Không nhận được mã?
             </p>
             <button
               onClick={handleResendOtp}
               disabled={isLoading}
-              className="w-full py-2 border-2 border-primary text-primary font-semibold rounded-lg hover:bg-blue-50 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm md:text-base"
+              className="w-full py-2.5 border-2 border-primary text-primary font-semibold rounded-lg hover:bg-blue-50 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm md:text-base active:scale-[0.98]"
             >
               🔄 Gửi lại OTP
             </button>
           </div>
 
           <div className="mt-6 bg-amber-50 border border-amber-200 rounded-lg p-4">
-            <p className="text-xs md:text-sm text-amber-800">
-              <strong>⚠️ Lưu ý:</strong> OTP sẽ hết hạn sau 3 phút. Nếu bạn
-              không nhận được, vui lòng yêu cầu gửi lại.
-            </p>
+            <div className="flex gap-2.5">
+              <span className="text-base flex-shrink-0">⚠️</span>
+              <p className="text-xs md:text-sm text-amber-800 leading-snug">
+                <strong>Lưu ý:</strong> OTP sẽ hết hạn sau 3 phút. Nếu bạn không
+                nhận được, vui lòng yêu cầu gửi lại.
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -253,6 +259,7 @@ export default function VerifyOtpPage() {
         autoClose={1500}
         hideProgressBar={true}
         pauseOnHover={false}
+        position="top-center"
       />
     </div>
   );

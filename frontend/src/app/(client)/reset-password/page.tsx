@@ -88,8 +88,8 @@ export default function ResetPasswordPage() {
 
   if (isSuccess) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-6 md:py-12 px-4 flex items-center justify-center">
-        <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8 max-w-md w-full text-center">
+      <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4 sm:px-6 lg:px-8">
+        <div className="bg-white rounded-2xl shadow-xl p-8 md:p-10 max-w-[440px] w-full text-center">
           <div className="inline-flex items-center justify-center w-20 h-20 bg-green-100 rounded-full mb-6">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -109,11 +109,11 @@ export default function ResetPasswordPage() {
           <h1 className="text-2xl md:text-3xl font-bold text-slate-800 mb-3">
             Thành Công!
           </h1>
-          <p className="text-slate-600 mb-6">
+          <p className="text-slate-600 mb-6 text-sm md:text-base leading-relaxed">
             Mật khẩu của bạn đã được cập nhật thành công. Vui lòng đăng nhập với
             mật khẩu mới.
           </p>
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-slate-500 animate-pulse">
             Đang chuyển hướng đến trang đăng nhập...
           </p>
         </div>
@@ -122,18 +122,18 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-6 md:py-12 px-4">
-      <div className="container mx-auto max-w-md">
-        <div className="mb-6">
-          <BackButton className="flex items-center gap-2 hover:opacity-80 transition-opacity" />
+    <div className="w-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4 sm:px-6 lg:px-8">
+      <div className="w-full max-w-[440px] space-y-6">
+        <div className="flex justify-start">
+          <BackButton className="flex items-center gap-2 hover:opacity-80 transition-opacity text-slate-600" />
         </div>
 
-        <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8">
-          <div className="text-center mb-6 md:mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
+        <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 md:p-10 w-full">
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center w-14 h-14 md:w-16 md:h-16 bg-blue-100 rounded-full mb-4">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="w-8 h-8 text-primary"
+                className="w-7 h-7 md:w-8 md:h-8 text-primary"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -153,13 +153,15 @@ export default function ResetPasswordPage() {
               Nhập mật khẩu mới cho tài khoản của bạn
             </p>
             {email && (
-              <p className="text-xs md:text-sm text-slate-500 mt-2">{email}</p>
+              <p className="text-xs md:text-sm text-slate-500 mt-2 font-medium bg-gray-50 inline-block px-3 py-1 rounded-full border border-gray-100">
+                {email}
+              </p>
             )}
           </div>
 
           <form
             onSubmit={handleSubmit(handleResetPassword)}
-            className="space-y-4"
+            className="space-y-5"
           >
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-2">
@@ -170,13 +172,13 @@ export default function ResetPasswordPage() {
                   type={showPassword ? "text" : "password"}
                   {...register("newPassword")}
                   placeholder="Nhập mật khẩu mới"
-                  className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
+                  className="w-full px-4 py-3 md:py-3.5 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 text-sm md:text-base placeholder:text-gray-400"
                   disabled={isLoading}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-500 hover:text-slate-700"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 transition-colors"
                   disabled={isLoading}
                 >
                   {showPassword ? (
@@ -219,7 +221,7 @@ export default function ResetPasswordPage() {
                 </button>
               </div>
               {errors.newPassword && (
-                <p className="text-red-500 text-xs md:text-sm mt-1">
+                <p className="text-red-500 text-xs md:text-sm mt-1.5 font-medium">
                   {errors.newPassword.message}
                 </p>
               )}
@@ -234,13 +236,13 @@ export default function ResetPasswordPage() {
                   type={showConfirmPassword ? "text" : "password"}
                   {...register("confirmPassword")}
                   placeholder="Nhập lại mật khẩu"
-                  className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
+                  className="w-full px-4 py-3 md:py-3.5 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 text-sm md:text-base placeholder:text-gray-400"
                   disabled={isLoading}
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-500 hover:text-slate-700"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 transition-colors"
                   disabled={isLoading}
                 >
                   {showConfirmPassword ? (
@@ -283,7 +285,7 @@ export default function ResetPasswordPage() {
                 </button>
               </div>
               {errors.confirmPassword && (
-                <p className="text-red-500 text-xs md:text-sm mt-1">
+                <p className="text-red-500 text-xs md:text-sm mt-1.5 font-medium">
                   {errors.confirmPassword.message}
                 </p>
               )}
@@ -292,17 +294,20 @@ export default function ResetPasswordPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full cursor-pointer py-3 bg-primary text-white font-bold rounded-lg hover:bg-blue-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 text-sm md:text-base"
+              className="w-full cursor-pointer py-3.5 bg-primary text-white font-bold rounded-lg hover:bg-blue-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] text-sm md:text-base shadow-md"
             >
               {isLoading ? "Đang cập nhật..." : "🔒 Cập Nhật Mật Khẩu"}
             </button>
           </form>
 
           <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <p className="text-xs md:text-sm text-blue-800">
-              <strong>💡 Gợi ý:</strong> Sử dụng mật khẩu mạnh kết hợp chữ hoa,
-              chữ thường, số và ký tự đặc biệt.
-            </p>
+            <div className="flex gap-2.5">
+              <span className="text-base flex-shrink-0">💡</span>
+              <p className="text-xs md:text-sm text-blue-800 leading-snug">
+                <strong>Gợi ý:</strong> Sử dụng mật khẩu mạnh kết hợp chữ hoa,
+                chữ thường, số và ký tự đặc biệt.
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -311,6 +316,7 @@ export default function ResetPasswordPage() {
         autoClose={1500}
         hideProgressBar={true}
         pauseOnHover={false}
+        position="top-center"
       />
     </div>
   );

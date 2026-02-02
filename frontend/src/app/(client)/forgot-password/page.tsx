@@ -68,18 +68,18 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-6 md:py-12 px-4">
-      <div className="container mx-auto max-w-md">
-        <div className="mb-6">
-          <BackButton className="flex cursor-pointer items-center gap-2 hover:opacity-80 transition-opacity" />
+    <div className="w-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4 sm:px-6 lg:px-8">
+      <div className="w-full max-w-[440px] space-y-6">
+        <div className="flex justify-start">
+          <BackButton className="flex cursor-pointer items-center gap-2 hover:opacity-80 transition-opacity text-slate-600" />
         </div>
 
-        <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8">
-          <div className="text-center mb-6 md:mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
+        <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 md:p-10 w-full">
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center w-14 h-14 md:w-16 md:h-16 bg-blue-100 rounded-full mb-4">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="w-8 h-8 text-primary"
+                className="w-7 h-7 md:w-8 md:h-8 text-primary"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -95,12 +95,12 @@ export default function ForgotPasswordPage() {
             <h1 className="text-2xl md:text-3xl font-bold text-slate-800 mb-2">
               Quên Mật Khẩu?
             </h1>
-            <p className="text-sm md:text-base text-slate-600">
+            <p className="text-sm md:text-base text-slate-600 leading-relaxed px-2">
               Nhập email của bạn và chúng tôi sẽ gửi mã OTP để đặt lại mật khẩu
             </p>
           </div>
 
-          <form onSubmit={handleSubmit(handleSendOtp)} className="space-y-4">
+          <form onSubmit={handleSubmit(handleSendOtp)} className="space-y-5">
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-2">
                 Địa chỉ Email
@@ -109,11 +109,11 @@ export default function ForgotPasswordPage() {
                 type="email"
                 {...register("email")}
                 placeholder="example@email.com"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 text-sm md:text-base"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 text-sm md:text-base placeholder:text-gray-400"
                 disabled={isLoading}
               />
               {errors.email && (
-                <p className="text-red-500 text-xs md:text-sm mt-1">
+                <p className="text-red-500 text-xs md:text-sm mt-1.5 font-medium">
                   {errors.email.message}
                 </p>
               )}
@@ -122,22 +122,22 @@ export default function ForgotPasswordPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full cursor-pointer py-3 bg-primary text-white font-bold rounded-lg hover:bg-blue-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 text-sm md:text-base"
+              className="w-full cursor-pointer py-3.5 bg-primary text-white font-bold rounded-lg hover:bg-blue-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] text-sm md:text-base shadow-md"
             >
               {isLoading ? "Đang gửi..." : "📧 Gửi Mã OTP"}
             </button>
           </form>
 
-          <div className="mt-6 pt-6 border-t border-gray-200">
+          <div className="mt-8 pt-6 border-t border-gray-100">
             <p className="text-xs md:text-sm text-slate-500 text-center">
               Bạn chưa nhận được email?
             </p>
-            <p className="text-xs md:text-sm text-slate-500 text-center mt-1">
+            <p className="text-xs md:text-sm text-slate-500 text-center mt-1 flex flex-col sm:block">
               Kiểm tra thư mục spam hoặc liên hệ
               <a
                 href="mailto:bookhivestore161@gmail.com"
                 target="_blank"
-                className="text-primary font-semibold hover:underline ml-1"
+                className="text-primary font-semibold hover:underline sm:ml-1 break-all"
               >
                 bookhivestore161@gmail.com
               </a>
@@ -145,10 +145,13 @@ export default function ForgotPasswordPage() {
           </div>
 
           <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <p className="text-xs md:text-sm text-blue-800">
-              <strong>💡 Mẹo:</strong> Mã OTP sẽ hết hạn sau 5 phút. Vui lòng
-              kiểm tra email ngay.
-            </p>
+            <div className="flex gap-2.5">
+              <span className="text-base flex-shrink-0">💡</span>
+              <p className="text-xs md:text-sm text-blue-800 leading-snug">
+                <strong>Mẹo:</strong> Mã OTP sẽ hết hạn sau 5 phút. Vui lòng
+                kiểm tra email ngay.
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -157,6 +160,7 @@ export default function ForgotPasswordPage() {
         autoClose={1500}
         hideProgressBar={true}
         pauseOnHover={false}
+        position="top-center"
       />
     </div>
   );
