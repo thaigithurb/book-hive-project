@@ -25,4 +25,9 @@ module.exports.generateDescriptionCode = () => {
   return Math.random().toString(36).slice(2, 8);;
 };
 
+module.exports.generateOTP = () => {
+  const otp = Math.floor(100000 + Math.random() * 900000);
+  return otp.toString();
+};
+
 export {};

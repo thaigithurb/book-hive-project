@@ -15,6 +15,7 @@ const generate = require("../../../../helpers/generate");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../../models/user.model");
+const { sendOTPEmail } = require("../../../../helpers/sendEmail");
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 exports.register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -275,6 +276,132 @@ module.exports.loginWithGoogle = (req, res) => __awaiter(void 0, void 0, void 0,
         return res.status(400).json({
             success: false,
             message: "Đăng nhập Google thất bại",
+            error: error.message,
+        });
+    }
+});
+module.exports.sendOtpForgotPassword = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { email } = req.body;
+        if (!email) {
+            return res.status(400).json({
+                success: false,
+                message: "Vui lòng nhập email",
+            });
+        }
+        const user = yield User.findOne({
+            email,
+            deleted: false,
+        });
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "Email không tồn tại",
+            });
+        }
+        const otp = generate.generateOTP();
+        const expiresAt = new Date(Date.now() + 3 * 60 * 1000);
+        user.resetOTP = otp;
+        user.resetOTPExpiresAt = expiresAt;
+        yield user.save();
+        yield sendOTPEmail(email, user.fullName, otp);
+        return res.status(200).json({
+            success: true,
+            message: "OTP đã được gửi tới email của bạn",
+            expiresAt: expiresAt,
+        });
+    }
+    catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Lỗi server",
+            error: error.message,
+        });
+    }
+});
+module.exports.verifyOtpForgotPassword = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { email, otp } = req.body;
+        if (!email || !otp) {
+            return res.status(400).json({
+                success: false,
+                message: "Vui lòng nhập email và OTP",
+            });
+        }
+        const user = yield User.findOne({
+            email,
+            deleted: false,
+        });
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "Email không tồn tại",
+            });
+        }
+        if (!user.resetOTPExpiresAt || user.resetOTPExpiresAt < new Date()) {
+            return res.status(400).json({
+                success: false,
+                message: "OTP đã hết hạn",
+            });
+        }
+        if (user.resetOTP !== otp) {
+            return res.status(400).json({
+                success: false,
+                message: "OTP không chính xác",
+            });
+        }
+        return res.status(200).json({
+            success: true,
+            message: "OTP chính xác",
+        });
+    }
+    catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Lỗi server",
+            error: error.message,
+        });
+    }
+});
+module.exports.resetPassword = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { email, newPassword, confirmPassword } = req.body;
+        if (!email || !newPassword || !confirmPassword) {
+            return res.status(400).json({
+                success: false,
+                message: "Vui lòng điền đầy đủ thông tin",
+            });
+        }
+        if (newPassword !== confirmPassword) {
+            return res.status(400).json({
+                success: false,
+                message: "Mật khẩu không khớp",
+            });
+        }
+        const user = yield User.findOne({
+            email,
+            deleted: false,
+        });
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User không tồn tại",
+            });
+        }
+        const hashedPassword = yield bcrypt.hash(newPassword, 10);
+        user.password = hashedPassword;
+        user.resetOTP = null;
+        user.resetOTPExpiresAt = null;
+        yield user.save();
+        return res.status(200).json({
+            success: true,
+            message: "Đặt lại mật khẩu thành công",
+        });
+    }
+    catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Lỗi server",
             error: error.message,
         });
     }

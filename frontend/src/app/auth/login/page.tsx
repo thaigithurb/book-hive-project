@@ -181,22 +181,6 @@ export default function LoginPage() {
                 )}
               </div>
 
-              <div className="flex items-center justify-between flex-wrap gap-2">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    className="w-4 h-4 rounded border-gray-300 focus:ring-2 focus:ring-blue-500"
-                  />
-                  <span className="text-sm text-gray-600">Ghi nhớ tôi</span>
-                </label>
-                <Link
-                  href="/forgot-password"
-                  className="text-sm text-blue-600 hover:text-blue-700 font-medium"
-                >
-                  Quên mật khẩu?
-                </Link>
-              </div>
-
               <button
                 type="submit"
                 disabled={loading}
@@ -214,6 +198,15 @@ export default function LoginPage() {
                   </>
                 )}
               </button>
+
+              <div className="flex items-center justify-end flex-wrap gap-2">
+                <Link
+                  href="/forgot-password"
+                  className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                >
+                  Quên mật khẩu?
+                </Link>
+              </div>
 
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">

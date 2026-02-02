@@ -38,6 +38,14 @@ const userSchema = new mongoose.Schema({
         unique: true,
         index: true,
     },
+    resetOTP: {
+        type: String,
+        default: null,
+    },
+    resetOTPExpiresAt: {
+        type: Date,
+        default: null,
+    },
 }, {
     timestamps: true,
 });

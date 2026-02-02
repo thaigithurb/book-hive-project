@@ -195,4 +195,125 @@ const sendOrderConfirmationEmail = (order) => __awaiter(this, void 0, void 0, fu
         return { success: false };
     }
 });
-module.exports = { sendOrderConfirmationEmail };
+const sendOTPEmail = (email, fullName, otp) => __awaiter(this, void 0, void 0, function* () {
+    try {
+        if (!process.env.BREVO_API_KEY) {
+            return { success: false, error: "Missing BREVO_API_KEY" };
+        }
+        const apiInstance = new brevo.TransactionalEmailsApi();
+        apiInstance.authentications["apiKey"].apiKey = process.env.BREVO_API_KEY;
+        if (!email || !otp) {
+            console.error("Missing required email data:", { email, otp });
+            return { success: false, error: "Missing email or otp" };
+        }
+        const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+          @media only screen and (max-width: 600px) {
+            .container { width: 100% !important; max-width: 100% !important; }
+            .content-padding { padding: 15px !important; }
+            .header-padding { padding: 20px !important; }
+            .mobile-text-small { font-size: 14px !important; }
+            .otp-code { font-size: 36px !important; letter-spacing: 8px !important; }
+          }
+        </style>
+      </head>
+      <body style="margin: 0; padding: 0; background-color: #f5f5f5; font-family: Arial, sans-serif;">
+        <div style="background-color: #f5f5f5; padding: 20px 0;">
+          <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+            <tr>
+              <td align="center">
+                <div class="container" style="max-width: 600px; margin: 0 auto; background-color: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); width: 100%;">
+                  
+                  <div class="header-padding" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center;">
+                    <h1 style="margin: 0; font-size: 28px;">🔐 Mã Xác Nhận</h1>
+                    <p style="margin: 10px 0 0 0; font-size: 14px;">BookHive - Cửa hàng sách online</p>
+                  </div>
+
+                  <div class="content-padding" style="padding: 30px;">
+                    <h2 style="color: #333; margin-top: 0;">Xin chào ${fullName || "bạn"},</h2>
+                    <p style="color: #666; line-height: 1.6; font-size: 16px;">
+                      Bạn đã yêu cầu đặt lại mật khẩu cho tài khoản BookHive. Sử dụng mã OTP dưới đây để xác nhận:
+                    </p>
+
+                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; padding: 30px; margin: 30px 0; text-align: center;">
+                      <p style="margin: 0; color: #fff; font-size: 14px; text-transform: uppercase; letter-spacing: 2px;">Mã OTP của bạn</p>
+                      <p class="otp-code" style="margin: 15px 0 0 0; color: #fff; font-size: 48px; font-weight: bold; letter-spacing: 12px; font-family: 'Courier New', monospace; word-break: break-all;">
+                        ${otp}
+                      </p>
+                    </div>
+
+                    <div style="background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; border-radius: 4px;">
+                      <p style="margin: 5px 0; color: #856404; font-size: 14px;">
+                        <strong>⏰ Lưu ý:</strong> Mã OTP này sẽ hết hạn sau <strong>3 phút</strong>. Vui lòng nhập nó nhanh chóng.
+                      </p>
+                    </div>
+
+                    <h3 style="color: #333; border-bottom: 2px solid #667eea; padding-bottom: 10px; margin-top: 30px; margin-bottom: 15px;">📝 Hướng Dẫn Sử Dụng</h3>
+                    <ol style="color: #666; line-height: 1.8; font-size: 14px; margin: 0; padding-left: 20px;">
+                      <li style="margin: 10px 0;">Sao chép mã OTP: <strong>${otp}</strong></li>
+                      <li style="margin: 10px 0;">Quay lại trang đặt lại mật khẩu</li>
+                      <li style="margin: 10px 0;">Dán mã OTP vào ô nhập liệu</li>
+                      <li style="margin: 10px 0;">Nhập mật khẩu mới của bạn</li>
+                      <li style="margin: 10px 0;">Nhấn "Cập Nhật Mật Khẩu"</li>
+                    </ol>
+
+                    <div style="background-color: #f0f7ff; border-radius: 8px; padding: 20px; margin: 20px 0; border-left: 4px solid #667eea;">
+                      <p style="margin: 0 0 10px 0; color: #333; font-weight: bold;">⚠️ Bảo Mật Quan Trọng</p>
+                      <p style="margin: 0; color: #666; font-size: 14px; line-height: 1.6;">
+                        Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này. Mã OTP này chỉ có giá trị cho một lần sử dụng duy nhất.
+                      </p>
+                    </div>
+
+                    <div style="background-color: #f0f7ff; border-radius: 8px; padding: 20px; margin: 20px 0;">
+                      <p style="margin: 0 0 10px 0; color: #333; font-weight: bold;">❓ Gặp Vấn Đề?</p>
+                      <p style="margin: 0; color: #666; font-size: 14px;">
+                        Nếu bạn không nhận được mã hoặc gặp sự cố, vui lòng liên hệ:
+                        <br><a href="mailto:support@bookhive.com" style="color: #667eea; text-decoration: none; word-break: break-all;">support@bookhive.com</a>
+                      </p>
+                    </div>
+                  </div>
+
+                  <div style="background-color: #f5f5f5; padding: 20px; text-align: center; border-top: 1px solid #ddd;">
+                    <p style="margin: 0; color: #666; font-size: 12px;">
+                      © 2026 BookHive. Tất cả quyền được bảo lưu.
+                    </p>
+                    <p style="margin: 5px 0 0 0; color: #999; font-size: 11px;">
+                      Đây là email tự động, vui lòng không trả lời email này.
+                    </p>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </table>
+        </div>
+      </body>
+      </html>
+    `;
+        const sendSmtpEmail = new brevo.SendSmtpEmail();
+        sendSmtpEmail.to = [{ email: email, name: fullName || "User" }];
+        sendSmtpEmail.sender = {
+            name: "BookHive",
+            email: process.env.BREVO_SENDER_EMAIL || "noreply@bookhive.com",
+        };
+        sendSmtpEmail.subject = "Mã Xác Nhận Đặt Lại Mật Khẩu - BookHive";
+        sendSmtpEmail.htmlContent = htmlContent;
+        sendSmtpEmail.replyTo = {
+            email: process.env.BREVO_SENDER_EMAIL || "support@bookhive.com",
+        };
+        yield apiInstance.sendTransacEmail(sendSmtpEmail);
+        return { success: true };
+    }
+    catch (error) {
+        console.error("Error sending OTP email:", {
+            message: error.message,
+            email: email,
+        });
+        return { success: false };
+    }
+});
+module.exports = { sendOrderConfirmationEmail, sendOTPEmail };
