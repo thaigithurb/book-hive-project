@@ -153,6 +153,7 @@ export default function Login() {
         autoClose={1500}
         hideProgressBar={true}
         pauseOnHover={false}
+        position="top-center"
       />
     </>
   );

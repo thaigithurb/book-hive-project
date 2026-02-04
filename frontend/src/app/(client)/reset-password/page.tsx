@@ -75,7 +75,7 @@ export default function ResetPasswordPage() {
 
         setTimeout(() => {
           router.push("/auth/login");
-        }, 2000);
+        }, 6000);
       }
     } catch (error: any) {
       const errorMessage =

@@ -206,6 +206,7 @@ const sendOTPEmail = (email, fullName, otp) => __awaiter(this, void 0, void 0, f
             console.error("Missing required email data:", { email, otp });
             return { success: false, error: "Missing email or otp" };
         }
+        const supportEmail = process.env.BREVO_SENDER_EMAIL;
         const htmlContent = `
       <!DOCTYPE html>
       <html>
@@ -249,7 +250,7 @@ const sendOTPEmail = (email, fullName, otp) => __awaiter(this, void 0, void 0, f
 
                     <div style="background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; border-radius: 4px;">
                       <p style="margin: 5px 0; color: #856404; font-size: 14px;">
-                        <strong>⏰ Lưu ý:</strong> Mã OTP này sẽ hết hạn sau <strong>3 phút</strong>. Vui lòng nhập nó nhanh chóng.
+                        <strong>⏰ Lưu ý:</strong> Mã OTP này sẽ hết hạn sau <strong>3 phút</strong>.
                       </p>
                     </div>
 
@@ -273,7 +274,7 @@ const sendOTPEmail = (email, fullName, otp) => __awaiter(this, void 0, void 0, f
                       <p style="margin: 0 0 10px 0; color: #333; font-weight: bold;">❓ Gặp Vấn Đề?</p>
                       <p style="margin: 0; color: #666; font-size: 14px;">
                         Nếu bạn không nhận được mã hoặc gặp sự cố, vui lòng liên hệ:
-                        <br><a href="mailto:support@bookhive.com" style="color: #667eea; text-decoration: none; word-break: break-all;">support@bookhive.com</a>
+                        <br><a href="mailto:${supportEmail}" style="color: #667eea; text-decoration: none; word-break: break-all;">${supportEmail}</a>
                       </p>
                     </div>
                   </div>
@@ -298,12 +299,12 @@ const sendOTPEmail = (email, fullName, otp) => __awaiter(this, void 0, void 0, f
         sendSmtpEmail.to = [{ email: email, name: fullName || "User" }];
         sendSmtpEmail.sender = {
             name: "BookHive",
-            email: process.env.BREVO_SENDER_EMAIL || "noreply@bookhive.com",
+            email: process.env.BREVO_SENDER_EMAIL,
         };
         sendSmtpEmail.subject = "Mã Xác Nhận Đặt Lại Mật Khẩu - BookHive";
         sendSmtpEmail.htmlContent = htmlContent;
         sendSmtpEmail.replyTo = {
-            email: process.env.BREVO_SENDER_EMAIL || "support@bookhive.com",
+            email: process.env.BREVO_SENDER_EMAIL,
         };
         yield apiInstance.sendTransacEmail(sendSmtpEmail);
         return { success: true };

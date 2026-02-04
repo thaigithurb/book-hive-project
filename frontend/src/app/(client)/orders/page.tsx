@@ -40,6 +40,13 @@ export default function OrdersPage() {
     defaultValues: { email: "" },
   });
 
+  useEffect(() => {
+    const savedEmail = localStorage.getItem("searchEmail");
+    if (savedEmail) {
+      setValue("email", savedEmail);
+    }
+  }, [setValue]);
+
   const user =
     typeof window !== "undefined"
       ? JSON.parse(localStorage.getItem("client_user") || "{}")
@@ -85,6 +92,9 @@ export default function OrdersPage() {
     try {
       setLoading(true);
       setHasSearched(true);
+
+      localStorage.setItem("searchEmail", form.email.trim());
+
       const res = await axios.get(
         `${API_URL}/api/v1/orders/user/${form.email.trim()}`,
         {
@@ -109,6 +119,15 @@ export default function OrdersPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSwitchToMyOrders = () => {
+    setSearchMode(false);
+    setValue("email", "");
+    localStorage.removeItem("searchEmail");
+    setPage(1);
+    setHasSearched(false);
+    setOrders([]);
   };
 
   const getStatusColor = (status: string) => {
@@ -232,13 +251,7 @@ export default function OrdersPage() {
       <div className="container mx-auto px-4">
         <div className="mb-6 md:mb-8 flex flex-col sm:flex-row gap-3 md:gap-4">
           <button
-            onClick={() => {
-              setSearchMode(false);
-              setValue("email", "");
-              setPage(1);
-              setHasSearched(false);
-              setOrders([]);
-            }}
+            onClick={handleSwitchToMyOrders}
             className={`px-4 py-2.5 md:px-6 md:py-3 font-semibold rounded-lg transition-all duration-200 text-sm md:text-base w-full sm:w-auto ${
               !searchMode
                 ? "bg-primary text-white shadow-md"

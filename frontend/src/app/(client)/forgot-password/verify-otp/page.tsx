@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -24,8 +24,10 @@ export default function VerifyOtpPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(0);
+  const [resendTimeLeft, setResendTimeLeft] = useState(0);
   const [isInitialized, setIsInitialized] = useState(false);
+  const timeLeftRef = useRef(0);
+  const resendTimeLeftRef = useRef(0);
 
   const {
     register,
@@ -58,32 +60,46 @@ export default function VerifyOtpPage() {
       const secondsLeft = Math.floor((expiresAt - now) / 1000);
 
       if (secondsLeft <= 0) {
-        localStorage.removeItem("forgotPasswordEmail");
-        localStorage.removeItem("otpExpiresAt");
-        router.push("/forgot-password");
+        timeLeftRef.current = 0;
+        setResendTimeLeft(0);
         return 0;
       }
 
-      setTimeLeft(secondsLeft);
+      timeLeftRef.current = secondsLeft;
       return secondsLeft;
     };
 
     calculateTimeLeft();
+    setResendTimeLeft(60);
+    resendTimeLeftRef.current = 60;
     setIsInitialized(true);
 
     const timer = setInterval(() => {
-      const remaining = calculateTimeLeft();
-      if (remaining <= 0) {
-        clearInterval(timer);
-      }
+      calculateTimeLeft();
     }, 1000);
 
     return () => clearInterval(timer);
   }, [router]);
 
+  useEffect(() => {
+    if (resendTimeLeftRef.current <= 0) return;
+
+    const timer = setInterval(() => {
+      resendTimeLeftRef.current -= 1;
+      setResendTimeLeft(Math.max(0, resendTimeLeftRef.current));
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
   const handleVerifyOtp = async (formData: VerifyOtpForm) => {
     if (!email) {
       toast.error("Email không hợp lệ");
+      return;
+    }
+
+    if (timeLeftRef.current <= 0) {
+      toast.error("OTP đã hết hạn. Vui lòng gửi lại OTP.");
       return;
     }
 
@@ -93,7 +109,7 @@ export default function VerifyOtpPage() {
       const response = await axios.post(
         `${API_URL}/api/v1/auth/forgot-password/verify-otp`,
         {
-          email: email,
+          email,
           otp: formData.otp,
         },
       );
@@ -103,7 +119,7 @@ export default function VerifyOtpPage() {
         localStorage.removeItem("otpExpiresAt");
 
         setTimeout(() => {
-          router.push(`/reset-password`);
+          router.push("/reset-password");
         }, 1500);
       }
     } catch (error: any) {
@@ -122,7 +138,7 @@ export default function VerifyOtpPage() {
       const response = await axios.post(
         `${API_URL}/api/v1/auth/forgot-password/send-otp`,
         {
-          email: email,
+          email,
         },
       );
 
@@ -134,7 +150,10 @@ export default function VerifyOtpPage() {
         const nowTime = new Date().getTime();
         const secondsLeft = Math.floor((expiresAtTime - nowTime) / 1000);
 
-        setTimeLeft(secondsLeft);
+        timeLeftRef.current = secondsLeft;
+        resendTimeLeftRef.current = 60;
+        setResendTimeLeft(60);
+
         toast.success("OTP mới đã được gửi");
       }
     } catch (error: any) {
@@ -146,8 +165,8 @@ export default function VerifyOtpPage() {
     }
   };
 
-  const minutes = Math.floor(timeLeft / 60);
-  const seconds = timeLeft % 60;
+  const resendMinutes = Math.floor(resendTimeLeft / 60);
+  const resendSeconds = resendTimeLeft % 60;
 
   if (!isInitialized) {
     return null;
@@ -157,7 +176,7 @@ export default function VerifyOtpPage() {
     <div className="w-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4 sm:px-6 lg:px-8">
       <div className="w-full max-w-[440px] space-y-6">
         <div className="flex justify-start">
-          <BackButton className="flex items-center gap-2 hover:opacity-80 transition-opacity text-slate-600" />
+          <BackButton className="flex cursor-pointer items-center gap-2 hover:opacity-80 transition-opacity text-slate-600" />
         </div>
 
         <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 md:p-10 w-full">
@@ -211,16 +230,6 @@ export default function VerifyOtpPage() {
               )}
             </div>
 
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 md:p-4">
-              <p className="text-sm md:text-base font-semibold text-blue-900 text-center flex items-center justify-center gap-2">
-                <span>⏱️</span>
-                <span>Hết hạn trong:</span>
-                <span className="text-primary font-bold min-w-[3.5rem] text-left">
-                  {minutes}:{seconds.toString().padStart(2, "0")}
-                </span>
-              </p>
-            </div>
-
             <button
               type="submit"
               disabled={isLoading || otpValue.length !== 6}
@@ -236,10 +245,14 @@ export default function VerifyOtpPage() {
             </p>
             <button
               onClick={handleResendOtp}
-              disabled={isLoading}
-              className="w-full py-2.5 border-2 border-primary text-primary font-semibold rounded-lg hover:bg-blue-50 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm md:text-base active:scale-[0.98]"
+              disabled={
+                isLoading || (resendTimeLeft > 0 && timeLeftRef.current > 0)
+              }
+              className="w-full py-2.5 cursor-pointer border-2 border-primary text-primary font-semibold rounded-lg hover:bg-blue-50 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm md:text-base active:scale-[0.98]"
             >
-              🔄 Gửi lại OTP
+              {resendTimeLeft > 0 && timeLeftRef.current > 0
+                ? `🔄 Gửi lại OTP (${resendMinutes}:${resendSeconds.toString().padStart(2, "0")})`
+                : "🔄 Gửi lại OTP"}
             </button>
           </div>
 
