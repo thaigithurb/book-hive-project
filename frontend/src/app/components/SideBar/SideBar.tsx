@@ -3,7 +3,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ToastContainer } from "react-toastify";
 import Logout from "../Auth/Logout/Logout";
-import { useUser } from "@/contexts/UserContext";
+import { useAdmin } from "@/contexts/AdminContext";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -45,8 +45,8 @@ const menu = [
 const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;
 
 export const SideBar = () => {
-  const { user } = useUser();
-  const permissions = user?.permissions || [];
+  const { admin } = useAdmin();
+  const permissions = admin?.permissions || [];
   const pathname = usePathname();
   const active =
     menu
@@ -61,12 +61,13 @@ export const SideBar = () => {
           <h2 className="text-[24px] font-bold mb-2 text-primary">
             Admin Panel
           </h2>
+          <p className="text-sm text-gray-600">👤 {admin?.email}</p>
         </div>
         <nav className="flex-1">
           {menu
             .filter(
               (item) =>
-                !item.permission || permissions.includes(item.permission)
+                !item.permission || permissions.includes(item.permission),
             )
             .map((item) => (
               <Link

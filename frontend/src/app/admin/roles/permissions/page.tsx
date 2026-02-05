@@ -11,15 +11,16 @@ import { AnimatePresence, motion } from "framer-motion";
 import NewAddButton from "@/app/components/Button/NewAddButton/NewAddButton";
 import ConfirmModal from "@/app/components/ConfirmModal/ConfirmModal";
 import { useRouter } from "next/navigation";
-import { useUser } from "@/contexts/UserContext";
+import { useAdmin } from "@/contexts/AdminContext";
 import PrivateRoute from "@/app/components/Auth/PrivateRoute/PrivateRoute";
 import ConditionalRender from "@/app/components/Auth/ConditionalRender/ConditionalRender";
+import axiosAdmin from "@/libs/axios-admin";
 
 const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function Permission() {
-  const { setUser } = useUser();
+  const { setAdmin } = useAdmin();
 
   const router = useRouter();
   const [roles, setRoles] = useState<Role[]>([]);
@@ -30,17 +31,11 @@ export default function Permission() {
   const [selectedPerm, setSelectedPerm] = useState<any>(null);
 
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const accessToken = localStorage.getItem("accessToken_admin");
 
   useEffect(() => {
     setLoading(true);
-    axios
-      .get(`${API_URL}/api/v1/${ADMIN_PREFIX}/roles`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-        withCredentials: true,
-      })
+    axiosAdmin
+      .get(`/api/v1/${ADMIN_PREFIX}/roles`)
       .then((res) => {
         setRoles(res.data.roles || []);
         setOriginalRoles(res.data.roles || []);
@@ -53,13 +48,8 @@ export default function Permission() {
   }, []);
 
   const fetchPermissions = () => {
-    axios
-      .get(`${API_URL}/api/v1/${ADMIN_PREFIX}/roles/permissions`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-        withCredentials: true,
-      })
+    axiosAdmin
+      .get(`/api/v1/${ADMIN_PREFIX}/roles/permissions`)
       .then((res) => setPermissionGroups(res.data.permissionGroups || []))
       .catch(() => setPermissionGroups([]));
   };
@@ -79,7 +69,7 @@ export default function Permission() {
             ? [...role.permissions, permKey]
             : role.permissions.filter((k) => k !== permKey),
         };
-      })
+      }),
     );
   };
 
@@ -100,36 +90,30 @@ export default function Permission() {
 
   const handleSave = async () => {
     try {
-      await axios.patch(
-        `${API_URL}/api/v1/${ADMIN_PREFIX}/roles/permissions/edit`,
-        { roles },
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-          withCredentials: true,
-        }
-      );
+      await axiosAdmin.patch(`/api/v1/${ADMIN_PREFIX}/roles/permissions/edit`, {
+        roles,
+      });
 
       setOriginalRoles(
         roles.map((role) => ({
           ...role,
           permissions: sortBy(role.permissions),
-        }))
+        })),
       );
       setHidden(true);
 
-      const userStr = localStorage.getItem("user");
-      if (userStr) {
-        const user = JSON.parse(userStr);
-        const currentRole = roles.find((r) => r.slug === user.role);
+      // ✅ Update admin user permissions
+      const adminUserStr = localStorage.getItem("admin_user");
+      if (adminUserStr) {
+        const adminUser = JSON.parse(adminUserStr);
+        const currentRole = roles.find((r) => r.slug === adminUser.role);
         if (currentRole) {
-          const updatedUser = {
-            ...user,
+          const updatedAdmin = {
+            ...adminUser,
             permissions: currentRole.permissions,
           };
-          localStorage.setItem("admin_user", JSON.stringify(updatedUser));
-          setUser(updatedUser);
+          localStorage.setItem("admin_user", JSON.stringify(updatedAdmin));
+          setAdmin(updatedAdmin);
         }
       }
 
@@ -147,15 +131,8 @@ export default function Permission() {
   const handleConfirmDelete = async () => {
     if (!selectedPerm) return;
     try {
-      await axios.patch(
-        `${API_URL}/api/v1/${ADMIN_PREFIX}/roles/permissions/delete/${selectedPerm._id}`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-          withCredentials: true,
-        }
+      await axiosAdmin.patch(
+        `/api/v1/${ADMIN_PREFIX}/roles/permissions/delete/${selectedPerm._id}`,
       );
       toast.success("Xóa quyền thành công!");
       fetchPermissions();
@@ -264,7 +241,7 @@ export default function Permission() {
                                   className="ml-2 text-blue-500 hover:underline cursor-pointer text-xs"
                                   onClick={() =>
                                     router.push(
-                                      `/${ADMIN_PREFIX}/roles/permissions/edit/${perm.slug}`
+                                      `/admin/roles/permissions/edit/${perm.slug}`,
                                     )
                                   }
                                 >
@@ -291,7 +268,7 @@ export default function Permission() {
                           </tr>
                         ))}
                       </React.Fragment>
-                    )
+                    ),
                   )}
                 </tbody>
               </table>

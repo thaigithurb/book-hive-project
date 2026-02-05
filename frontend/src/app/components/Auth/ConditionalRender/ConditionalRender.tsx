@@ -1,4 +1,6 @@
-import { useUser } from "@/contexts/UserContext";
+"use client";
+
+import { useAdmin } from "@/contexts/AdminContext";
 
 interface ConditionalRenderProps {
   permission: string;
@@ -11,10 +13,10 @@ export default function ConditionalRender({
   children,
   fallback = null,
 }: ConditionalRenderProps) {
-  const { user } = useUser();
+  const { admin } = useAdmin();
 
-  if (user === undefined) return null;
-  if (!user?.permissions?.includes(permission)) {
+  if (admin === undefined) return null;
+  if (!admin?.permissions?.includes(permission)) {
     return <>{fallback}</>;
   }
 

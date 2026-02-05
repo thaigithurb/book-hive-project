@@ -31,9 +31,7 @@ module.exports.login = async (req, res) => {
 
     // Lưu refreshToken mới vào DB
     user.refreshToken = refreshToken;
-    user.refreshTokenExpiresAt = new Date(
-      Date.now() + 7 * 24 * 60 * 60 * 1000 
-    );
+    user.refreshTokenExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
     await user.save();
 
     res.cookie("refreshToken_admin", refreshToken, {
@@ -45,9 +43,14 @@ module.exports.login = async (req, res) => {
 
     // tạo mới accessToken
     const accessToken = jwt.sign(
-      { id: user._id, email: user.email, role_id: user.role_id },
+      {
+        id: user._id,
+        email: user.email,
+        role_id: user.role_id,
+        permissions: user.role_id?.permissions || [],
+      },
       process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN }
+      { expiresIn: process.env.JWT_EXPIRES_IN },
     );
 
     return res.status(200).json({
@@ -88,7 +91,7 @@ module.exports.refresh = async (req, res) => {
     const accessToken = jwt.sign(
       { id: user._id, email: user.email, role_id: user.role_id },
       process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN }
+      { expiresIn: process.env.JWT_EXPIRES_IN },
     );
 
     return res.status(200).json({
@@ -136,7 +139,7 @@ module.exports.logout = async (req, res) => {
       {
         refreshToken: refreshToken,
       },
-      { refreshToken: null, refreshTokenExpiresAt: null }
+      { refreshToken: null, refreshTokenExpiresAt: null },
     );
 
     res.clearCookie("refreshToken_admin", {
@@ -152,6 +155,5 @@ module.exports.logout = async (req, res) => {
     });
   }
 };
-
 
 export {};

@@ -3,8 +3,8 @@ import React from "react";
 import Footer from "../components/Layout/Footer/Footer";
 import { CartProvider } from "@/contexts/CartContext";
 import { UserProvider } from "@/contexts/UserContext";
-import ClientAuthGuard from "../components/Auth/ClientAuthGuard/ClientAuthGuard";
 import { Header } from "../components/Layout/Header/Header";
+import ClientAuthGuard from "../components/Auth/ClientAuthGuard/ClientAuthGuard";
 
 export const metadata: Metadata = {
   title: "BookHive",

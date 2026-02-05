@@ -24,7 +24,7 @@ module.exports = (app) => {
 
     app.use(version + "/auth", authRoutes);
 
-    app.use(version + "/users", clientAuth, userRoutes);
+    app.use(version + "/users", userRoutes);
 
     app.use(version + "/favorites", clientAuth, favoriteRoutes);
 

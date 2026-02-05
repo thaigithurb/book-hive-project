@@ -1,114 +1,64 @@
 "use client";
 import { useEffect, useState } from "react";
-import axios from "axios";
-import { useUser } from "@/contexts/UserContext";
+import { useAdmin } from "@/contexts/AdminContext";
 import { Loading } from "@/app/components/Loading/Loading";
+import axiosAdmin from "@/libs/axios-admin";
+import { useRouter } from "next/navigation";
 
 const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-export default function AdminAuthGuard({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const [checkedAuth, setCheckedAuth] = useState(false);
-  const { setUser } = useUser();
+  const { setAdmin } = useAdmin();
+  const router = useRouter();
 
-  const setUserFromToken = (token: string) => {
-    try {
-      const userStr = localStorage.getItem("admin_user");
-      if (userStr) {
-        setUser(JSON.parse(userStr));
-        return;
-      }
-      const payload = JSON.parse(atob(token.split(".")[1]));
-      setUser({
-        id: payload.id,
-        email: payload.email,
-        role: payload.role,
-        permissions: payload.permissions || [],
-      });
-    } catch {
-      setUser(null);
-    }
+  const logout = () => {
+    localStorage.removeItem("accessToken_admin");
+    localStorage.removeItem("admin_user");
+    setAdmin(null);
+    router.replace(`/auth/${ADMIN_PREFIX}/login`);
   };
 
-  const refreshAccessToken = async () => {
-    try {
-      const res = await axios.post(
-        `${API_URL}/api/v1/${ADMIN_PREFIX}/auth/refresh`,
-        {},
-        { withCredentials: true },
-      );
+  const checkAuth = async () => {
+    const accessToken = localStorage.getItem("accessToken_admin");
+    const adminUserStr = localStorage.getItem("admin_user");
 
-      if (res.data?.accessToken) {
-        localStorage.setItem("accessToken_admin", res.data.accessToken);
-        setUserFromToken(res.data.accessToken);
-        return true;
-      }
-      return false;
-    } catch (error) {
-      console.error("Refresh token failed:", error);
-      localStorage.removeItem("accessToken_admin");
-      localStorage.removeItem("admin_user");
-      return false;
+    if (!accessToken || !adminUserStr) {
+      logout();
+      setCheckedAuth(true);
+      return;
     }
-  };
 
-  const verifyToken = async (token: string) => {
     try {
-      await axios.post(
-        `${API_URL}/api/v1/${ADMIN_PREFIX}/auth/verify`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
-      return true;
+      await axiosAdmin.post(`/api/v1/${ADMIN_PREFIX}/auth/verify`);
+      const adminData = JSON.parse(adminUserStr);
+      setAdmin(adminData);
     } catch {
-      return false;
+      logout();
+    } finally {
+      setCheckedAuth(true);
     }
   };
 
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        let accessToken = localStorage.getItem("accessToken_admin");
+    checkAuth();
+  }, [setAdmin]);
 
-        if (!accessToken) {
-          const refreshed = await refreshAccessToken();
-          if (!refreshed) {
-            window.location.href = `/auth/${ADMIN_PREFIX}/login`;
-            return;
-          }
-          setCheckedAuth(true);
-          return;
-        }
+  useEffect(() => {
+    const handleStorageChange = (e: any) => {
+      if (e.key === "accessToken_admin" || e.key === "admin_user") {
+        const accessToken = localStorage.getItem("accessToken_admin");
+        const adminUserStr = localStorage.getItem("admin_user");
 
-        const isValid = await verifyToken(accessToken);
-        if (isValid) {
-          setUserFromToken(accessToken);
-          setCheckedAuth(true);
-          return;
+        if (!accessToken || !adminUserStr) {
+          logout();
         }
-
-        const refreshed = await refreshAccessToken();
-        if (refreshed) {
-          setCheckedAuth(true);
-        } else {
-          window.location.href = `/auth/${ADMIN_PREFIX}/login`;
-        }
-      } catch (error) {
-        console.error("Auth check error:", error);
-        window.location.href = `/auth/${ADMIN_PREFIX}/login`;
       }
     };
 
-    checkAuth();
-  }, [setUser]);
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, [setAdmin]);
 
   if (!checkedAuth)
     return <Loading fullScreen={true} size="lg" text="Đang xác thực..." />;

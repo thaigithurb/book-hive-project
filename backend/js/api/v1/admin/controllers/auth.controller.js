@@ -14,7 +14,7 @@ const jwt = require("jsonwebtoken");
 const Account = require("../../models/account.model");
 const generate = require("../../../../helpers/generate");
 module.exports.login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b;
+    var _a, _b, _c;
     try {
         const { email, password } = req.body;
         const user = yield Account.findOne({ email }).populate("role_id");
@@ -41,15 +41,20 @@ module.exports.login = (req, res) => __awaiter(void 0, void 0, void 0, function*
             sameSite: "strict",
             expires: user.refreshTokenExpiresAt,
         });
-        const accessToken = jwt.sign({ id: user._id, email: user.email, role_id: user.role_id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });
+        const accessToken = jwt.sign({
+            id: user._id,
+            email: user.email,
+            role_id: user.role_id,
+            permissions: ((_a = user.role_id) === null || _a === void 0 ? void 0 : _a.permissions) || [],
+        }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });
         return res.status(200).json({
             message: "Đăng nhập thành công!",
             accessToken,
             user: {
                 id: user._id,
                 email: user.email,
-                role: (_a = user.role_id) === null || _a === void 0 ? void 0 : _a.slug,
-                permissions: ((_b = user.role_id) === null || _b === void 0 ? void 0 : _b.permissions) || [],
+                role: (_b = user.role_id) === null || _b === void 0 ? void 0 : _b.slug,
+                permissions: ((_c = user.role_id) === null || _c === void 0 ? void 0 : _c.permissions) || [],
             },
         });
     }

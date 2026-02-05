@@ -182,25 +182,6 @@ module.exports.logout = (req, res) => __awaiter(void 0, void 0, void 0, function
         });
     }
 });
-module.exports.logout = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const refreshToken = req.cookies.refreshToken_admin;
-        yield User.findOneAndUpdate({
-            refreshToken: refreshToken,
-        }, { refreshToken: null, refreshTokenExpiresAt: null });
-        res.clearCookie("refreshToken_user", {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "strict",
-        });
-        return res.status(200).json({ message: "Đăng xuất thành công!" });
-    }
-    catch (error) {
-        return res.status(400).json({
-            message: "Đăng xuất thất bại",
-        });
-    }
-});
 module.exports.loginWithGoogle = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { token } = req.body;

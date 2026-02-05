@@ -1,6 +1,7 @@
 "use client";
 
 import { useCart } from "@/contexts/CartContext";
+import { useUser } from "@/contexts/UserContext";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -12,8 +13,7 @@ export const Header = () => {
   const [keyword, setKeyword] = useState("");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const cartCount = getTotalItems();
-  const userString =
-    typeof window !== "undefined" ? localStorage.getItem("client_user") : null;
+  const userString = typeof window !== "undefined" ? localStorage.getItem("client_user") : null;
   const user = userString ? JSON.parse(userString) : null;
 
   const handleSearch = (e: any) => {
@@ -185,7 +185,7 @@ export const Header = () => {
                   className="px-4 py-2 text-primary font-medium transition-all duration-300 hover:bg-blue-50 hover:text-blue-600 rounded-lg hover:shadow-[0_4px_12px_rgba(59,130,246,0.2)] block w-full lg:w-auto"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  👤 {user?.fullName ?? "Tài khoản"}
+                  👤 {user && user.fullName ? user.fullName : "Tài khoản"}
                 </Link>
               </div>
             </div>

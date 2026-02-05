@@ -18,7 +18,7 @@ module.exports = (app) => {
     app.use(version + "/payment", paymentRoutes);
     app.use(version + "/cart", clientAuth, cartRoutes);
     app.use(version + "/auth", authRoutes);
-    app.use(version + "/users", clientAuth, userRoutes);
+    app.use(version + "/users", userRoutes);
     app.use(version + "/favorites", clientAuth, favoriteRoutes);
     app.use(version + "/reviews", clientAuth, reviewRoutes);
 };

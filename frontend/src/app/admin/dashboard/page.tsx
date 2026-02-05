@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { StatCard } from "@/app/components/Card/StatCard";
+import axiosAdmin from "@/libs/axios-admin";
 
 type DashboardStats = {
   totalBooks: number;
@@ -39,15 +40,9 @@ export default function Dashboard() {
         }
 
         const [booksRes, ordersRes, usersRes] = await Promise.all([
-          axios.get(`${API_URL}/api/v1/books`, {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-          axios.get(`${API_URL}/api/v1/orders`, {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-          axios.get(`${API_URL}/api/v1/users`, {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
+          axios.get(`${API_URL}/api/v1/books`),
+          axios.get(`${API_URL}/api/v1/orders`),
+          axios.get(`${API_URL}/api/v1/users`),
         ]);
 
         const books = booksRes.data?.books || [];

@@ -2,12 +2,13 @@ const express = require("express");
 const router = express.Router();
 
 const controller = require("../controllers/user.controller");
+const { clientAuth } = require("../../../../middleware/auth.middleware");
 
 router.get("/", controller.index);
 
-router.patch("/edit", controller.edit);
+router.patch("/edit", clientAuth, controller.edit);
 
-router.get("/me", controller.getUser);
+router.get("/me", clientAuth, controller.getUser);
 
 module.exports = router;
 

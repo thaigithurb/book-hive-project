@@ -1,4 +1,6 @@
-import { useUser } from "@/contexts/UserContext";
+"use client";
+
+import { useAdmin } from "@/contexts/AdminContext";
 import { useRouter } from "next/navigation";
 
 interface TableActionsProps {
@@ -21,7 +23,7 @@ export default function TableActions({
   onDelete,
 }: TableActionsProps) {
   const router = useRouter();
-  const { user } = useUser();
+  const { admin } = useAdmin();
 
   return (
     <>
@@ -29,7 +31,7 @@ export default function TableActions({
         {actions.map((action, index) => {
           if (
             action.permission &&
-            !user?.permissions?.includes(action.permission)
+            !admin?.permissions?.includes(action.permission)
           ) {
             return null;
           }
@@ -42,7 +44,7 @@ export default function TableActions({
               className={action.class}
               onClick={() => {
                 router.push(
-                  `/${ADMIN_PREFIX}/${source}/${action.title}/${slug}`
+                  `/${ADMIN_PREFIX}/${source}/${action.title}/${slug}`,
                 );
               }}
             >
@@ -50,7 +52,7 @@ export default function TableActions({
             </button>
           );
         })}
-        {user?.permissions?.includes(permissionDelete) && (
+        {admin?.permissions?.includes(permissionDelete) && (
           <button
             className="py-1 px-3 rounded-[6px] text-[13.6px] font-semibold bg-red-100 text-red-700 hover:bg-red-200 transition-colors duration-200 cursor-pointer"
             onClick={() => onDelete(id)}

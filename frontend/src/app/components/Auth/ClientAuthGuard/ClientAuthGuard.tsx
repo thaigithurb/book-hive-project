@@ -1,10 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
-import axios from "axios";
+import axiosClient from "@/libs/axios-client";
 import { useUser } from "@/contexts/UserContext";
 import { Loading } from "@/app/components/Loading/Loading";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function ClientAuthGuard({
   children,
@@ -14,94 +12,65 @@ export default function ClientAuthGuard({
   const [checkedAuth, setCheckedAuth] = useState(false);
   const { setUser } = useUser();
 
-  const setUserFromToken = (token: string) => {
+  const extractUserFromToken = (token: string) => {
     try {
-      const userStr = localStorage.getItem("client_user");
-      if (userStr) {
-        setUser(JSON.parse(userStr));
-        return;
-      }
       const payload = JSON.parse(atob(token.split(".")[1]));
-      setUser({
+      return {
         id: payload.id,
         email: payload.email,
-        role: payload.role,
-      });
+      };
     } catch {
-      setUser(null);
+      return null;
     }
   };
 
-  const refreshAccessToken = async () => {
-    try {
-      const res = await axios.post(
-        `${API_URL}/api/v1/auth/refresh`,
-        {},
-        { withCredentials: true },
-      );
-
-      if (res.data?.accessToken) {
-        localStorage.setItem("accessToken_user", res.data.accessToken);
-        setUserFromToken(res.data.accessToken);
-        return true;
-      }
-      return false;
-    } catch (error) {
-      console.error("Refresh token failed:", error);
-      localStorage.removeItem("accessToken_user");
-      localStorage.removeItem("client_user");
-      return false;
-    }
-  };
-
-  const verifyToken = async (token: string) => {
-    try {
-      await axios.post(
-        `${API_URL}/api/v1/auth/verify`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
-      return true;
-    } catch {
-      return false;
-    }
+  const logout = () => {
+    localStorage.removeItem("accessToken_user");
+    localStorage.removeItem("client_user");
+    setUser(null);
   };
 
   useEffect(() => {
     const checkAuth = async () => {
-      try {
-        let accessToken = localStorage.getItem("accessToken_user");
+      const accessToken = localStorage.getItem("accessToken_user");
+      const clientUser = localStorage.getItem("client_user");
 
-        if (!accessToken) {
-          const refreshed = await refreshAccessToken();
-          if (refreshed) {
-            setCheckedAuth(true);
-          } else {
-            setCheckedAuth(true);
-          }
-          return;
-        }
-
-        const isValid = await verifyToken(accessToken);
-        if (isValid) {
-          setUserFromToken(accessToken);
-          setCheckedAuth(true);
-          return;
-        }
-
-        const refreshed = await refreshAccessToken();
+      if (!accessToken || !clientUser) {
+        logout();
         setCheckedAuth(true);
-      } catch (error) {
-        console.error("Auth check error:", error);
+        return;
+      }
+
+      try {
+        await axiosClient.post("/api/v1/auth/verify");
+        const userData = extractUserFromToken(accessToken);
+        if (userData) {
+          setUser(userData);
+        }
+      } catch {
+        logout();
+      } finally {
         setCheckedAuth(true);
       }
     };
 
     checkAuth();
+  }, [setUser]);
+
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "accessToken_user" || e.key === "client_user") {
+        const accessToken = localStorage.getItem("accessToken_user");
+        const clientUser = localStorage.getItem("client_user");
+
+        if (!accessToken || !clientUser) {
+          logout();
+        }
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
   }, [setUser]);
 
   if (!checkedAuth)
