@@ -36,6 +36,8 @@ module.exports.index = (req, res) => __awaiter(void 0, void 0, void 0, function*
         const total = yield Book.countDocuments(find);
         if (books && books.length > 0) {
             const booksWithCategory = [];
+            const thirtyDaysAgo = new Date();
+            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
             for (const book of books) {
                 const bookObj = book.toObject();
                 if (book.category_id) {
@@ -43,6 +45,152 @@ module.exports.index = (req, res) => __awaiter(void 0, void 0, void 0, function*
                         _id: book.category_id,
                     }).select("title");
                     bookObj.category_name = category.title;
+                }
+                if (!bookObj.newest && book.createdAt >= thirtyDaysAgo) {
+                    bookObj.newest = true;
+                }
+                booksWithCategory.push(bookObj);
+            }
+            return res.status(200).json({
+                message: "Thành công!",
+                books: booksWithCategory,
+                total: total,
+                limit: limit,
+            });
+        }
+        return res.status(400).json({
+            message: "Không có sách nào",
+        });
+    }
+    catch (error) {
+        res.json("Không tìm thấy!");
+    }
+});
+module.exports.booksRent = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const keyword = req.query.keyWord;
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 12;
+        const skip = (page - 1) * limit;
+        const find = {
+            deleted: false,
+            status: "active",
+            priceBuy: 0,
+        };
+        if (keyword) {
+            const regex = new RegExp(keyword, "i");
+            find.$or = [{ title: regex }, { author: regex }];
+        }
+        let books = [];
+        if (req.query.sortKey === "priceRentDay") {
+            const type = "day";
+            books = yield Book.aggregate([
+                { $match: find },
+                {
+                    $addFields: {
+                        priceRentSort: {
+                            $first: {
+                                $map: {
+                                    input: {
+                                        $filter: {
+                                            input: "$priceRentOptions",
+                                            as: "opt",
+                                            cond: { $eq: ["$$opt.type", type] },
+                                        },
+                                    },
+                                    as: "opt",
+                                    in: "$$opt.price",
+                                },
+                            },
+                        },
+                    },
+                },
+                { $sort: { priceRentSort: Number(req.query.sortValue) } },
+                { $skip: skip },
+                { $limit: limit },
+            ]);
+        }
+        else {
+            let sort = {};
+            if (req.query.sortKey && req.query.sortValue) {
+                sort[req.query.sortKey] = Number(req.query.sortValue);
+            }
+            else {
+                sort.position = "desc";
+            }
+            books = yield Book.find(find).skip(skip).limit(limit).sort(sort);
+        }
+        const total = yield Book.countDocuments(find);
+        if (books && books.length > 0) {
+            const booksWithCategory = [];
+            const thirtyDaysAgo = new Date();
+            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+            for (const book of books) {
+                const bookObj = book;
+                if (book.category_id) {
+                    const category = yield Category.findOne({
+                        _id: book.category_id,
+                    }).select("title");
+                    bookObj.category_name = category.title;
+                }
+                if (!bookObj.newest && book.createdAt >= thirtyDaysAgo) {
+                    bookObj.newest = true;
+                }
+                booksWithCategory.push(bookObj);
+            }
+            return res.status(200).json({
+                message: "Thành công!",
+                books: booksWithCategory,
+                total: total,
+                limit: limit,
+            });
+        }
+        return res.status(400).json({
+            message: "Không có sách nào",
+        });
+    }
+    catch (error) {
+        res.json("Không tìm thấy!");
+    }
+});
+module.exports.booksBuy = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const keyword = req.query.keyWord;
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 12;
+        const skip = (page - 1) * limit;
+        const find = {
+            deleted: false,
+            status: "active",
+            priceRentOptions: [],
+        };
+        if (keyword) {
+            const regex = new RegExp(keyword, "i");
+            find.$or = [{ title: regex }, { author: regex }];
+        }
+        let sort = {};
+        if (req.query.sortKey && req.query.sortValue) {
+            sort[req.query.sortKey] = Number(req.query.sortValue);
+        }
+        else {
+            sort.position = "desc";
+        }
+        const books = yield Book.find(find).skip(skip).limit(limit).sort(sort);
+        const total = yield Book.countDocuments(find);
+        if (books && books.length > 0) {
+            const booksWithCategory = [];
+            const thirtyDaysAgo = new Date();
+            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+            for (const book of books) {
+                const bookObj = book.toObject();
+                if (book.category_id) {
+                    const category = yield Category.findOne({
+                        _id: book.category_id,
+                    }).select("title");
+                    bookObj.category_name = category.title;
+                }
+                if (!bookObj.newest && book.createdAt >= thirtyDaysAgo) {
+                    bookObj.newest = true;
                 }
                 booksWithCategory.push(bookObj);
             }
@@ -111,144 +259,14 @@ module.exports.featured = (req, res) => __awaiter(void 0, void 0, void 0, functi
         res.json("Không tìm thấy!");
     }
 });
-module.exports.booksRent = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const keyword = req.query.keyWord;
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 12;
-        const skip = (page - 1) * limit;
-        const find = {
-            deleted: false,
-            status: "active",
-            priceBuy: 0,
-        };
-        if (keyword) {
-            const regex = new RegExp(keyword, "i");
-            find.$or = [{ title: regex }, { author: regex }];
-        }
-        let books = [];
-        if (req.query.sortKey === "priceRentDay") {
-            const type = "day";
-            books = yield Book.aggregate([
-                { $match: find },
-                {
-                    $addFields: {
-                        priceRentSort: {
-                            $first: {
-                                $map: {
-                                    input: {
-                                        $filter: {
-                                            input: "$priceRentOptions",
-                                            as: "opt",
-                                            cond: { $eq: ["$$opt.type", type] },
-                                        },
-                                    },
-                                    as: "opt",
-                                    in: "$$opt.price",
-                                },
-                            },
-                        },
-                    },
-                },
-                { $sort: { priceRentSort: Number(req.query.sortValue) } },
-                { $skip: skip },
-                { $limit: limit },
-            ]);
-        }
-        else {
-            let sort = {};
-            if (req.query.sortKey && req.query.sortValue) {
-                sort[req.query.sortKey] = Number(req.query.sortValue);
-            }
-            else {
-                sort.position = "desc";
-            }
-            books = yield Book.find(find).skip(skip).limit(limit).sort(sort);
-        }
-        const total = yield Book.countDocuments(find);
-        if (books && books.length > 0) {
-            const booksWithCategory = [];
-            for (const book of books) {
-                const bookObj = book;
-                if (book.category_id) {
-                    const category = yield Category.findOne({
-                        _id: book.category_id,
-                    }).select("title");
-                    bookObj.category_name = category.title;
-                }
-                booksWithCategory.push(bookObj);
-            }
-            return res.status(200).json({
-                message: "Thành công!",
-                books: booksWithCategory,
-                total: total,
-                limit: limit,
-            });
-        }
-        return res.status(400).json({
-            message: "Không có sách nào",
-        });
-    }
-    catch (error) {
-        res.json("Không tìm thấy!");
-    }
-});
-module.exports.booksBuy = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const keyword = req.query.keyWord;
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 12;
-        const skip = (page - 1) * limit;
-        const find = {
-            deleted: false,
-            status: "active",
-            priceRentOptions: [],
-        };
-        if (keyword) {
-            const regex = new RegExp(keyword, "i");
-            find.$or = [{ title: regex }, { author: regex }];
-        }
-        let sort = {};
-        if (req.query.sortKey && req.query.sortValue) {
-            sort[req.query.sortKey] = Number(req.query.sortValue);
-        }
-        else {
-            sort.position = "desc";
-        }
-        const books = yield Book.find(find).skip(skip).limit(limit).sort(sort);
-        const total = yield Book.countDocuments(find);
-        if (books && books.length > 0) {
-            const booksWithCategory = [];
-            for (const book of books) {
-                const bookObj = book.toObject();
-                if (book.category_id) {
-                    const category = yield Category.findOne({
-                        _id: book.category_id,
-                    }).select("title");
-                    bookObj.category_name = category.title;
-                }
-                booksWithCategory.push(bookObj);
-            }
-            return res.status(200).json({
-                message: "Thành công!",
-                books: booksWithCategory,
-                total: total,
-                limit: limit,
-            });
-        }
-        return res.status(400).json({
-            message: "Không có sách nào",
-        });
-    }
-    catch (error) {
-        res.json("Không tìm thấy!");
-    }
-});
 module.exports.newest = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
         const books = yield Book.find({
             deleted: false,
             status: "active",
+            createdAt: { $gte: thirtyDaysAgo },
         }).sort({ createdAt: -1 });
         if (books) {
             return res.status(200).json({

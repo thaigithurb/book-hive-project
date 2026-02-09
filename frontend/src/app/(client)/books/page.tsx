@@ -125,6 +125,7 @@ export default function Books() {
                 <BookCard
                   key={book._id}
                   book={book}
+                  newest={book.newest ? true : false}
                   featured={book.featured ? true : false}
                   isFavorite={favoriteIds.includes(book._id)}
                   onToggleFavorite={handleToggleFavorite}

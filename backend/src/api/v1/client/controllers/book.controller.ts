@@ -32,6 +32,8 @@ module.exports.index = async (req, res) => {
 
     if (books && books.length > 0) {
       const booksWithCategory = [];
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
       for (const book of books) {
         const bookObj = book.toObject();
@@ -41,6 +43,11 @@ module.exports.index = async (req, res) => {
           }).select("title");
           bookObj.category_name = category.title;
         }
+        
+        if (!bookObj.newest && book.createdAt >= thirtyDaysAgo) {
+          bookObj.newest = true;
+        }
+        
         booksWithCategory.push(bookObj);
       }
 
@@ -49,63 +56,6 @@ module.exports.index = async (req, res) => {
         books: booksWithCategory,
         total: total,
         limit: limit,
-      });
-    }
-
-    return res.status(400).json({
-      message: "Không có sách nào",
-    });
-  } catch (error) {
-    res.json("Không tìm thấy!");
-  }
-};
-
-// [GET] /api/v1/books/detail/:bookSlug
-module.exports.detail = async (req, res) => {
-  try {
-    const slug = req.params.bookSlug;
-
-    const book = await Book.findOne({
-      slug: slug,
-      deleted: false,
-      status: "active",
-    });
-    if (!book) {
-      return res.status(404).json({ message: "Không tìm thấy sách!" });
-    }
-
-    const bookObj = book.toObject();
-    if (book.category_id) {
-      const category = await Category.findOne({
-        _id: book.category_id,
-      }).select("title");
-      bookObj.category_name = category.title;
-    }
-
-    return res.status(200).json({
-      message: "Lấy thông tin sách thành công!",
-      book: bookObj,
-    });
-  } catch (error) {
-    return res.status(400).json({
-      message: "Lỗi khi lấy thông tin sách!",
-    });
-  }
-};
-
-// [GET] /api/v1/books/featured
-module.exports.featured = async (req, res) => {
-  try {
-    const books = await Book.find({
-      deleted: false,
-      status: "active",
-      featured: true,
-    }).sort({ position: -1 });
-
-    if (books) {
-      return res.status(200).json({
-        message: "Thành công!",
-        books: books,
       });
     }
 
@@ -178,6 +128,8 @@ module.exports.booksRent = async (req, res) => {
 
     if (books && books.length > 0) {
       const booksWithCategory = [];
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
       for (const book of books) {
         const bookObj = book;
@@ -187,6 +139,11 @@ module.exports.booksRent = async (req, res) => {
           }).select("title");
           bookObj.category_name = category.title;
         }
+        
+        if (!bookObj.newest && book.createdAt >= thirtyDaysAgo) {
+          bookObj.newest = true;
+        }
+        
         booksWithCategory.push(bookObj);
       }
 
@@ -238,6 +195,8 @@ module.exports.booksBuy = async (req, res) => {
 
     if (books && books.length > 0) {
       const booksWithCategory = [];
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
       for (const book of books) {
         const bookObj = book.toObject();
@@ -247,6 +206,11 @@ module.exports.booksBuy = async (req, res) => {
           }).select("title");
           bookObj.category_name = category.title;
         }
+        
+        if (!bookObj.newest && book.createdAt >= thirtyDaysAgo) {
+          bookObj.newest = true;
+        }
+        
         booksWithCategory.push(bookObj);
       }
 
@@ -266,12 +230,74 @@ module.exports.booksBuy = async (req, res) => {
   }
 };
 
-// [GET] /api/v1/books/newest
-module.exports.newest = async (req, res) => {
+
+// [GET] /api/v1/books/detail/:bookSlug
+module.exports.detail = async (req, res) => {
+  try {
+    const slug = req.params.bookSlug;
+
+    const book = await Book.findOne({
+      slug: slug,
+      deleted: false,
+      status: "active",
+    });
+    if (!book) {
+      return res.status(404).json({ message: "Không tìm thấy sách!" });
+    }
+
+    const bookObj = book.toObject();
+    if (book.category_id) {
+      const category = await Category.findOne({
+        _id: book.category_id,
+      }).select("title");
+      bookObj.category_name = category.title;
+    }
+
+    return res.status(200).json({
+      message: "Lấy thông tin sách thành công!",
+      book: bookObj,
+    });
+  } catch (error) {
+    return res.status(400).json({
+      message: "Lỗi khi lấy thông tin sách!",
+    });
+  }
+};
+
+// [GET] /api/v1/books/featured
+module.exports.featured = async (req, res) => {
   try {
     const books = await Book.find({
       deleted: false,
       status: "active",
+      featured: true,
+    }).sort({ position: -1 });
+
+    if (books) {
+      return res.status(200).json({
+        message: "Thành công!",
+        books: books,
+      });
+    }
+
+    return res.status(400).json({
+      message: "Không có sách nào",
+    });
+  } catch (error) {
+    res.json("Không tìm thấy!");
+  }
+};
+
+// [GET] /api/v1/books/newest
+module.exports.newest = async (req, res) => {
+  try {
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    
+    const books = await Book.find({
+      deleted: false,
+      status: "active",
+      createdAt: { $gte: thirtyDaysAgo },
     }).sort({ createdAt: -1 });
 
     if (books) {

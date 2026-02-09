@@ -30,6 +30,6 @@ export interface Book {
   createdBy: UserRef;
   deletedBy: UserRef;
   updatedBy: UserRef;
-  // For UI: quantity to rent (not from DB, but for calculation)
   rentQuantity?: number;
+  newest: boolean;
 }
