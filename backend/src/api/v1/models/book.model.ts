@@ -1,18 +1,5 @@
 const mongoose = require("mongoose");
 
-const priceRentOptionSchema = new mongoose.Schema(
-  {
-    type: {
-      type: String,
-      enum: ["day", "week"],
-      required: true,
-    },
-    days: { type: Number, required: true },
-    price: { type: Number, required: true },
-  },
-  { _id: false }
-);
-
 const bookSchema = new mongoose.Schema(
   {
     title: String,
@@ -22,10 +9,6 @@ const bookSchema = new mongoose.Schema(
     priceBuy: {
       type: Number,
       default: 0,
-    },
-    priceRentOptions: {
-      type: [priceRentOptionSchema],
-      default: [],
     },
     rating: {
       type: Number,

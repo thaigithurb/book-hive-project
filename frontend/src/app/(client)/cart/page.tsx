@@ -69,7 +69,7 @@ export default function CartPage() {
                 <button
                   onClick={(e) => {
                     e.preventDefault();
-                    removeFromCart(item.bookId, item.type);
+                    removeFromCart(item.bookId);
                     toast.info("Đã xóa khỏi giỏ hàng");
                   }}
                   className="absolute top-2 right-2 p-1.5 text-gray-400 hover:text-red-600 sm:hidden z-10"
@@ -141,7 +141,6 @@ export default function CartPage() {
                           updateQuantity(
                             item.bookId,
                             Math.max(1, item.quantity - 1),
-                            item.type,
                           );
                         }}
                         className="w-6 h-6 md:w-8 md:h-8 flex items-center justify-center bg-gray-200 hover:bg-gray-300 rounded-md transition-colors duration-200 font-bold text-slate-700 text-sm md:text-base"
@@ -155,7 +154,7 @@ export default function CartPage() {
                         onChange={(e) => {
                           const value = parseInt(e.target.value) || 1;
                           if (value > 0) {
-                            updateQuantity(item.bookId, value, item.type);
+                            updateQuantity(item.bookId, value);
                           }
                         }}
                         className="w-8 h-6 md:w-12 md:h-8 text-center border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary text-xs md:text-sm"
@@ -166,7 +165,6 @@ export default function CartPage() {
                           updateQuantity(
                             item.bookId,
                             item.quantity + 1,
-                            item.type,
                           );
                         }}
                         className="w-6 h-6 md:w-8 md:h-8 flex items-center justify-center bg-gray-200 hover:bg-gray-300 rounded-md transition-colors duration-200 font-bold text-slate-700 text-sm md:text-base"

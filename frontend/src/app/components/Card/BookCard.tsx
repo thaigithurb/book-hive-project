@@ -69,16 +69,7 @@ export const BookCard = ({
                     ? book.priceBuy.toLocaleString("vi-VN") + "đ"
                     : "Liên hệ"}
                 </p>
-                <p className="text-[10px] md:text-[13.6px] text-secondary2 mt-1 mb-0">
-                  Thuê:{" "}
-                  {book.priceRentOptions?.find(
-                    (option) => option.type === "day",
-                  )?.price
-                    ? book.priceRentOptions
-                        .find((option) => option.type === "day")!
-                        .price.toLocaleString("vi-VN") + "đ"
-                    : "Liên hệ"}
-                </p>
+                <p className="text-[10px] md:text-[13.6px] text-secondary2 mt-1 mb-0" />
               </div>
               <span className="text-base md:text-[20px] text-primary">
                 <FaArrowRightLong />

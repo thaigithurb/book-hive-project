@@ -10,11 +10,6 @@ export interface Book {
   category_name: string;
   description: string;
   priceBuy: number;
-  priceRentOptions: Array<{
-    type: 'day' | 'week';
-    days: number;
-    price: number;
-  }>;
   rating: number;
   reviews: number;
   image: string;
@@ -30,6 +25,5 @@ export interface Book {
   createdBy: UserRef;
   deletedBy: UserRef;
   updatedBy: UserRef;
-  rentQuantity?: number;
   newest: boolean;
 }

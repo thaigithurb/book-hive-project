@@ -147,29 +147,6 @@ export default function BookDetail() {
                         : "Liên hệ"}
                     </span>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-base text-slate-800">Giá thuê:</span>
-                    <div className="flex flex-col items-end">
-                      <span className="text-[17px] text-secondary1 font-semibold">
-                        {book.priceRentOptions?.find(
-                          (opt: any) => opt.type === "day",
-                        )
-                          ? `${book.priceRentOptions
-                              .find((opt: any) => opt.type === "day")
-                              .price.toLocaleString("vi-VN")}đ/ngày`
-                          : "Không có giá thuê/ngày"}
-                      </span>
-                      <span className="text-[17px] text-secondary1 font-semibold">
-                        {book.priceRentOptions?.find(
-                          (opt: any) => opt.type === "week",
-                        )
-                          ? `${book.priceRentOptions
-                              .find((opt: any) => opt.type === "week")
-                              .price.toLocaleString("vi-VN")}đ/tuần`
-                          : "Không có giá thuê/tuần"}
-                      </span>
-                    </div>
-                  </div>
                 </motion.div>
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}

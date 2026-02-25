@@ -11,7 +11,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const { PayOS } = require("@payos/node");
 const Order = require("../../models/order.model");
-const Rental = require("../../models/rental.model");
 const Transaction = require("../../models/transaction.model");
 const { sendOrderConfirmationEmail } = require("../../../../helpers/sendEmail");
 const { generateDescriptionCode } = require("../../../../helpers/generate");
@@ -21,12 +20,9 @@ const payOS = new PayOS({
     checksumKey: process.env.PAYOS_CHECKSUM_KEY,
 });
 const findDocumentByCode = (code) => __awaiter(void 0, void 0, void 0, function* () {
-    let document = yield Order.findOne({ orderCode: String(code) });
+    const document = yield Order.findOne({ orderCode: String(code) });
     if (document)
         return { document, type: "order" };
-    document = yield Rental.findOne({ rentalCode: String(code) });
-    if (document)
-        return { document, type: "rental" };
     return { document: null, type: null };
 });
 module.exports.createCombinedPaymentLink = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -57,10 +53,9 @@ module.exports.createCombinedPaymentLink = (req, res) => __awaiter(void 0, void 
                 doc.document.status = "cancelled";
                 doc.document.isExpired = true;
                 yield doc.document.save();
-                const typeLabel = doc.type === "rental" ? "Đơn thuê" : "Đơn hàng";
                 return res.status(400).json({
                     error: -1,
-                    message: `${typeLabel} ${doc.code} đã hết hạn`,
+                    message: `Đơn hàng ${doc.code} đã hết hạn`,
                 });
             }
         }
@@ -104,17 +99,11 @@ module.exports.webhook = (req, res) => __awaiter(void 0, void 0, void 0, functio
         const { code, desc, data } = req.body;
         if (code === "00" && desc === "success") {
             const orderCode = String(data.orderCode);
-            const mainOrder = yield Order.findOne({ orderCode: orderCode });
-            const mainRental = yield Rental.findOne({ rentalCode: orderCode });
-            const mainDoc = mainOrder || mainRental;
+            const mainDoc = yield Order.findOne({ orderCode: orderCode });
             const paidDocuments = [];
             if (mainDoc && mainDoc.checkoutUrl) {
                 const checkoutUrl = mainDoc.checkoutUrl;
                 const pendingOrders = yield Order.find({
-                    checkoutUrl,
-                    status: "pending",
-                });
-                const pendingRentals = yield Rental.find({
                     checkoutUrl,
                     status: "pending",
                 });
@@ -135,31 +124,13 @@ module.exports.webhook = (req, res) => __awaiter(void 0, void 0, void 0, functio
                         verifiedAt: new Date(),
                     }).save();
                 }
-                for (const rental of pendingRentals) {
-                    rental.status = "renting";
-                    rental.rentedAt = new Date();
-                    yield rental.save();
-                    paidDocuments.push({ doc: rental, type: "rental" });
-                    yield new Transaction({
-                        orderCode: String(rental.rentalCode),
-                        bankCode: data.counterAccountBankId,
-                        accountNo: data.accountNumber,
-                        amount: data.amount,
-                        description: data.description,
-                        transactionDate: data.transactionDateTime
-                            ? new Date(data.transactionDateTime)
-                            : new Date(),
-                        status: "success",
-                        verifiedAt: new Date(),
-                    }).save();
-                }
             }
             try {
                 if (paidDocuments.length === 1) {
-                    const { doc, type } = paidDocuments[0];
+                    const { doc } = paidDocuments[0];
                     const emailOrder = {
                         userInfo: doc.userInfo,
-                        orderCode: type === "order" ? doc.orderCode : doc.rentalCode,
+                        orderCode: doc.orderCode,
                         items: doc.items || [],
                         totalAmount: doc.totalAmount || 0,
                     };
@@ -169,7 +140,7 @@ module.exports.webhook = (req, res) => __awaiter(void 0, void 0, void 0, functio
                     const firstDoc = paidDocuments[0].doc;
                     const userInfo = firstDoc.userInfo;
                     const combinedCode = paidDocuments
-                        .map((d) => d.type === "order" ? d.doc.orderCode : d.doc.rentalCode)
+                        .map((d) => d.doc.orderCode)
                         .join(", ");
                     const combinedItems = paidDocuments.flatMap((d) => d.doc.items || []);
                     const combinedTotal = paidDocuments.reduce((sum, d) => sum + (d.doc.totalAmount || 0), 0);
@@ -203,7 +174,7 @@ module.exports.cancelPaymentLink = (req, res) => __awaiter(void 0, void 0, void 
                 message: "Không tìm thấy đơn hàng!",
             });
         }
-        if (document.status === "paid" || document.status === "renting") {
+        if (document.status === "paid") {
             return res.status(400).json({
                 error: -1,
                 message: "Đã thanh toán, không thể hủy",

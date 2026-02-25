@@ -176,7 +176,7 @@ export default function ProfilePage() {
               <div className="text-2xl mb-2">📦</div>
               <h3 className="font-semibold text-base md:text-lg">Đơn hàng</h3>
               <p className="text-xs md:text-sm text-gray-600">
-                Xem lịch sử mua hàng và thuê
+                Xem lịch sử mua hàng
               </p>
             </Link>
             <Link

@@ -27,13 +27,8 @@ export default function CheckoutPage() {
   const {
     items,
     clearCart,
-    getBuyItems,
-    getRentItems,
-    getTotalBuyPrice,
-    getTotalRentPrice,
   } = useCart();
   const [isLoaded, setIsLoaded] = useState(false);
-  const [cartType, setCartType] = useState<"all" | "buy" | "rent">("all");
   const [paymentMethod, setPaymentMethod] = useState<"transfer" | "cod">(
     "transfer",
   );
@@ -84,35 +79,7 @@ export default function CheckoutPage() {
     );
   }
 
-  const buyItems = getBuyItems();
-  const rentItems = getRentItems();
-  const displayItems =
-    cartType === "all" ? items : cartType === "buy" ? buyItems : rentItems;
-
-  const isAllEmpty =
-    items.length === 0 && buyItems.length === 0 && rentItems.length === 0;
-
-  if (isAllEmpty) {
-    return (
-      <div className="min-h-screen py-8 md:py-12">
-        <div className="container mx-auto px-4">
-          <div className="bg-white rounded-2xl p-6 md:p-12 shadow text-center">
-            <h1 className="text-2xl md:text-3xl font-bold text-slate-800 mb-4">
-              Giỏ hàng trống
-            </h1>
-            <Link
-              href="/home"
-              className="inline-block px-6 py-3 bg-primary text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors text-sm md:text-base"
-            >
-              Quay lại mua sắm
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  const totalAmount = displayItems.reduce(
+  const totalAmount = items.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0,
   );
@@ -121,73 +88,26 @@ export default function CheckoutPage() {
     setIsProcessing(true);
 
     try {
-      let createdCodes: string[] = [];
+      const orderData = {
+        userInfo: formData,
+        items: items.map((item) => ({
+          id: item.bookId,
+          title: item.title,
+          price: item.price,
+          quantity: item.quantity,
+          slug: item.slug,
+          image: item.image,
+        })),
+        totalAmount,
+        paymentMethod,
+      };
 
-      if (cartType === "all" || cartType === "buy") {
-        const buyItemsToCreate = items.filter((item) => item.type !== "rent");
+      const orderResponse = await axios.post(
+        `${API_URL}/api/v1/orders/create`,
+        orderData,
+      );
 
-        if (buyItemsToCreate.length > 0) {
-          const buyOrderData = {
-            userInfo: formData,
-            items: buyItemsToCreate.map((item) => ({
-              id: item.bookId,
-              title: item.title,
-              price: item.price,
-              quantity: item.quantity,
-              slug: item.slug,
-              image: item.image,
-            })),
-            totalAmount: buyItemsToCreate.reduce(
-              (sum, item) => sum + item.price * item.quantity,
-              0,
-            ),
-            paymentMethod,
-          };
-
-          const buyResponse = await axios.post(
-            `${API_URL}/api/v1/orders/create`,
-            buyOrderData,
-          );
-          createdCodes.push(buyResponse.data.order.orderCode);
-        }
-      }
-
-      if (cartType === "all" || cartType === "rent") {
-        const rentItemsToCreate = items.filter((item) => item.type === "rent");
-
-        if (rentItemsToCreate.length > 0) {
-          const rentOrderData = {
-            userInfo: formData,
-            items: rentItemsToCreate.map((item) => ({
-              id: item.bookId,
-              title: item.title,
-              price: item.price,
-              quantity: item.quantity,
-              slug: item.slug,
-              image: item.image,
-              rentalType: item.rentalType,
-              rentalDays: item.rentalDays,
-            })),
-            totalAmount: rentItemsToCreate.reduce(
-              (sum, item) => sum + item.price * item.quantity,
-              0,
-            ),
-            paymentMethod,
-          };
-
-          const rentResponse = await axios.post(
-            `${API_URL}/api/v1/rentals/create`,
-            rentOrderData,
-          );
-          createdCodes.push(rentResponse.data.rental.rentalCode);
-        }
-      }
-
-      if (createdCodes.length === 0) {
-        toast.error("Không có sản phẩm để tạo đơn!");
-        setIsProcessing(false);
-        return;
-      }
+      const createdCode = orderResponse.data.order.orderCode;
 
       if (paymentMethod === "cod") {
         try {
@@ -208,10 +128,10 @@ export default function CheckoutPage() {
         setIsRedirecting(true);
 
         setTimeout(() => {
-          router.push(`/order-success?codes=${createdCodes.join(",")}`);
+          router.push(`/order-success?codes=${createdCode}`);
         }, 1500);
       } else {
-        sessionStorage.setItem("codes", JSON.stringify(createdCodes));
+        sessionStorage.setItem("codes", JSON.stringify([createdCode]));
         sessionStorage.setItem("paymentMethod", paymentMethod);
         sessionStorage.setItem("totalAmount", totalAmount.toString());
 
@@ -236,40 +156,7 @@ export default function CheckoutPage() {
           Thanh toán
         </h1>
 
-        <div className="mb-6 md:mb-8 flex gap-2 md:gap-4 border-b border-gray-300 overflow-x-auto whitespace-nowrap pb-1 md:pb-0">
-          <button
-            onClick={() => setCartType("all")}
-            className={`px-4 py-2 md:px-6 md:py-3 text-sm md:text-base font-semibold transition-colors ${
-              cartType === "all"
-                ? "text-primary border-b-2 border-primary"
-                : "text-slate-600 hover:text-slate-800"
-            }`}
-          >
-            Tất cả ({items.length})
-          </button>
-          <button
-            onClick={() => setCartType("buy")}
-            className={`px-4 py-2 md:px-6 md:py-3 text-sm md:text-base font-semibold transition-colors ${
-              cartType === "buy"
-                ? "text-primary border-b-2 border-primary"
-                : "text-slate-600 hover:text-slate-800"
-            }`}
-          >
-            Mua ({buyItems.length})
-          </button>
-          <button
-            onClick={() => setCartType("rent")}
-            className={`px-4 py-2 md:px-6 md:py-3 text-sm md:text-base font-semibold transition-colors ${
-              cartType === "rent"
-                ? "text-primary border-b-2 border-primary"
-                : "text-slate-600 hover:text-slate-800"
-            }`}
-          >
-            Thuê ({rentItems.length})
-          </button>
-        </div>
-
-        {displayItems.length === 0 ? (
+        {items.length === 0 ? (
           <div className="bg-white rounded-2xl p-6 md:p-12 shadow text-center">
             <h1 className="text-2xl md:text-3xl font-bold text-slate-800 mb-4">
               Không có sản phẩm

@@ -9,8 +9,6 @@ router.get("/featured", controller.featured);
 
 router.get("/detail/:bookSlug", controller.detail);
 
-router.get("/rent-only", controller.booksRent);
-
 router.get("/buy-only", controller.booksBuy);
 
 router.get("/newest", controller.newest);

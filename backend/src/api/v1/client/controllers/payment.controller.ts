@@ -1,6 +1,5 @@
 const { PayOS } = require("@payos/node");
 const Order = require("../../models/order.model");
-const Rental = require("../../models/rental.model");
 const Transaction = require("../../models/transaction.model");
 const { sendOrderConfirmationEmail } = require("../../../../helpers/sendEmail");
 const { generateDescriptionCode } = require("../../../../helpers/generate");
@@ -11,14 +10,10 @@ const payOS = new PayOS({
   checksumKey: process.env.PAYOS_CHECKSUM_KEY,
 });
 
-// Tìm document bằng code
+// Tìm order bằng code
 const findDocumentByCode = async (code) => {
-  let document = await Order.findOne({ orderCode: String(code) });
+  const document = await Order.findOne({ orderCode: String(code) });
   if (document) return { document, type: "order" };
-
-  document = await Rental.findOne({ rentalCode: String(code) });
-  if (document) return { document, type: "rental" };
-
   return { document: null, type: null };
 };
 
@@ -34,7 +29,7 @@ module.exports.createCombinedPaymentLink = async (req, res) => {
       });
     }
 
-    const documents = [];
+    const documents: any[] = [];
     for (const code of codes) {
       const { document, type } = await findDocumentByCode(code);
       if (document) {
@@ -58,10 +53,9 @@ module.exports.createCombinedPaymentLink = async (req, res) => {
         doc.document.isExpired = true;
         await doc.document.save();
 
-        const typeLabel = doc.type === "rental" ? "Đơn thuê" : "Đơn hàng";
         return res.status(400).json({
           error: -1,
-          message: `${typeLabel} ${doc.code} đã hết hạn`,
+          message: `Đơn hàng ${doc.code} đã hết hạn`,
         });
       }
     }
@@ -111,20 +105,14 @@ module.exports.webhook = async (req, res) => {
     const { code, desc, data } = req.body;
     if (code === "00" && desc === "success") {
       const orderCode = String(data.orderCode);
-      const mainOrder = await Order.findOne({ orderCode: orderCode });
-      const mainRental = await Rental.findOne({ rentalCode: orderCode });
-      const mainDoc = mainOrder || mainRental;
+      const mainDoc = await Order.findOne({ orderCode: orderCode });
 
-      const paidDocuments: { doc: any; type: "order" | "rental" }[] = [];
+      const paidDocuments: { doc: any; type: "order" }[] = [];
 
       if (mainDoc && mainDoc.checkoutUrl) {
         const checkoutUrl = mainDoc.checkoutUrl;
 
         const pendingOrders = await Order.find({
-          checkoutUrl,
-          status: "pending",
-        });
-        const pendingRentals = await Rental.find({
           checkoutUrl,
           status: "pending",
         });
@@ -148,33 +136,14 @@ module.exports.webhook = async (req, res) => {
           }).save();
         }
 
-        for (const rental of pendingRentals) {
-          rental.status = "renting";
-          rental.rentedAt = new Date();
-          await rental.save();
-          paidDocuments.push({ doc: rental, type: "rental" });
-
-          await new Transaction({
-            orderCode: String(rental.rentalCode),
-            bankCode: data.counterAccountBankId,
-            accountNo: data.accountNumber,
-            amount: data.amount,
-            description: data.description,
-            transactionDate: data.transactionDateTime
-              ? new Date(data.transactionDateTime)
-              : new Date(),
-            status: "success",
-            verifiedAt: new Date(),
-          }).save();
-        }
       }
 
       try {
         if (paidDocuments.length === 1) {
-          const { doc, type } = paidDocuments[0];
+          const { doc } = paidDocuments[0];
           const emailOrder = {
             userInfo: doc.userInfo,
-            orderCode: type === "order" ? doc.orderCode : doc.rentalCode,
+            orderCode: doc.orderCode,
             items: doc.items || [],
             totalAmount: doc.totalAmount || 0,
           };
@@ -183,9 +152,7 @@ module.exports.webhook = async (req, res) => {
           const firstDoc = paidDocuments[0].doc;
           const userInfo = firstDoc.userInfo;
           const combinedCode = paidDocuments
-            .map((d) =>
-              d.type === "order" ? d.doc.orderCode : d.doc.rentalCode,
-            )
+            .map((d) => d.doc.orderCode)
             .join(", ");
           const combinedItems = paidDocuments.flatMap((d) => d.doc.items || []);
           const combinedTotal = paidDocuments.reduce(
@@ -226,7 +193,7 @@ module.exports.cancelPaymentLink = async (req, res) => {
       });
     }
 
-    if (document.status === "paid" || document.status === "renting") {
+    if (document.status === "paid") {
       return res.status(400).json({
         error: -1,
         message: "Đã thanh toán, không thể hủy",

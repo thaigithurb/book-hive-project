@@ -23,8 +23,6 @@ export default function EditBook() {
     category_id: "",
     description: "",
     priceBuy: "",
-    priceRentDay: "",
-    priceRentWeek: "",
     position: "",
     status: "active",
     image: "",
@@ -103,14 +101,6 @@ export default function EditBook() {
           category_id: book.category_id,
           description: book.description,
           priceBuy: book.priceBuy,
-          priceRentDay:
-            book.priceRentOptions?.find(
-              (opt: { type: string; price: string }) => opt.type === "day"
-            )?.price ?? "",
-          priceRentWeek:
-            book.priceRentOptions?.find(
-              (opt: { type: string; price: string }) => opt.type === "week"
-            )?.price ?? "",
           position: book.position,
           status: book.status,
           image: book.image,

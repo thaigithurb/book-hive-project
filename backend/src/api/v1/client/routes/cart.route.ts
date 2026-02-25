@@ -13,8 +13,6 @@ router.patch("/edit/:id", controller.editItem);
 
 router.delete("/delete-all", controller.clear);
 
-router.post("/add-rental", controller.addRental);
-
 module.exports = router;
 
 export {};

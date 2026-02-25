@@ -19,8 +19,6 @@ export default function Create() {
     description: "",
     priceBuy: "",
     position: "",
-    priceRentDay: "",
-    priceRentWeek: "",
     status: "active",
     featured: false,
   });
@@ -128,8 +126,6 @@ export default function Create() {
           position: "",
           status: "active",
           featured: false,
-          priceRentDay: "",
-          priceRentWeek: "",
         });
         setPreview(null);
         setImageFile(null);

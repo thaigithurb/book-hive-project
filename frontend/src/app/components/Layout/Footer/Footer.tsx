@@ -16,8 +16,7 @@ export default function Footer() {
             BookHive
           </span>
           <p className="mt-2 text-xs md:text-sm opacity-80">
-            Nền tảng mua & thuê sách trực tuyến uy tín, đa dạng đầu sách, giao
-            hàng tận nơi.
+            Nền tảng mua sách trực tuyến uy tín, đa dạng đầu sách, giao hàng tận nơi.
           </p>
         </div>
         <div>

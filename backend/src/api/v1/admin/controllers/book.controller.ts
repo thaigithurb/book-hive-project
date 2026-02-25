@@ -266,28 +266,12 @@ module.exports.delete = async (req, res) => {
 // [POST] /api/v1/admin/books/create
 module.exports.create = async (req, res) => {
   try {
-    let { position, title, priceRentDay, priceRentWeek, ...newBookData } =
+    let { position, title, ...newBookData } =
       req.body;
 
     const slug = slugify(title, { lower: true, strict: true, locale: "vi" });
 
     const priceBuy = req.body.priceBuy ? Number(req.body.priceBuy) : 0;
-
-    const priceRentOptions = [];
-    if (priceRentDay) {
-      priceRentOptions.push({
-        type: "day",
-        days: 1,
-        price: Number(priceRentDay),
-      });
-    }
-    if (priceRentWeek) {
-      priceRentOptions.push({
-        type: "week",
-        days: 7,
-        price: Number(priceRentWeek),
-      });
-    }
 
     // Lấy link ảnh từ file upload
     let image = "";
@@ -315,7 +299,6 @@ module.exports.create = async (req, res) => {
       position,
       image,
       priceBuy,
-      priceRentOptions,
       slug,
       title,
       createdBy: req.user.id,
@@ -380,7 +363,7 @@ module.exports.edit = async (req, res) => {
       }
     }
 
-    const updateData = { ...req.body, position: newPos || oldPos };
+    const updateData: any = { ...req.body, position: newPos || oldPos };
     if (!req.file && (req.body.image === undefined || req.body.image === "")) {
       updateData.image = book.image;
     }
@@ -397,23 +380,6 @@ module.exports.edit = async (req, res) => {
     }
 
     updateData.updatedBy = req.user.id;
-
-    const priceRentOptions = [];
-    if (req.body.priceRentDay) {
-      priceRentOptions.push({
-        type: "day",
-        days: 1,
-        price: Number(req.body.priceRentDay),
-      });
-    }
-    if (req.body.priceRentWeek) {
-      priceRentOptions.push({
-        type: "week",
-        days: 7,
-        price: Number(req.body.priceRentWeek),
-      });
-    }
-    updateData.priceRentOptions = priceRentOptions;
 
     // Cập nhật sách
     await Book.updateOne({ _id: book._id }, updateData);

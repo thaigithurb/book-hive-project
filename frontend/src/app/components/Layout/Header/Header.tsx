@@ -137,24 +137,6 @@ export const Header = () => {
                   Tất cả sách
                   <span className="hidden lg:block absolute bottom-0 left-0 w-0 h-0.5 bg-blue-500 transition-all duration-300 group-hover:w-full"></span>
                 </Link>
-
-                <div className="lg:absolute lg:left-0 lg:mt-0 w-full lg:w-[160px] bg-white lg:shadow-[0_8px_24px_rgba(0,0,0,0.12)] rounded-lg lg:opacity-0 lg:invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform origin-top lg:group-hover:translate-y-2 z-50 border border-gray-100 lg:border-none text-sm md:text-base">
-                  <Link
-                    href="/books/rent-only"
-                    className="block px-4 py-2 md:py-3 text-primary font-medium transition-all duration-300 hover:bg-blue-50 hover:text-blue-600 lg:rounded-t-lg first:rounded-t-lg"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    📖 Sách thuê
-                  </Link>
-                  <div className="border-t border-gray-100"></div>
-                  <Link
-                    href="/books/buy-only"
-                    className="block px-4 py-2 md:py-3 text-primary font-medium transition-all duration-300 hover:bg-blue-50 hover:text-blue-600 lg:rounded-b-lg last:rounded-b-lg"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    🛍️ Sách mua
-                  </Link>
-                </div>
               </div>
 
               <Link

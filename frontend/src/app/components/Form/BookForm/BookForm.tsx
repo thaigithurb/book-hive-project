@@ -11,8 +11,6 @@ type BookFormData = {
   position?: number | string;
   status: string;
   featured: boolean;
-  priceRentDay: string;
-  priceRentWeek: string;
 };
 
 type BookFormProps = {
@@ -157,32 +155,6 @@ export default function BookForm({
             onChange={handleMoneyChange}
             placeholder="Nhập giá mua"
             min={0}
-          />
-        </div>
-        <div className="flex-1">
-          <label className="block mb-1 font-medium text-gray-700">
-            Giá thuê (ngày)
-          </label>
-          <input
-            type="text"
-            name="priceRentDay"
-            value={formatVN(form.priceRentDay || "")}
-            onChange={handleMoneyChange}
-            className={inputClass}
-            placeholder="Nhập giá ngày"
-          />
-        </div>
-        <div className="flex-1">
-          <label className="block mb-1 font-medium text-gray-700">
-            Giá thuê (tuần)
-          </label>
-          <input
-            type="text"
-            name="priceRentWeek"
-            value={formatVN(form.priceRentWeek || "")}
-            onChange={handleMoneyChange}
-            className={inputClass}
-            placeholder="Nhập giá tuần"
           />
         </div>
       </div>

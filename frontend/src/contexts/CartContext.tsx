@@ -13,23 +13,15 @@ interface CartItem {
   quantity: number;
   image?: string;
   slug: string;
-  type: "buy" | "rent";
-  rentalType?: "day" | "week"; 
-  rentalDays?: number; 
 }
 
 interface CartContextType {
   items: CartItem[];
   addToCart: (item: CartItem) => void;
-  addToRent: (item: CartItem) => void; 
-  removeFromCart: (id: string, type?: "buy" | "rent") => void;
-  updateQuantity: (id: string, quantity: number, type?: "buy" | "rent") => void; 
+  removeFromCart: (id: string) => void;
+  updateQuantity: (id: string, quantity: number) => void;
   clearCart: () => void;
   getTotalItems: () => number;
-  getBuyItems: () => CartItem[]; 
-  getRentItems: () => CartItem[]; 
-  getTotalBuyPrice: () => number; 
-  getTotalRentPrice: () => number; 
   isAuthenticated: boolean;
   isLoading: boolean;
 }
@@ -82,14 +74,13 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   }, [items, isLoaded, isAuthenticated]);
 
   const addToCart = (newItem: CartItem) => {
-    newItem.type = "buy"; 
     setItems((prevItems) => {
       const existingItem = prevItems.find(
-        (item) => item.bookId === newItem.bookId && item.type === "buy" 
+        (item) => item.bookId === newItem.bookId
       );
       if (existingItem) {
         return prevItems.map((item) =>
-          item.bookId === newItem.bookId && item.type === "buy" 
+          item.bookId === newItem.bookId
             ? { ...item, quantity: item.quantity + newItem.quantity }
             : item
         );
@@ -106,39 +97,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const addToRent = (newItem: CartItem) => {
-    newItem.type = "rent";
-    setItems((prevItems) => {
-      const existingItem = prevItems.find(
-        (item) =>
-          item.bookId === newItem.bookId &&
-          item.type === "rent" &&
-          item.rentalType === newItem.rentalType &&
-          item.rentalDays === newItem.rentalDays
-      );
-      if (existingItem) {
-        return prevItems.map((item) =>
-          item.bookId === newItem.bookId &&
-            item.type === "rent" &&
-            item.rentalType === newItem.rentalType &&
-            item.rentalDays === newItem.rentalDays
-            ? { ...item, quantity: item.quantity + newItem.quantity }
-            : item
-        );
-      }
-      return [...prevItems, newItem];
-    });
-    if (isAuthenticated) {
-      const accessToken = localStorage.getItem("accessToken_user");
-      axios.post(`${API_URL}/api/v1/cart/add-rental`, newItem, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-    }
-  };
-
-  const removeFromCart = async (id: string, type: "buy" | "rent" = "buy") => {
+  const removeFromCart = async (id: string) => {
     if (isAuthenticated) {
       const accessToken = localStorage.getItem("accessToken_user");
       try {
@@ -153,23 +112,22 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
       }
     } else {
       setItems((prevItems) =>
-        prevItems.filter((item) => !(item.bookId === id && item.type === type))
+        prevItems.filter((item) => item.bookId !== id)
       );
     }
   };
 
   const updateQuantity = (
     id: string,
-    quantity: number,
-    type: "buy" | "rent" = "buy"
+    quantity: number
   ) => {
     if (quantity <= 0) {
-      removeFromCart(id, type);
+      removeFromCart(id);
       return;
     }
     setItems((prevItems) =>
       prevItems.map((item) =>
-        item.bookId === id && item.type === type
+        item.bookId === id
           ? { ...item, quantity }
           : item
       )
@@ -204,46 +162,15 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     return items.reduce((total, item) => total + item.quantity, 0);
   };
 
-  // NEW: Lấy items mua
-  const getBuyItems = (): CartItem[] => {
-    return items.filter((item) => item.type === "buy");
-  };
-
-  // NEW: Lấy items thuê
-  const getRentItems = (): CartItem[] => {
-    return items.filter((item) => item.type === "rent");
-  };
-
-  // NEW: Tính tổng tiền mua
-  const getTotalBuyPrice = (): number => {
-    return getBuyItems().reduce(
-      (sum, item) => sum + item.price * item.quantity,
-      0
-    );
-  };
-
-  // NEW: Tính tổng tiền thuê
-  const getTotalRentPrice = (): number => {
-    return getRentItems().reduce(
-      (sum, item) => sum + item.price * item.quantity,
-      0
-    );
-  };
-
   return (
     <CartContext.Provider
       value={{
         items,
         addToCart,
-        addToRent, // NEW
         removeFromCart,
         updateQuantity,
         clearCart,
         getTotalItems,
-        getBuyItems, 
-        getRentItems,
-        getTotalBuyPrice,
-        getTotalRentPrice, 
         isAuthenticated,
         isLoading,
       }}

@@ -14,18 +14,7 @@ type DetailClientProps = {
 };
 
 export default function DetailClient({ book }: DetailClientProps) {
-  const [rentType, setRentType] = useState<"day" | "week">("day");
-  const [rentQuantity, setRentQuantity] = useState<number | string>(1);
-  const { addToCart, addToRent } = useCart();
-
-  const getRentPrice = () => {
-    if (!book?.priceRentOptions) return null;
-    const option = book.priceRentOptions.find(
-      (opt: any) => opt.type === rentType,
-    );
-    if (!option) return null;
-    return option.price * Number(rentQuantity);
-  };
+  const { addToCart } = useCart();
 
   const handleBuyNow = () => {
     if (!book) return;
@@ -36,30 +25,6 @@ export default function DetailClient({ book }: DetailClientProps) {
       quantity: 1,
       image: book.image,
       slug: book.slug,
-      type: "buy",
-    } as any);
-    toast.success("Đã thêm vào giỏ hàng!");
-  };
-
-  const handleRentNow = () => {
-    if (!book) return;
-    const rentOption = book.priceRentOptions.find(
-      (opt: any) => opt.type === rentType,
-    );
-    if (!rentOption) {
-      toast.error("Loại thuê không hợp lệ!");
-      return;
-    }
-    addToRent({
-      bookId: book._id,
-      title: book.title,
-      price: rentOption.price,
-      quantity: 1,
-      image: book.image,
-      slug: book.slug,
-      type: "rent",
-      rentalType: rentType,
-      rentalDays: Number(rentQuantity),
     } as any);
     toast.success("Đã thêm vào giỏ hàng!");
   };
@@ -124,54 +89,6 @@ export default function DetailClient({ book }: DetailClientProps) {
                       : "Liên hệ"}
                   </span>
                 </div>
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm md:text-base text-slate-800">
-                    Giá thuê:
-                  </span>
-                  <span className="text-xl md:text-2xl font-bold text-secondary1">
-                    {getRentPrice() !== null && getRentPrice() !== undefined
-                      ? `${getRentPrice()!.toLocaleString("vi-VN")}đ`
-                      : "Liên hệ"}
-                  </span>
-                </div>
-                <div className="flex flex-wrap gap-2 items-center">
-                  <select
-                    className="border rounded-lg px-2 py-1 text-sm md:text-base"
-                    value={rentType}
-                    onChange={(e) =>
-                      setRentType(e.target.value as "day" | "week")
-                    }
-                  >
-                    <option value="day">Ngày</option>
-                    <option value="week">Tuần</option>
-                  </select>
-                  <input
-                    type="number"
-                    min={1}
-                    max={rentType === "day" ? 6 : 4}
-                    className="border rounded-lg px-2 py-1 w-16 md:w-20 text-sm md:text-base"
-                    value={rentQuantity}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      if (val === "") {
-                        setRentQuantity("");
-                      } else {
-                        const num = Number(val);
-                        const max = rentType === "day" ? 6 : 4;
-                        if (num < 1) setRentQuantity(1);
-                        else if (num > max) setRentQuantity(max);
-                        else setRentQuantity(num);
-                      }
-                    }}
-                  />
-                  <span className="text-sm md:text-base text-slate-600">
-                    {rentType === "day"
-                      ? "ngày"
-                      : rentType === "week"
-                        ? "tuần"
-                        : ""}
-                  </span>
-                </div>
               </div>
               <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
                 <button
@@ -179,12 +96,6 @@ export default function DetailClient({ book }: DetailClientProps) {
                   className="flex-1 py-3 md:py-4 font-semibold cursor-pointer bg-secondary1 text-white rounded-xl text-sm md:text-base hover:bg-blue-700 transition-colors duration-200"
                 >
                   🛒 Mua ngay
-                </button>
-                <button
-                  onClick={handleRentNow}
-                  className="flex-1 py-3 md:py-4 font-semibold bg-white text-secondary1 border-2 border-secondary1 rounded-xl cursor-pointer text-sm md:text-base hover:bg-blue-50 transition-colors duration-200"
-                >
-                  📖 Thuê sách
                 </button>
               </div>
             </div>
