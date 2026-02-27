@@ -126,7 +126,7 @@ export default function CartPage() {
                     <button
                       onClick={(e) => {
                         e.preventDefault();
-                        removeFromCart(item.bookId, item.type);
+                        removeFromCart(item.bookId);
                         toast.info("Đã xóa khỏi giỏ hàng");
                       }}
                       className="hidden sm:block flex-shrink-0 cursor-pointer px-3 py-1.5 md:px-4 md:py-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg transition-colors duration-200 font-semibold text-xs md:text-sm"
