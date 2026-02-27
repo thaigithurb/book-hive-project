@@ -120,22 +120,30 @@ module.exports.newest = (req, res) => __awaiter(void 0, void 0, void 0, function
     try {
         const thirtyDaysAgo = new Date();
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-        const books = yield Book.find({
+        let books = yield Book.find({
             deleted: false,
             status: "active",
             createdAt: { $gte: thirtyDaysAgo },
-        }).sort({ createdAt: -1 });
-        if (books) {
-            return res.status(200).json({
-                message: "Thành công!",
-                books: books,
-            });
+        })
+            .sort({ createdAt: -1 })
+            .limit(10);
+        if (books.length === 0) {
+            books = yield Book.find({
+                deleted: false,
+                status: "active",
+            })
+                .sort({ createdAt: -1 })
+                .limit(10);
         }
-        return res.status(400).json({
-            message: "Không có sách nào",
+        return res.status(200).json({
+            message: "Thành công!",
+            total: books.length,
+            books,
         });
     }
     catch (error) {
-        res.json("Không tìm thấy!");
+        return res.status(500).json({
+            message: "Lỗi server!",
+        });
     }
 });

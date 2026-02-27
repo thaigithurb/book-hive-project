@@ -174,7 +174,7 @@ module.exports.cancelPaymentLink = (req, res) => __awaiter(void 0, void 0, void 
                 message: "Không tìm thấy đơn hàng!",
             });
         }
-        if (document.status === "paid") {
+        if (document.status === "confirmed") {
             return res.status(400).json({
                 error: -1,
                 message: "Đã thanh toán, không thể hủy",

@@ -129,25 +129,33 @@ module.exports.newest = async (req, res) => {
   try {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    
-    const books = await Book.find({
+
+    let books = await Book.find({
       deleted: false,
       status: "active",
       createdAt: { $gte: thirtyDaysAgo },
-    }).sort({ createdAt: -1 });
+    })
+      .sort({ createdAt: -1 })
+      .limit(10);
 
-    if (books) {
-      return res.status(200).json({
-        message: "Thành công!",
-        books: books,
-      });
+    if (books.length === 0) {
+      books = await Book.find({
+        deleted: false,
+        status: "active",
+      })
+        .sort({ createdAt: -1 })
+        .limit(10);
     }
 
-    return res.status(400).json({
-      message: "Không có sách nào",
+    return res.status(200).json({
+      message: "Thành công!",
+      total: books.length,
+      books,
     });
   } catch (error) {
-    res.json("Không tìm thấy!");
+    return res.status(500).json({
+      message: "Lỗi server!",
+    });
   }
 };
 

@@ -193,7 +193,7 @@ module.exports.cancelPaymentLink = async (req, res) => {
       });
     }
 
-    if (document.status === "paid") {
+    if (document.status === "confirmed") {
       return res.status(400).json({
         error: -1,
         message: "Đã thanh toán, không thể hủy",
