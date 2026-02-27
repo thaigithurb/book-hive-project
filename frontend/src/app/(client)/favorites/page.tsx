@@ -1,14 +1,12 @@
 "use client";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import Link from "next/link";
 import { Book } from "@/app/interfaces/book.interface";
 import { Loading } from "@/app/components/Loading/Loading";
 import Pagination from "@/app/components/Pagination/Pagination";
 import { FavoriteCard } from "@/app/components/Card/FavoriteCard";
 import { useSyncParams } from "@/app/utils/useSyncParams";
 import { usePageChange } from "@/app/utils/usePageChange";
-import { AiOutlineDelete } from "react-icons/ai";
 import { toast, ToastContainer } from "react-toastify";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
