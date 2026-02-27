@@ -118,7 +118,7 @@ module.exports.webhook = async (req, res) => {
         });
 
         for (const order of pendingOrders) {
-          order.status = "paid";
+          order.status = "processing";
           await order.save();
           paidDocuments.push({ doc: order, type: "order" });
 
@@ -193,7 +193,7 @@ module.exports.cancelPaymentLink = async (req, res) => {
       });
     }
 
-    if (document.status === "confirmed") {
+    if (document.status === "processing") {
       return res.status(400).json({
         error: -1,
         message: "Đã thanh toán, không thể hủy",

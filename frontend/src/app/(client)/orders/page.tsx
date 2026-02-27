@@ -134,7 +134,7 @@ export default function OrdersPage() {
     switch (status) {
       case "pending":
         return "bg-yellow-50 text-yellow-700 border border-yellow-200";
-      case "confirmed":
+      case "processing":
         return "bg-blue-50 text-blue-700 border border-blue-200";
       case "shipped":
         return "bg-purple-50 text-purple-700 border border-purple-200";
@@ -150,7 +150,7 @@ export default function OrdersPage() {
   const getStatusText = (status: string) => {
     const statusMap: Record<string, string> = {
       pending: "Chờ xác nhận",
-      confirmed: "Đang xử lý",
+      processing: "Đang xử lý",
       shipped: "Đã gửi",
       delivered: "Đã giao",
       cancelled: "Đã hủy",

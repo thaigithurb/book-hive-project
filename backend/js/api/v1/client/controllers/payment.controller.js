@@ -108,7 +108,7 @@ module.exports.webhook = (req, res) => __awaiter(void 0, void 0, void 0, functio
                     status: "pending",
                 });
                 for (const order of pendingOrders) {
-                    order.status = "paid";
+                    order.status = "processing";
                     yield order.save();
                     paidDocuments.push({ doc: order, type: "order" });
                     yield new Transaction({
@@ -174,7 +174,7 @@ module.exports.cancelPaymentLink = (req, res) => __awaiter(void 0, void 0, void 
                 message: "Không tìm thấy đơn hàng!",
             });
         }
-        if (document.status === "confirmed") {
+        if (document.status === "processing") {
             return res.status(400).json({
                 error: -1,
                 message: "Đã thanh toán, không thể hủy",
