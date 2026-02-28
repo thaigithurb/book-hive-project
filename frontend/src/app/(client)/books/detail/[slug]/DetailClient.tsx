@@ -8,9 +8,8 @@ import { FaStar } from "react-icons/fa";
 import { useState } from "react";
 import { Book } from "@/app/interfaces/book.interface";
 import Image from "next/image";
-import axios from "axios";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+import ReviewForm from "@/app/components/Form/ReviewForm/ReviewForm";
+import ReviewList from "@/app/components/ReviewList/ReviewList";
 
 type DetailClientProps = {
   book: Book;
@@ -18,11 +17,8 @@ type DetailClientProps = {
 
 export default function DetailClient({ book }: DetailClientProps) {
   const { addToCart } = useCart();
-  const [rating, setRating] = useState(0);
-  const [hoverRating, setHoverRating] = useState(0);
-  const [reviewText, setReviewText] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const token = localStorage.getItem("accessToken_user");
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const handleBuyNow = () => {
     if (!book) return;
@@ -35,34 +31,6 @@ export default function DetailClient({ book }: DetailClientProps) {
       slug: book.slug,
     } as any);
     toast.success("Đã thêm vào giỏ hàng!");
-  };
-
-  const handleSubmitReview = async () => {
-    if (rating === 0) {
-      toast.error("Vui lòng chọn số sao!");
-      return;
-    }
-
-    setIsSubmitting(true);
-    try {
-      const response = await axios.post(
-        `${API_URL}/api/v1/reviews/send`,
-        {
-          bookId: book._id,
-          rating: rating,
-          comment: reviewText.trim(),
-        },
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
-
-      toast.success(`${response.data.message}`);
-      setRating(0);
-      setReviewText("");
-    } catch (error: any) {
-      toast.error(error.response.data.message);
-    } finally {
-      setIsSubmitting(false);
-    }
   };
 
   return (
@@ -136,64 +104,35 @@ export default function DetailClient({ book }: DetailClientProps) {
               </div>
             </div>
           </div>
+
           <div className="bg-white rounded-2xl p-4 md:p-8 shadow">
             <h2 className="text-xl md:text-2xl font-bold mb-4 md:mb-6 text-slate-800">
               Đánh giá &amp; Nhận xét
             </h2>
-            <div className="bg-blue-50 rounded-xl p-4 md:p-6 mb-6 md:mb-8">
-              <h3 className="text-base md:text-[17.6px] font-semibold mb-4 text-slate-800">
-                Viết đánh giá của bạn
-              </h3>
-              <div className="mb-4">
-                <label className="block mb-2 text-sm md:text-[14.4px] text-slate-800">
-                  Đánh giá:
-                </label>
-                <div className="text-2xl flex gap-[4px]">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <span
-                      key={star}
-                      className={`cursor-pointer transition-colors ${
-                        star <= (hoverRating || rating)
-                          ? "text-yellow-400"
-                          : "text-[#d1d5db]"
-                      }`}
-                      onMouseEnter={() => setHoverRating(star)}
-                      onMouseLeave={() => setHoverRating(0)}
-                      onClick={() => setRating(star)}
-                    >
-                      ★
-                    </span>
-                  ))}
-                </div>
+
+            {token ? (
+              <ReviewForm
+                bookId={book._id}
+                token={token}
+                onReviewSubmitted={setRefreshTrigger}
+                refreshTrigger={refreshTrigger}
+              />
+            ) : (
+              <div className="bg-yellow-50 rounded-xl p-4 md:p-6 mb-6 md:mb-8 border border-yellow-200 text-center">
+                <p className="text-slate-700 text-sm md:text-base">
+                  Vui lòng{" "}
+                  <a
+                    href="/login"
+                    className="font-semibold text-secondary1 hover:underline"
+                  >
+                    đăng nhập
+                  </a>{" "}
+                  để viết đánh giá
+                </p>
               </div>
-              <div className="mb-4">
-                <label
-                  htmlFor="reviewText"
-                  className="block mb-2 text-sm md:text-[14.4px] text-slate-800"
-                >
-                  Nhận xét:
-                </label>
-                <textarea
-                  id="reviewText"
-                  rows={4}
-                  value={reviewText}
-                  onChange={(e) => setReviewText(e.target.value)}
-                  placeholder="Chia sẻ cảm nhận của bạn về cuốn sách..."
-                  className="w-full hover:border-secondary1 p-3 border-2 border-slate-200 rounded-lg text-sm md:text-base bg-white text-slate-800 resize-vertical outline-none focus:ring-2 focus:ring-secondary1 focus:border-secondary1 transition duration-200"
-                />
-              </div>
-              <button
-                onClick={handleSubmitReview}
-                className="px-6 py-3 bg-secondary1 text-white rounded-lg font-semibold text-sm md:text-base hover:bg-blue-700 cursor-pointer transition-colors duration-200"
-              >
-                Gửi đánh giá
-              </button>
-            </div>
-            <div>
-              <p className="text-center text-slate-400 text-sm md:text-base">
-                Chưa có đánh giá nào. Hãy là người đầu tiên!
-              </p>
-            </div>
+            )}
+
+            <ReviewList bookId={book._id} refreshTrigger={refreshTrigger} />
           </div>
         </div>
       </div>

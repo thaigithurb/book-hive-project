@@ -12,6 +12,31 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const User = require("../../models/user.model");
 const Review = require("../../models/review.model");
 const Book = require("../../models/book.model");
+module.exports.bookReviews = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const bookId = req.params.bookId;
+        if (!bookId) {
+            return res.status(400).json({
+                message: "Không có bookId",
+            });
+        }
+        const records = yield Review.find({
+            book: bookId,
+        })
+            .populate("user", "fullName")
+            .sort({ createdAt: -1 });
+        res.status(200).json({
+            records: records,
+        });
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({
+            message: "Lỗi khi lấy danh sách đánh giá",
+            error: error.message,
+        });
+    }
+});
 module.exports.sendReview = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const userId = req.user.userId;
@@ -47,6 +72,31 @@ module.exports.sendReview = (req, res) => __awaiter(void 0, void 0, void 0, func
         console.error(error);
         return res.status(500).json({
             message: "Có lỗi khi gửi đánh giá",
+            error: error.message,
+        });
+    }
+});
+module.exports.myReview = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const userId = req.user.userId;
+        const bookId = req.params.bookId;
+        const record = yield Review.findOne({
+            user: userId,
+            book: bookId,
+        });
+        if (!record) {
+            return res.status(400).json({
+                message: "Không tìm thấy đánh giá nào!",
+            });
+        }
+        res.status(200).json({
+            record: record,
+        });
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({
+            message: "Lỗi khi lấy đánh giá riêng",
             error: error.message,
         });
     }

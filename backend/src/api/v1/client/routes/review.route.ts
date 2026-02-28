@@ -2,9 +2,13 @@ const express = require("express");
 const router = express.Router();
 
 const controller = require("../controllers/review.controller");
+const { clientAuth } = require("../../../../middleware/auth.middleware");
 
-router.post("/send", controller.sendReview);
+router.get("/:bookId", controller.bookReviews);
 
+router.post("/send", clientAuth, controller.sendReview);
+
+router.get("/my-review/:bookId", clientAuth, controller.myReview);
 
 module.exports = router;
 
