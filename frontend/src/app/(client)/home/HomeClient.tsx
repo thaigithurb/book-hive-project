@@ -5,7 +5,6 @@ import axios from "axios";
 import { Book } from "@/app/interfaces/book.interface";
 import { BookCard } from "@/app/components/Card/BookCard";
 import { BookCardSkeleton } from "@/app/components/Skeleton/BookCardSkeleton";
-import { ToastContainer } from "react-toastify";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 

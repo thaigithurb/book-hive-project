@@ -1,9 +1,13 @@
 import { Book } from "@/app/interfaces/book.interface";
+import axios from "axios";
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
-import { FaStar } from "react-icons/fa";
+import { FaStar, FaStarHalfAlt } from "react-icons/fa";
 import { FaArrowRightLong } from "react-icons/fa6";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 interface BookCardProps {
   book: Book;
@@ -22,6 +26,35 @@ export const BookCard = ({
   isLoggedIn,
   onToggleFavorite,
 }: BookCardProps) => {
+  const [averageRating, setAverageRating] = useState<number | null>(null);
+
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        const response = await axios.get(
+          `${API_URL}/api/v1/reviews/${book._id}`,
+        );
+        const reviews = response.data.records || [];
+
+        if (reviews.length > 0) {
+          const totalRating = reviews.reduce(
+            (sum: number, review: any) => sum + review.rating,
+            0,
+          );
+          const avgRating = totalRating / reviews.length;
+          setAverageRating(Math.round(avgRating * 10) / 10);
+        } else {
+          setAverageRating(null);
+        }
+      } catch (error) {
+        console.error("Error fetching reviews:", error);
+        setAverageRating(null);
+      }
+    };
+
+    fetchReviews();
+  }, [book._id]);
+
   return (
     <div className="relative group h-full">
       <Link href={`/books/detail/${book.slug}`} className="block h-full">
@@ -54,14 +87,27 @@ export const BookCard = ({
               {book.author}
             </p>
             <div className="flex items-center gap-2 mb-2 md:mb-3">
-              <span className="text-yellow-400 text-sm md:text-[16px]">
-                <FaStar />
-              </span>
+              <div className="flex items-center gap-1">
+                {averageRating !== null ? (
+                  <span className="text-yellow-400 text-sm md:text-[16px]">
+                    <FaStar />
+                  </span>
+                ) : (
+                  <span className="text-gray-300 text-sm md:text-[16px]">
+                    <FaStar />
+                  </span>
+                )}
+              </div>
               <span className="text-xs md:text-[14.4px] text-primary">
-                Chưa có đánh giá
+                {averageRating !== null ? (
+                  <>
+                    {averageRating} 
+                  </>
+                ) : (
+                  "Chưa có đánh giá"
+                )}
               </span>
             </div>
-
             <div className="flex justify-between items-center mt-auto pt-2">
               <div>
                 <p className="text-base md:text-[17.6px] font-bold text-secondary1 m-0">

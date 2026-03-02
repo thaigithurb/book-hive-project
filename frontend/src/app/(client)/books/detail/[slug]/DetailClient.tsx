@@ -4,7 +4,7 @@ import { BackButton } from "@/app/components/Button/BackButton/BackButton";
 import { ToastContainer, toast } from "react-toastify";
 import DOMPurify from "dompurify";
 import { useCart } from "@/contexts/CartContext";
-import { FaStar } from "react-icons/fa";
+import { FaStar, FaStarHalfAlt } from "react-icons/fa";
 import { useState } from "react";
 import { Book } from "@/app/interfaces/book.interface";
 import Image from "next/image";
@@ -53,11 +53,41 @@ export default function DetailClient({ book }: DetailClientProps) {
                 <div className="text-8xl md:text-[128px] mb-6">📚</div>
               )}
               <div className="flex items-center justify-center gap-2 mb-4">
-                <span className="text-yellow-400 text-xl md:text-2xl">
-                  <FaStar />
-                </span>
+                <div className="flex items-center gap-1">
+                  {[...Array(5)].map((_, i) => {
+                    const fillPercentage = book.rating - i;
+                    if (fillPercentage >= 1) {
+                      return (
+                        <span
+                          key={i}
+                          className="text-yellow-400 text-l md:text-xl"
+                        >
+                          <FaStar />
+                        </span>
+                      );
+                    } else if (fillPercentage > 0) {
+                      return (
+                        <span
+                          key={i}
+                          className="text-yellow-400 text-l md:text-xl"
+                        >
+                          <FaStarHalfAlt />
+                        </span>
+                      );
+                    } else {
+                      return (
+                        <span
+                          key={i}
+                          className="text-gray-300 text-l md:text-xl"
+                        >
+                          <FaStar />
+                        </span>
+                      );
+                    }
+                  })}
+                </div>
                 <span className="text-lg md:text-xl font-bold text-slate-800">
-                  {book.rating ?? "Liên hệ"}
+                  {book.rating}
                 </span>
                 <span className="text-sm md:text-base text-slate-400">
                   ({book.reviews ?? 0} đánh giá)
@@ -99,7 +129,7 @@ export default function DetailClient({ book }: DetailClientProps) {
                   onClick={handleBuyNow}
                   className="flex-1 py-3 md:py-4 font-semibold cursor-pointer bg-secondary1 text-white rounded-xl text-sm md:text-base hover:bg-blue-700 transition-colors duration-200"
                 >
-                  🛒 Mua ngay
+                  🛒 Thêm vào giỏ hàng
                 </button>
               </div>
             </div>

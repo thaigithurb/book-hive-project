@@ -1,7 +1,5 @@
 import HomeClient from "./HomeClient";
 
-
-
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 async function getBooks() {
