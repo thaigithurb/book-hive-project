@@ -5,6 +5,7 @@ import axios from "axios";
 import { Book } from "@/app/interfaces/book.interface";
 import { BookCard } from "@/app/components/Card/BookCard";
 import { BookCardSkeleton } from "@/app/components/Skeleton/BookCardSkeleton";
+import Link from "next/link";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -64,6 +65,19 @@ export default function HomeClient({
     <>
       <div className="py-4 px-4 md:py-[32px] md:px-[24px]">
         <div className="container mx-auto">
+          <div className="mb-8 md:mb-12 rounded-2xl overflow-hidden shadow-lg relative group">
+            <img
+              src="/book-hive-banner.jpg"
+              alt="Book Hive Banner"
+              className="w-full h-auto object-cover"
+            />
+            <Link
+              href="/books"
+              className="absolute bottom-1/4 left-1/2 transform -translate-x-1/2 translate-y-1/2 bg-white/20 backdrop-blur-md text-white px-6 md:px-8 py-3 md:py-4 rounded-lg font-semibold border border-white/30 hover:bg-white/30 transition-all duration-300 shadow-lg hover:shadow-xl"
+            >
+              Khám phá ngay
+            </Link>
+          </div>
           <div>
             <h2 className="text-2xl font-bold mb-4 text-primary">
               Sách nổi bật
