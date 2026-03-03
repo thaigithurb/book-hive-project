@@ -152,7 +152,7 @@ export default function DetailClient({ book }: DetailClientProps) {
                 <p className="text-slate-700 text-sm md:text-base">
                   Vui lòng{" "}
                   <a
-                    href="/login"
+                    href="/auth/login"
                     className="font-semibold text-secondary1 hover:underline"
                   >
                     đăng nhập
