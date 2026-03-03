@@ -15,6 +15,9 @@ const Book = require("../../models/book.model");
 module.exports.bookReviews = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const bookId = req.params.bookId;
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 5;
+        const skip = (page - 1) * limit;
         if (!bookId) {
             return res.status(400).json({
                 message: "Không có bookId",
@@ -24,9 +27,14 @@ module.exports.bookReviews = (req, res) => __awaiter(void 0, void 0, void 0, fun
             book: bookId,
         })
             .populate("user", "fullName")
+            .skip(skip)
+            .limit(limit)
             .sort({ createdAt: -1 });
+        const total = yield Review.countDocuments({ book: bookId });
         res.status(200).json({
             records: records,
+            total,
+            limit
         });
     }
     catch (error) {

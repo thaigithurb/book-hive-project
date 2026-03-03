@@ -17,6 +17,7 @@ type DetailClientProps = {
 
 export default function DetailClient({ book }: DetailClientProps) {
   const { addToCart } = useCart();
+  const [currentPage, setCurrentPage] = useState(1);
   const token = localStorage.getItem("accessToken_user");
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
@@ -162,7 +163,12 @@ export default function DetailClient({ book }: DetailClientProps) {
               </div>
             )}
 
-            <ReviewList bookId={book._id} refreshTrigger={refreshTrigger} />
+            <ReviewList
+              bookId={book._id}
+              refreshTrigger={refreshTrigger}
+              currentPage={currentPage}
+              onPageChange={setCurrentPage}
+            />
           </div>
         </div>
       </div>
