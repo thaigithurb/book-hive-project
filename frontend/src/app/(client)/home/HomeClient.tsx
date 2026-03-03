@@ -73,7 +73,7 @@ export default function HomeClient({
             />
             <Link
               href="/books"
-              className="absolute bottom-1/4 left-1/2 transform -translate-x-1/2 translate-y-1/2 bg-white/20 backdrop-blur-md text-white px-6 md:px-8 py-3 md:py-4 rounded-lg font-semibold border border-white/30 hover:bg-white/30 transition-all duration-300 shadow-lg hover:shadow-xl"
+              className="absolute bottom-1/4 left-1/2 transform -translate-x-1/2 translate-y-1/2 bg-white/20 backdrop-blur-md text-white px-4 md:px-8 py-2 md:py-4 text-[10px] md:text-[18px] rounded-lg font-semibold border border-white/30 hover:bg-white/30 transition-all duration-300 shadow-lg hover:shadow-xl"
             >
               Khám phá ngay
             </Link>
