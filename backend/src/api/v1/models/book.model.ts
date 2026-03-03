@@ -30,6 +30,10 @@ const bookSchema = new mongoose.Schema(
     },
     featured: Boolean,
     newest: Boolean,
+    soldCount: {
+      type: Number,
+      default: 0,
+    },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "Account" },
     deletedBy: { type: mongoose.Schema.Types.ObjectId, ref: "Account" },
     updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: "Account" },
@@ -38,7 +42,7 @@ const bookSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 const Book = mongoose.model("Book", bookSchema, "books");

@@ -26,4 +26,5 @@ export interface Book {
   deletedBy: UserRef;
   updatedBy: UserRef;
   newest: boolean;
+  soldCount: number;
 }
