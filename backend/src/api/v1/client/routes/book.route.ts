@@ -11,6 +11,8 @@ router.get("/detail/:bookSlug", controller.detail);
 
 router.get("/newest", controller.newest);
 
+router.get("/best-seller", controller.bestSeller);
+
 module.exports = router;
 
 export {};

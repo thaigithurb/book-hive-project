@@ -43,11 +43,11 @@ module.exports.index = async (req, res) => {
           }).select("title");
           bookObj.category_name = category.title;
         }
-        
+
         if (!bookObj.newest && book.createdAt >= thirtyDaysAgo) {
           bookObj.newest = true;
         }
-        
+
         booksWithCategory.push(bookObj);
       }
 
@@ -151,6 +151,27 @@ module.exports.newest = async (req, res) => {
       message: "Thành công!",
       total: books.length,
       books,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Lỗi server!",
+    });
+  }
+};
+
+// [GET] /api/v1/books/best-seller
+module.exports.bestSeller = async (req, res) => {
+  try {
+    const records = await Book.find().sort({ soldCount: -1 }).limit(10);
+
+    if (!records) {
+      return res.status(400).json({
+        message: "Không tìm thấy sách nào!"
+      });
+    }
+
+    return res.status(200).json({
+      records,
     });
   } catch (error) {
     return res.status(500).json({

@@ -10,6 +10,7 @@ interface BookCardProps {
   featured?: boolean;
   newest?: boolean;
   isFavorite?: boolean;
+  bestSeller?: boolean;
   onToggleFavorite?: (bookId: string, next: boolean) => void;
   isLoggedIn: boolean;
 }
@@ -19,23 +20,29 @@ export const BookCard = ({
   featured,
   newest,
   isFavorite = false,
+  bestSeller,
   isLoggedIn,
   onToggleFavorite,
 }: BookCardProps) => {
   return (
-    <div className="relative group h-full">
+    <div className="relative z-10 group h-full">
       <Link href={`/books/detail/${book.slug}`} className="block h-full">
         <div className="bg-[#ffff] rounded-2xl p-3 md:p-5 shadow-[0_2px_8px_rgba(0,0,0,0.05)] cursor-pointer transition-transform duration-300 hover:-translate-y-2 relative h-full flex flex-col">
-          {featured ? (
-            <span className="absolute top-2 right-2 md:top-4 md:right-4 bg-yellow-400 text-white text-[10px] md:text-xs font-bold px-2 py-0.5 md:px-3 md:py-1 rounded shadow-lg z-10">
+          {featured && (
+            <div className="absolute top-2 right-2 bg-yellow-500 text-white text-xs font-semibold px-2 py-1 rounded-md z-10">
               Nổi bật
-            </span>
-          ) : newest ? (
-            <span className="absolute top-2 right-2 md:top-4 md:right-4 bg-blue-500 text-white text-[10px] md:text-xs font-bold px-2 py-0.5 md:px-3 md:py-1 rounded shadow-lg z-10">
+            </div>
+          )}
+          {newest && (
+            <div className="absolute top-2 right-2 bg-blue-500 text-white text-xs font-semibold px-2 py-1 rounded-md z-10">
               Mới nhất
-            </span>
-          ) : null}
-
+            </div>
+          )}
+          {bestSeller && (
+            <div className="absolute top-2 right-2 bg-red-500 text-white text-xs font-semibold px-2 py-1 rounded-md z-10">
+              Bán chạy
+            </div>
+          )}
           <div className="mb-2 h-[140px] sm:h-[160px] md:h-[190px] object-cover shrink-0">
             <Image
               src={book.image}
@@ -47,10 +54,10 @@ export const BookCard = ({
           </div>
 
           <div className="flex flex-col flex-1">
-            <h3 className="text-sm sm:text-base md:text-[17px] line-clamp-1 min-h-[20px] md:min-h-[28px] font-[700] mb-1 md:mb-[8px] text-primary">
+            <h3 className="text-left text-sm sm:text-base md:text-[17px] line-clamp-1 min-h-[20px] md:min-h-[28px] font-[700] mb-1 md:mb-[8px] text-primary">
               {book.title}
             </h3>
-            <p className="text-xs sm:text-sm md:text-[14.4px] text-secondary2 mb-1 md:mb-[8px] line-clamp-1">
+            <p className="text-xs sm:text-sm md:text-[14.4px] text-secondary2 text-left mb-1 md:mb-[8px] line-clamp-1">
               {book.author}
             </p>
             <div className="flex justify-between items-center gap-2 mb-2 md:mb-3">

@@ -6,15 +6,23 @@ import { Book } from "@/app/interfaces/book.interface";
 import { BookCard } from "@/app/components/Card/BookCard";
 import { BookCardSkeleton } from "@/app/components/Skeleton/BookCardSkeleton";
 import Link from "next/link";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { FreeMode, Pagination } from "swiper/modules";
+
+import "swiper/css";
+import "swiper/css/free-mode";
+import "swiper/css/pagination";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function HomeClient({
   featuredBooks,
   newestBooks,
+  bestSellerBooks,
 }: {
   featuredBooks: Book[];
   newestBooks: Book[];
+  bestSellerBooks: Book[];
 }) {
   const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -79,6 +87,75 @@ export default function HomeClient({
             </Link>
           </div>
           <div>
+            <h2 className="text-2xl font-bold mb-4 text-primary">Sách mới</h2>
+            <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-[24px] mb-10">
+              {isLoading
+                ? Array.from({ length: 8 }).map((_, i) => (
+                    <BookCardSkeleton key={i} />
+                  ))
+                : newestBooks
+                    .slice(0, 8)
+                    .map((book, index) => (
+                      <BookCard
+                        key={index}
+                        book={book}
+                        featured={false}
+                        newest={true}
+                        isFavorite={favoriteIds.includes(book._id)}
+                        onToggleFavorite={handleToggleFavorite}
+                        isLoggedIn={isLoggedIn}
+                      />
+                    ))}
+            </div>
+          </div>
+          <div className="mb-10">
+            <h2 className="text-2xl font-bold mb-4 text-primary">
+              Bán chạy nhất
+            </h2>
+            <Swiper
+              slidesPerView={4}
+              spaceBetween={30}
+              freeMode={true}
+              pagination={{
+                clickable: true,
+              }}
+              modules={[FreeMode, Pagination]}
+              className="mySwiper"
+            >
+              {isLoading
+                ? Array.from({ length: 4 }).map((_, i) => (
+                    <SwiperSlide key={i}>
+                      <BookCardSkeleton />
+                    </SwiperSlide>
+                  ))
+                : bestSellerBooks.map((book, index) => (
+                    <SwiperSlide key={index}>
+                      <BookCard
+                        book={book}
+                        featured={false}
+                        newest={false}
+                        bestSeller={true}
+                        isFavorite={favoriteIds.includes(book._id)}
+                        onToggleFavorite={handleToggleFavorite}
+                        isLoggedIn={isLoggedIn}
+                      />
+                    </SwiperSlide>
+                  ))}
+              <SwiperSlide>
+                <div className="flex items-center justify-center h-full min-h-[300px]">
+                  <Link
+                    href="/books"
+                    className="flex gap-2 items-center justify-center px-6 py-4 bg-primary text-white rounded-lg hover:bg-primary/90 transition-all duration-300 shadow-lg hover:shadow-xl"
+                  >
+                    <span className="text-sm font-semibold">Xem thêm</span>
+                    <span className="text-xl">→</span>
+                  </Link>
+                </div>
+              </SwiperSlide>
+            </Swiper>
+          </div>
+
+          <div>
             <h2 className="text-2xl font-bold mb-4 text-primary">
               Sách nổi bật
             </h2>
@@ -95,28 +172,6 @@ export default function HomeClient({
                         book={book}
                         featured={true}
                         newest={false}
-                        isFavorite={favoriteIds.includes(book._id)}
-                        onToggleFavorite={handleToggleFavorite}
-                        isLoggedIn={isLoggedIn}
-                      />
-                    ))}
-            </div>
-          </div>
-          <div>
-            <h2 className="text-2xl font-bold mb-4 text-primary">Sách mới</h2>
-            <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-[24px] mb-10">
-              {isLoading
-                ? Array.from({ length: 8 }).map((_, i) => (
-                    <BookCardSkeleton key={i} />
-                  ))
-                : newestBooks
-                    .slice(0, 8)
-                    .map((book, index) => (
-                      <BookCard
-                        key={index}
-                        book={book}
-                        featured={false}
-                        newest={true}
                         isFavorite={favoriteIds.includes(book._id)}
                         onToggleFavorite={handleToggleFavorite}
                         isLoggedIn={isLoggedIn}

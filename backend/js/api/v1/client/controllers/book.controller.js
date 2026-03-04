@@ -147,3 +147,21 @@ module.exports.newest = (req, res) => __awaiter(void 0, void 0, void 0, function
         });
     }
 });
+module.exports.bestSeller = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const records = yield Book.find().sort({ soldCount: -1 }).limit(10);
+        if (!records) {
+            return res.status(400).json({
+                message: "Không tìm thấy sách nào!"
+            });
+        }
+        return res.status(200).json({
+            records,
+        });
+    }
+    catch (error) {
+        return res.status(500).json({
+            message: "Lỗi server!",
+        });
+    }
+});
