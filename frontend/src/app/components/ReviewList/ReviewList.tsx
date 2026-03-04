@@ -50,9 +50,36 @@ export default function ReviewList({
 
   const totalPages = Math.ceil(totalReviews / REVIEWS_PER_PAGE);
 
+  const getPageNumbers = () => {
+    const pages: (number | string)[] = [];
+    const maxPagesToShow = 3;
+
+    if (totalPages <= maxPagesToShow + 2) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+
+    if (currentPage <= 2) {
+      for (let i = 1; i <= maxPagesToShow; i++) pages.push(i);
+      pages.push("...", totalPages);
+    } else if (currentPage >= totalPages - 1) {
+      pages.push(1, "...");
+      for (let i = totalPages - maxPagesToShow + 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      pages.push(1, "...");
+      for (let i = currentPage - 1; i <= currentPage + 1; i++) pages.push(i);
+      pages.push("...", totalPages);
+    }
+
+    return pages;
+  };
+
   if (loading) {
     return <div className="text-center py-4 text-slate-500">Đang tải...</div>;
   }
+
+  const pages = getPageNumbers();
 
   return (
     <div>
@@ -96,24 +123,31 @@ export default function ReviewList({
           </div>
 
           {totalPages > 1 && (
-            <div className="flex justify-center items-center gap-2">
+            <div className="flex justify-center items-center gap-1 md:gap-2 flex-wrap px-2 mt-6">
               <button
                 onClick={() => onPageChange(Math.max(1, currentPage - 1))}
                 disabled={currentPage === 1}
-                className="px-3 cursor-pointer py-2 text-sm md:text-base border border-gray-300 rounded-lg text-slate-700 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 transition"
+                className="px-2 md:px-3 py-1 md:py-2 text-xs md:text-base border border-gray-300 rounded-lg text-slate-700 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 transition"
               >
                 ←
               </button>
 
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                (page) => (
+              {pages.map((page, index) =>
+                page === "..." ? (
+                  <span
+                    key={`dots-${index}`}
+                    className="px-1 md:px-2 py-1 md:py-2 text-xs md:text-base"
+                  >
+                    ...
+                  </span>
+                ) : (
                   <button
                     key={page}
-                    onClick={() => onPageChange(page)}
-                    className={`cursor-pointer px-3 py-2 text-sm md:text-base rounded-lg transition ${
+                    onClick={() => onPageChange(page as number)}
+                    className={`px-2 md:px-3 py-1 md:py-2 text-xs md:text-base rounded-lg transition font-medium ${
                       currentPage === page
-                        ? "bg-secondary1 text-white"
-                        : "border border-gray-300 text-slate-700 hover:bg-gray-100"
+                        ? "bg-secondary1 text-white cursor-default"
+                        : "border border-gray-300 text-slate-700 hover:bg-gray-100 cursor-pointer"
                     }`}
                   >
                     {page}
@@ -126,7 +160,7 @@ export default function ReviewList({
                   onPageChange(Math.min(totalPages, currentPage + 1))
                 }
                 disabled={currentPage === totalPages}
-                className="cursor-pointer px-3 py-2 text-sm md:text-base border border-gray-300 rounded-lg text-slate-700 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 transition"
+                className="px-2 md:px-3 py-1 md:py-2 text-xs md:text-base border border-gray-300 rounded-lg text-slate-700 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 transition"
               >
                 →
               </button>

@@ -109,27 +109,25 @@ export default function HomeClient({
             </div>
           </div>
           <div className="mb-10">
-            <h2 className="text-2xl font-bold text-primary">
-              Bán chạy nhất
-            </h2>
-          <Swiper
-            slidesPerView={2}
-            spaceBetween={16}
-            breakpoints={{
-              640: {
-                slidesPerView: 2,
-                spaceBetween: 16,
-              },
-              1024: {
-                slidesPerView: 3,
-                spaceBetween: 20,
-              },
-              1280: {
-                slidesPerView: 4,
-                spaceBetween: 30,
-              },
-            }}
-            freeMode={true}
+            <h2 className="text-2xl font-bold text-primary">Bán chạy nhất</h2>
+            <Swiper
+              slidesPerView={2}
+              spaceBetween={16}
+              breakpoints={{
+                640: {
+                  slidesPerView: 2,
+                  spaceBetween: 16,
+                },
+                1024: {
+                  slidesPerView: 3,
+                  spaceBetween: 20,
+                },
+                1280: {
+                  slidesPerView: 4,
+                  spaceBetween: 30,
+                },
+              }}
+              freeMode={true}
               pagination={{
                 clickable: true,
               }}

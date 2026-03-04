@@ -12,7 +12,6 @@ import useChangeStatus from "@/app/utils/useChangeStatus";
 import { useBulkSelect } from "@/app/utils/useBulkSelect";
 import ConfirmModal from "@/app/components/ConfirmModal/ConfirmModal";
 import { toast, ToastContainer } from "react-toastify";
-import { motion, AnimatePresence } from "framer-motion";
 import NewAddButton from "@/app/components/Button/NewAddButton/NewAddButton";
 import { usePageChange } from "@/app/utils/usePageChange";
 import { useSortChange } from "@/app/utils/useSortChange";
@@ -36,7 +35,6 @@ export default function Categories() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [editedCategories, setEditedCategories] = useState<Category[]>([]);
   const [sort, setSort] = useState<{ key: string; value: 1 | -1 } | null>(null);
-  const [isFirstLoad, setIsFirstLoad] = useState(true);
   const limit = 8;
   const accessToken = localStorage.getItem("accessToken_admin");
   const [sortValue, setSortValue] = useState("");
@@ -63,7 +61,6 @@ export default function Categories() {
     },
     setTotal,
     setLoading,
-    setIsFirstLoad,
     source: "categories",
   });
 
@@ -150,36 +147,21 @@ export default function Categories() {
   return (
     <>
       <PrivateRoute permission="view_categories">
-        <motion.div
-          initial={isFirstLoad ? { opacity: 0, y: -20 } : false}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="flex justify-between items-center mb-8"
-        >
+        <div className="flex justify-between items-center mb-8">
           <h1 className="text-[32px] font-bold m-0 text-primary">
             📂 Quản lý thể loại
           </h1>
           <ConditionalRender permission="create_category">
             <NewAddButton label="Thêm thể loại mới" source="categories" />
           </ConditionalRender>
-        </motion.div>
+        </div>
 
-        <motion.div
-          initial={isFirstLoad ? { opacity: 0, y: -20 } : false}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          className="flex items-center justify-between mb-6"
-        >
+        <div className="flex items-center justify-between mb-6">
           <StatusFilter value={status} onChange={setStatus} />
           <Search value={keyword} onChange={setKeyword} label="thể loại" />
-        </motion.div>
+        </div>
 
-        <motion.div
-          initial={isFirstLoad ? { opacity: 0, y: -20 } : false}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="flex justify-between items-center"
-        >
+        <div className="flex justify-between items-center">
           <ConditionalRender permission="edit_category">
             <ChangeMulti
               options={[
@@ -204,65 +186,37 @@ export default function Categories() {
               options={sortOptions}
             />
           </div>
-        </motion.div>
+        </div>
 
-        <AnimatePresence mode="wait">
-          {loading ? (
-            <motion.div
-              key="loading"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className="text-center py-8 text-gray-500"
-            >
-              Đang tải...
-            </motion.div>
-          ) : categories.length === 0 ? (
-            <motion.div
-              key="empty"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.5 }}
-              className="text-center py-8 text-gray-500 text-lg font-semibold"
-            >
-              Không tìm thấy
-            </motion.div>
-          ) : (
-            <motion.div
-              key="content"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.5 }}
-            >
-              <CategoryTable
-                categories={editedCategories}
-                setEditedCategories={setEditedCategories}
-                onChangeStatus={handleChangeStatus}
-                selectedIds={selectedIds}
-                onSelect={handleSelect}
-                onSelectAll={handleSelectAll}
-                setDeleteId={setDeleteId}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {loading ? (
+          <div className="text-center py-8 text-gray-500">Đang tải...</div>
+        ) : categories.length === 0 ? (
+          <div className="text-center py-8 text-gray-500 text-lg font-semibold">
+            Không tìm thấy
+          </div>
+        ) : (
+          <div>
+            <CategoryTable
+              categories={editedCategories}
+              setEditedCategories={setEditedCategories}
+              onChangeStatus={handleChangeStatus}
+              selectedIds={selectedIds}
+              onSelect={handleSelect}
+              onSelectAll={handleSelectAll}
+              setDeleteId={setDeleteId}
+            />
+          </div>
+        )}
 
         {!loading && categories.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-          >
+          <div>
             <Pagination
               page={page}
               total={total}
               limit={limit}
               onPageChange={handlePageChange}
             />
-          </motion.div>
+          </div>
         )}
 
         <ConfirmModal

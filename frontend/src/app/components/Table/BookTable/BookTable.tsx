@@ -108,6 +108,7 @@ export default function BookTable({
                     height={400}
                     src={book.image}
                     alt={book.title}
+                    loading="lazy"
                     className="w-16 h-16 object-cover rounded bg-gray-100"
                   />
                   <span className="text-[16px] max-w-[400px] font-semibold text-primary">

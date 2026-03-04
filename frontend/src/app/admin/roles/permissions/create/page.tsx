@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import { BackButton } from "@/app/components/Button/BackButton/BackButton";
-import { motion } from "framer-motion";
 import PermissionForm from "@/app/components/Form/PermissionForm/PermissionForm";
 import PrivateRoute from "@/app/components/Auth/PrivateRoute/PrivateRoute";
 
@@ -99,26 +98,13 @@ export default function CreatePermission() {
 
   return (
     <PrivateRoute permission="create_permission">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
+      <div>
         <div className="max-w-xl mx-auto mt-8 bg-white p-8 rounded-xl shadow relative">
           <BackButton className="absolute -top-10 -left-70 flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 transition cursor-pointer" />
-          <motion.h1
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-2xl font-bold mb-6 text-primary"
-          >
+          <h1 className="text-2xl font-bold mb-6 text-primary">
             Tạo mới quyền
-          </motion.h1>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-          >
+          </h1>
+          <div>
             <PermissionForm
               form={form}
               loading={loading}
@@ -127,14 +113,14 @@ export default function CreatePermission() {
               buttonLabel="Tạo mới"
               groupOptions={groupNames}
             />
-          </motion.div>
+          </div>
           <ToastContainer
             autoClose={1500}
             hideProgressBar={true}
             pauseOnHover={false}
           />
         </div>
-      </motion.div>
+      </div>
     </PrivateRoute>
   );
 }

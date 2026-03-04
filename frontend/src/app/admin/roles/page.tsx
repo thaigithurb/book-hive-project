@@ -9,7 +9,6 @@ import ChangeMulti from "@/app/components/ChangeMulti/ChangeMulti";
 import { useBulkSelect } from "@/app/utils/useBulkSelect";
 import ConfirmModal from "@/app/components/ConfirmModal/ConfirmModal";
 import { toast, ToastContainer } from "react-toastify";
-import { motion, AnimatePresence } from "framer-motion";
 import { Role } from "@/app/interfaces/role.interface";
 import NewAddButton from "@/app/components/Button/NewAddButton/NewAddButton";
 import { usePageChange } from "@/app/utils/usePageChange";
@@ -34,7 +33,6 @@ export default function Roles() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [editedRoles, setEditedRoles] = useState<Role[]>([]);
   const [sort, setSort] = useState<{ key: string; value: 1 | -1 } | null>(null);
-  const [isFirstLoad, setIsFirstLoad] = useState(true);
   const limit = 5;
   const accessToken = localStorage.getItem("accessToken_admin");
   const [sortValue, setSortValue] = useState("");
@@ -61,7 +59,6 @@ export default function Roles() {
     },
     setTotal,
     setLoading,
-    setIsFirstLoad,
     source: "roles",
   });
 
@@ -143,35 +140,20 @@ export default function Roles() {
   return (
     <>
       <PrivateRoute permission="view_roles">
-        <motion.div
-          initial={isFirstLoad ? { opacity: 0, y: -20 } : false}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="flex justify-between items-center mb-8"
-        >
+        <div className="flex justify-between items-center mb-8">
           <h1 className="text-[32px] font-bold m-0 text-primary">
             🔑 Nhóm quyền
           </h1>
           <ConditionalRender permission="create_role">
             <NewAddButton label="Thêm vai trò mới" source="roles" />
           </ConditionalRender>
-        </motion.div>
+        </div>
 
-        <motion.div
-          initial={isFirstLoad ? { opacity: 0, y: -20 } : false}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          className="flex items-center justify-between mb-6"
-        >
+        <div className="flex items-center justify-between mb-6">
           <Search value={keyword} onChange={setKeyword} label="vai trò" />
-        </motion.div>
+        </div>
 
-        <motion.div
-          initial={isFirstLoad ? { opacity: 0, y: -20 } : false}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="flex justify-between items-center"
-        >
+        <div className="flex justify-between items-center">
           <ConditionalRender permission="edit_role">
             <ChangeMulti
               options={[{ label: "Xóa tất cả", value: "delete_all" }]}
@@ -191,64 +173,36 @@ export default function Roles() {
               options={sortOptions}
             />
           </div>
-        </motion.div>
+        </div>
 
-        <AnimatePresence mode="wait">
-          {loading ? (
-            <motion.div
-              key="loading"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className="text-center text-gray-500 py-8"
-            >
-              Đang tải...
-            </motion.div>
-          ) : roles.length === 0 ? (
-            <motion.div
-              key="empty"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.5 }}
-              className="text-center py-8 text-gray-500 text-lg font-semibold"
-            >
-              Không tìm thấy
-            </motion.div>
-          ) : (
-            <motion.div
-              key="content"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.5 }}
-            >
-              <RoleTable
-                roles={editedRoles}
-                setEditedRoles={setEditedRoles}
-                selectedIds={selectedIds}
-                onSelect={handleSelect}
-                onSelectAll={handleSelectAll}
-                setDeleteId={setDeleteId}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {loading ? (
+          <div className="text-center text-gray-500 py-8">Đang tải...</div>
+        ) : roles.length === 0 ? (
+          <div className="text-center py-8 text-gray-500 text-lg font-semibold">
+            Không tìm thấy
+          </div>
+        ) : (
+          <div>
+            <RoleTable
+              roles={editedRoles}
+              setEditedRoles={setEditedRoles}
+              selectedIds={selectedIds}
+              onSelect={handleSelect}
+              onSelectAll={handleSelectAll}
+              setDeleteId={setDeleteId}
+            />
+          </div>
+        )}
 
         {!loading && roles.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-          >
+          <div>
             <Pagination
               page={page}
               total={total}
               limit={limit}
               onPageChange={handlePageChange}
             />
-          </motion.div>
+          </div>
         )}
 
         <ConfirmModal

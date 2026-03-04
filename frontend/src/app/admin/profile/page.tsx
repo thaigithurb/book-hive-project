@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
 import axios from "axios";
 import Image from "next/image";
 
@@ -44,12 +43,7 @@ export default function Profile() {
     );
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 40 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, ease: "easeOut" }}
-      className="max-w-xl mx-auto mt-30 bg-white rounded-xl shadow-md p-8"
-    >
+    <div className="max-w-xl mx-auto mt-30 bg-white rounded-xl shadow-md p-8">
       <div className="flex items-center space-x-6 mb-6">
         <Image
           src={user.avatar}
@@ -77,6 +71,6 @@ export default function Profile() {
           <div className="text-lg">{user.phone}</div>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }

@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams, useRouter } from "next/navigation";
-import { motion } from "framer-motion";
 import { ToastContainer, toast } from "react-toastify";
 import { BackButton } from "@/app/components/Button/BackButton/BackButton";
 import PrivateRoute from "@/app/components/Auth/PrivateRoute/PrivateRoute";
@@ -58,26 +57,17 @@ export default function AccountDetail() {
   return (
     <>
       <PrivateRoute permission="view_accounts">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          exit={{ opacity: 0, y: -20 }}
-          className="max-w-xl mx-auto mt-8 bg-white p-8 rounded-xl shadow relative"
-        >
+        <div className="max-w-xl mx-auto mt-8 bg-white p-8 rounded-xl shadow relative">
           <BackButton className="absolute -top-10 -left-80 flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 transition cursor-pointer" />
           <h1 className="text-2xl font-bold mb-6 text-primary">
             Chi tiết tài khoản
           </h1>
           <div className="flex flex-col items-center gap-4">
             {account.avatar && (
-              <motion.img
+              <img
                 src={account.avatar}
                 alt="Avatar"
                 className="w-45 h-45 rounded-full object-cover mb-4"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.4, ease: "easeOut" }}
               />
             )}
             <div className="w-full">
@@ -122,7 +112,7 @@ export default function AccountDetail() {
             hideProgressBar={true}
             pauseOnHover={false}
           />
-        </motion.div>
+        </div>
       </PrivateRoute>
     </>
   );

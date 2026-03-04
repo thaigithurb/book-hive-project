@@ -59,7 +59,7 @@ export const SideBar = () => {
       <aside className="fixed top-0 left-0 h-screen w-[280px] bg-white p-6 shadow-[2px_0_8px_rgba(0,0,0,0.05)] z-30 flex flex-col">
         <div className="mb-8">
           <h2 className="text-[24px] font-bold mb-2 text-primary">
-            Admin Panel
+            BookHive Admin
           </h2>
           <p className="text-sm text-gray-600">👤 {admin?.email}</p>
         </div>

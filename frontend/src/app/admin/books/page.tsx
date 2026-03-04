@@ -10,7 +10,6 @@ import ChangeMulti from "@/app/components/ChangeMulti/ChangeMulti";
 import { useBulkSelect } from "@/app/utils/useBulkSelect";
 import ConfirmModal from "@/app/components/ConfirmModal/ConfirmModal";
 import { toast, ToastContainer } from "react-toastify";
-import { AnimatePresence, motion } from "framer-motion";
 import NewAddButton from "@/app/components/Button/NewAddButton/NewAddButton";
 import { useSearchParams } from "next/navigation";
 import SortSelect from "@/app/components/SortSelect/SortSelect";
@@ -39,7 +38,6 @@ export default function Books() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [editedBooks, setEditedBooks] = useState<Book[]>([]);
   const [sort, setSort] = useState<{ key: string; value: 1 | -1 } | null>(null);
-  const [isFirstLoad, setIsFirstLoad] = useState(true);
   const limit = 7;
   const accessToken = localStorage.getItem("accessToken_admin");
   const sortOptions = [
@@ -68,7 +66,6 @@ export default function Books() {
     },
     setTotal,
     setLoading,
-    setIsFirstLoad,
     source: "books",
   });
 
@@ -156,34 +153,19 @@ export default function Books() {
   return (
     <>
       <PrivateRoute permission="view_books">
-        <motion.div
-          initial={isFirstLoad ? { opacity: 0, y: -20 } : false}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="flex justify-between items-center mb-8"
-        >
+        <div className="flex justify-between items-center mb-8">
           <h1 className="text-[32px] font-bold m-0 text-primary">
             📚 Quản lý sách
           </h1>
           <ConditionalRender permission="create_book">
             <NewAddButton label="Thêm sách mới" source="books" />
           </ConditionalRender>
-        </motion.div>
-        <motion.div
-          initial={isFirstLoad ? { opacity: 0, y: -20 } : false}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          className="flex items-center justify-between mb-6"
-        >
+        </div>
+        <div className="flex items-center justify-between mb-6">
           <StatusFilter value={status} onChange={setStatus} />
           <Search value={keyword} onChange={setKeyword} label="sách" />
-        </motion.div>
-        <motion.div
-          initial={isFirstLoad ? { opacity: 0, y: -20 } : false}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="flex justify-between items-center"
-        >
+        </div>
+        <div className="flex justify-between items-center">
           <ConditionalRender permission="edit_book">
             <ChangeMulti
               options={[
@@ -208,63 +190,36 @@ export default function Books() {
               options={sortOptions}
             />
           </div>
-        </motion.div>
-        <AnimatePresence mode="wait">
-          {loading ? (
-            <motion.div
-              key="loading"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className="text-center text-gray-500 py-8"
-            >
-              Đang tải...
-            </motion.div>
-          ) : books.length === 0 ? (
-            <motion.div
-              key="empty"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.5 }}
-              className="text-center py-8 text-gray-500 text-lg font-semibold"
-            >
-              Không tìm thấy
-            </motion.div>
-          ) : (
-            <motion.div
-              key="content"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.5 }}
-            >
-              <BookTable
-                books={editedBooks}
-                setEditedBooks={setEditedBooks}
-                onChangeStatus={handleChangeStatus}
-                selectedIds={selectedIds}
-                onSelect={handleSelect}
-                onSelectAll={handleSelectAll}
-                setDeleteId={setDeleteId}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
+        </div>
+
+        {loading ? (
+          <div className="text-center text-gray-500 py-8">Đang tải...</div>
+        ) : books.length === 0 ? (
+          <div className="text-center py-8 text-gray-500 text-lg font-semibold">
+            Không tìm thấy
+          </div>
+        ) : (
+          <div>
+            <BookTable
+              books={editedBooks}
+              setEditedBooks={setEditedBooks}
+              onChangeStatus={handleChangeStatus}
+              selectedIds={selectedIds}
+              onSelect={handleSelect}
+              onSelectAll={handleSelectAll}
+              setDeleteId={setDeleteId}
+            />
+          </div>
+        )}
         {!loading && books.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-          >
+          <div>
             <Pagination
               page={page}
               total={total}
               limit={limit}
               onPageChange={handlePageChange}
             />
-          </motion.div>
+          </div>
         )}
         <ConfirmModal
           open={!!deleteId || pendingDeleteIds.length > 0}

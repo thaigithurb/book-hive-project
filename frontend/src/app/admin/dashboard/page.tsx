@@ -15,6 +15,35 @@ type DashboardStats = {
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case "pending":
+      return "bg-yellow-500";
+    case "processing":
+      return "bg-blue-500";
+    case "shipped":
+      return "bg-purple-500";
+    case "delivered":
+      return "bg-green-500";
+    case "cancelled":
+      return "bg-red-500";
+    default:
+      return "bg-gray-500";
+  }
+};
+
+const getStatusText = (status: string) => {
+  const statusMap: Record<string, string> = {
+    pending: "Chờ xác nhận",
+    confirmed: "Đã xác nhận",
+    shipping: "Đang giao",
+    shipped: "Đã gửi",
+    delivered: "Đã giao",
+    cancelled: "Đã hủy",
+  };
+  return statusMap[status] || status;
+};
+
 export default function Dashboard() {
   const [stats, setStats] = useState<DashboardStats>({
     totalBooks: 0,
@@ -25,7 +54,6 @@ export default function Dashboard() {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -50,7 +78,7 @@ export default function Dashboard() {
         const accounts = usersRes.data?.users || [];
 
         const totalRevenue = orders
-          .filter((order: any) => order.status === "paid")
+          .filter((order: any) => order.status === "delivered")
           .reduce(
             (sum: number, order: any) => sum + (order.totalAmount || 0),
             0,
@@ -74,14 +102,6 @@ export default function Dashboard() {
     };
 
     fetchStats();
-  }, [refreshTrigger]);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setRefreshTrigger((prev) => prev + 1);
-    }, 15000);
-
-    return () => clearInterval(interval);
   }, []);
 
   return (
@@ -149,25 +169,11 @@ export default function Dashboard() {
                       </td>
                       <td className="p-2">
                         <span
-                          className={`px-3 py-1 rounded text-white text-sm font-medium ${
-                            order.status === "completed"
-                              ? "bg-green-500"
-                              : order.status === "pending"
-                                ? "bg-yellow-500"
-                                : order.status === "cancelled"
-                                  ? "bg-red-500"
-                                  : "bg-blue-500"
-                          }`}
+                          className={`px-3 py-1 rounded text-white text-sm font-medium ${getStatusColor(
+                            order.status,
+                          )}`}
                         >
-                          {order.status === "pending"
-                            ? "Chờ xử lý"
-                            : order.status === "completed"
-                              ? "Hoàn thành"
-                              : order.status === "cancelled"
-                                ? "Đã hủy"
-                                : order.status === "paid"
-                                  ? "Đã thanh toán"
-                                  : ""}
+                          {getStatusText(order.status)}
                         </span>
                       </td>
                     </tr>

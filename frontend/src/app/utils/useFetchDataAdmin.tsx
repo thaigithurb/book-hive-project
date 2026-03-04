@@ -15,7 +15,7 @@ type UseFetchDataAdminParams = {
     onSuccess: (data: { items: any[]; total: number }) => void;
     setTotal: (total: number) => void;
     setLoading: (loading: boolean) => void;
-    setIsFirstLoad: (isFirstLoad: boolean) => void;
+    setIsFirstLoad?: (isFirstLoad: boolean) => void;
     source: string;
 };
 
@@ -62,7 +62,7 @@ export function useFetchDataAdmin({
                 })
                 .finally(() => {
                     setLoading(false);
-                    setIsFirstLoad(false);
+                    setIsFirstLoad?.(false);
                 });
         }, 400),
         [status, keyword, page, sort, limit, accessToken, ADMIN_PREFIX]

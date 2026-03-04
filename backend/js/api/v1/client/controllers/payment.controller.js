@@ -108,7 +108,7 @@ module.exports.webhook = (req, res) => __awaiter(void 0, void 0, void 0, functio
                     status: "pending",
                 });
                 for (const order of pendingOrders) {
-                    order.status = "processing";
+                    order.status = "confirmed";
                     yield order.save();
                     paidDocuments.push({ doc: order, type: "order" });
                     yield new Transaction({

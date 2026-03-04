@@ -7,7 +7,6 @@ import React from "react";
 import DOMPurify from "dompurify";
 import { isEqual, sortBy } from "lodash";
 import { toast, ToastContainer } from "react-toastify";
-import { AnimatePresence, motion } from "framer-motion";
 import NewAddButton from "@/app/components/Button/NewAddButton/NewAddButton";
 import ConfirmModal from "@/app/components/ConfirmModal/ConfirmModal";
 import { useRouter } from "next/navigation";
@@ -148,23 +147,11 @@ export default function Permission() {
     <>
       <PrivateRoute permission="view_permissions">
         {loading ? (
-          <motion.div
-            key="loading"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="min-h-screen flex items-center justify-center"
-          >
+          <div className="min-h-screen flex items-center justify-center">
             <div className="text-xl text-gray-500">Đang tải...</div>
-          </motion.div>
+          </div>
         ) : (
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 30 }}
-            transition={{ duration: 0.5 }}
-          >
+          <div>
             <h1 className="text-[32px] font-bold m-0 mb-2 text-primary">
               🛡️ Phân quyền
             </h1>
@@ -173,14 +160,7 @@ export default function Permission() {
                 <NewAddButton label="Thêm mới" source="roles/permissions" />
               </ConditionalRender>
             </div>
-            <motion.div
-              key={hidden ? "table-hidden" : "table-visible"}
-              initial={{ y: 30 }}
-              animate={{ y: 0 }}
-              exit={{ y: 30 }}
-              transition={{ duration: 0.4 }}
-              className="overflow-x-auto rounded-2xl bg-white shadow p-4"
-            >
+            <div className="overflow-x-auto rounded-2xl bg-white shadow p-4">
               <table className="min-w-full border-separate border-spacing-y-2">
                 <thead>
                   <tr className="bg-[#F7F9FB]">
@@ -272,35 +252,23 @@ export default function Permission() {
                   )}
                 </tbody>
               </table>
-            </motion.div>
-            <motion.div
-              className="mb-5 text-right"
-              initial={false}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-            >
-              <AnimatePresence>
-                {!hidden && (
-                  <motion.button
-                    key="save-btn"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 10 }}
-                    transition={{ duration: 0.3 }}
-                    className="py-3 px-6 mt-[20px] bg-secondary1 transition-colors duration-200 text-white rounded-lg text-[16px] font-semibold cursor-pointer hover:bg-blue-600 p-[10px]"
-                    onClick={handleSave}
-                  >
-                    Lưu thay đổi
-                  </motion.button>
-                )}
-              </AnimatePresence>
-            </motion.div>
+            </div>
+            <div className="mb-5 text-right">
+              {!hidden && (
+                <button
+                  className="py-3 px-6 mt-[20px] bg-secondary1 transition-colors duration-200 text-white rounded-lg text-[16px] font-semibold cursor-pointer hover:bg-blue-600 p-[10px]"
+                  onClick={handleSave}
+                >
+                  Lưu thay đổi
+                </button>
+              )}
+            </div>
             <ToastContainer
               autoClose={1500}
               hideProgressBar={true}
               pauseOnHover={false}
             />
-          </motion.div>
+          </div>
         )}
         <ConfirmModal
           open={deleteModalOpen}

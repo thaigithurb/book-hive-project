@@ -118,7 +118,7 @@ module.exports.webhook = async (req, res) => {
         });
 
         for (const order of pendingOrders) {
-          order.status = "processing";
+          order.status = "confirmed";
           await order.save();
           paidDocuments.push({ doc: order, type: "order" });
 
