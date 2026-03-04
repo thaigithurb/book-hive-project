@@ -109,7 +109,7 @@ export default function HomeClient({
             </div>
           </div>
           <div className="mb-10">
-            <h2 className="text-2xl font-bold mb-4 text-primary">
+            <h2 className="text-2xl font-bold text-primary">
               Bán chạy nhất
             </h2>
           <Swiper
@@ -134,7 +134,7 @@ export default function HomeClient({
                 clickable: true,
               }}
               modules={[FreeMode, Pagination]}
-              className="mySwiper"
+              className="mySwiper !pt-[16px]"
             >
               {isLoading
                 ? Array.from({ length: 4 }).map((_, i) => (

@@ -25,7 +25,7 @@ export const BookCard = ({
   onToggleFavorite,
 }: BookCardProps) => {
   return (
-    <div className="relative z-10 group h-full">
+    <div className="relative group h-full">
       <Link href={`/books/detail/${book.slug}`} className="block h-full">
         <div className="bg-[#ffff] rounded-2xl p-3 md:p-5 shadow-[0_2px_8px_rgba(0,0,0,0.05)] cursor-pointer transition-transform duration-300 hover:-translate-y-2 relative h-full flex flex-col">
           {featured && (
