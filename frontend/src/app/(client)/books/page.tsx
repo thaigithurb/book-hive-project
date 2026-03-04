@@ -18,7 +18,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL;
 export default function Books() {
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
-  const [keyword, setKeyword] = useState(""); 
+  const [keyword, setKeyword] = useState("");
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [sort, setSort] = useState<{ key: string; value: 1 | -1 } | null>(null);
@@ -98,6 +98,13 @@ export default function Books() {
     <>
       <div className="py-4 px-4 md:py-[32px] md:px-[24px]">
         <div className="container mx-auto">
+          <div className="mb-8 md:mb-12 rounded-2xl overflow-hidden shadow-lg relative group">
+            <img
+              src="/book-hive-banner-2.png"
+              alt="Book Hive Banner"
+              className="w-full h-auto object-cover"
+            />
+          </div>
           <div className="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <h2 className="text-xl md:text-2xl font-bold text-primary">
               Tất cả sách
