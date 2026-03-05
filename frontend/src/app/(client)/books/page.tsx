@@ -166,7 +166,7 @@ export default function Books() {
 
           <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-[24px] mb-8">
             {loading ? (
-              Array.from({ length: 8 }).map((_, i) => (
+              Array.from({ length: 12 }).map((_, i) => (
                 <BookCardSkeleton key={i} />
               ))
             ) : books.length > 0 ? (

@@ -48,6 +48,7 @@ export const BookCard = ({
               src={book.image}
               className="w-full h-full object-cover rounded-[10px]"
               alt={book.title}
+              loading="lazy"
               width={400}
               height={400}
             />
