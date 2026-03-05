@@ -12,6 +12,7 @@ import { FreeMode, Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/free-mode";
 import "swiper/css/pagination";
+import FloatingElements from "@/app/components/FloatingElements.tsx/FloatingElements";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -74,6 +75,7 @@ export default function HomeClient({
       <div className="py-4 px-4 md:py-[32px] md:px-[24px]">
         <div className="container mx-auto">
           <div className="mb-8 md:mb-12 rounded-2xl overflow-hidden shadow-lg relative group">
+            <FloatingElements />
             <img
               src="/book-hive-banner.jpg"
               alt="Book Hive Banner"
@@ -81,7 +83,7 @@ export default function HomeClient({
             />
             <Link
               href="/books"
-              className="absolute bottom-1/4 left-1/2 transform -translate-x-1/2 translate-y-1/2 bg-white/20 backdrop-blur-md text-white px-4 md:px-8 py-2 md:py-4 text-[10px] md:text-[18px] rounded-lg font-semibold border border-white/30 hover:bg-white/30 transition-all duration-300 shadow-lg hover:shadow-xl"
+              className="animate-gentle-bounce absolute bottom-1/4 left-1/2 transform -translate-x-1/2 translate-y-1/2 bg-white/20 backdrop-blur-md text-white px-4 md:px-8 py-2 md:py-4 text-[10px] md:text-[18px] rounded-lg font-semibold border border-white/30 hover:bg-white/30 transition-all duration-300 shadow-lg hover:shadow-xl"
             >
               Khám phá ngay
             </Link>

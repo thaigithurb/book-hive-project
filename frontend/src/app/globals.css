@@ -38,6 +38,18 @@ body {
   animation: ping-favorite 0.4s;
 }
 
+@keyframes gentle-bounce {
 
+  0%,
+  100% {
+    transform: translateY(0);
+  }
 
+  50% {
+    transform: translateY(-12px);
+  }
+}
 
+.animate-gentle-bounce {
+  animation: gentle-bounce 2.5s ease-in-out infinite;
+}
