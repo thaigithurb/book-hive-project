@@ -5,13 +5,19 @@ import axios from "axios";
 import { Book } from "@/app/interfaces/book.interface";
 import { BookCard } from "@/app/components/Card/BookCard";
 import debounce from "lodash.debounce";
-import Pagination from "@/app/components/Pagination/Pagination";
+import PaginationComponent from "@/app/components/Pagination/Pagination";
 import SortSelect from "@/app/components/SortSelect/SortSelect";
 import { useSyncParams } from "@/app/utils/useSyncParams";
 import { usePageChange } from "@/app/utils/usePageChange";
 import { useSortChange } from "@/app/utils/useSortChange";
 import { BookCardSkeleton } from "@/app/components/Skeleton/BookCardSkeleton";
 import { useFetchFavorites } from "@/app/utils/useFetchFavorites";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Autoplay, Pagination, Navigation } from "swiper/modules";
+
+import "swiper/css";
+import "swiper/css/pagination";
+import "swiper/css/navigation";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -98,13 +104,49 @@ export default function Books() {
     <>
       <div className="py-4 px-4 md:py-[32px] md:px-[24px]">
         <div className="container mx-auto">
-          <div className="mb-8 md:mb-12 rounded-2xl overflow-hidden shadow-lg relative group">
-            <img
-              src="/book-hive-banner-2.png"
-              alt="Book Hive Banner"
-              className="w-full h-auto object-cover"
-            />
-          </div>
+          <Swiper
+            spaceBetween={30}
+            centeredSlides={true}
+            navigation={true}
+            pagination={{
+              clickable: true,
+            }}
+            autoplay={{
+              delay: 2500,
+              disableOnInteraction: false,
+            }}
+            modules={[Autoplay, Navigation, Pagination]}
+            className="mySwiper"
+          >
+            <SwiperSlide>
+              <div className="mb-8 md:mb-12 rounded-2xl overflow-hidden shadow-lg relative group">
+                <img
+                  src="/book-hive-banner-2.png"
+                  alt="Book Hive Banner"
+                  className="w-full h-auto object-cover"
+                />
+              </div>
+            </SwiperSlide>
+            <SwiperSlide>
+              <div className="mb-8 md:mb-12 rounded-2xl overflow-hidden shadow-lg relative group">
+                <img
+                  src="/book-hive-banner-3.png"
+                  alt="Book Hive Banner"
+                  className="w-full h-auto object-cover"
+                />
+              </div>
+            </SwiperSlide>
+            <SwiperSlide>
+              <div className="mb-8 md:mb-12 rounded-2xl overflow-hidden shadow-lg relative group">
+                <img
+                  src="/book-hive-banner-4.png"
+                  alt="Book Hive Banner"
+                  className="w-full h-auto object-cover"
+                />
+              </div>
+            </SwiperSlide>
+          </Swiper>
+
           <div className="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <h2 className="text-xl md:text-2xl font-bold text-primary">
               Tất cả sách
@@ -148,7 +190,7 @@ export default function Books() {
 
           {books.length > 0 && (
             <div className="flex justify-center">
-              <Pagination
+              <PaginationComponent
                 page={page}
                 total={total}
                 limit={limit}
