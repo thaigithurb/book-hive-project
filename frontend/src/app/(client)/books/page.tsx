@@ -13,11 +13,10 @@ import { useSortChange } from "@/app/utils/useSortChange";
 import { BookCardSkeleton } from "@/app/components/Skeleton/BookCardSkeleton";
 import { useFetchFavorites } from "@/app/utils/useFetchFavorites";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay, Pagination, Navigation } from "swiper/modules";
+import { Autoplay, Pagination } from "swiper/modules";
 
 import "swiper/css";
 import "swiper/css/pagination";
-import "swiper/css/navigation";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -107,7 +106,6 @@ export default function Books() {
           <Swiper
             spaceBetween={30}
             centeredSlides={true}
-            navigation={true}
             pagination={{
               clickable: true,
             }}
@@ -115,7 +113,7 @@ export default function Books() {
               delay: 2500,
               disableOnInteraction: false,
             }}
-            modules={[Autoplay, Navigation, Pagination]}
+            modules={[Autoplay, Pagination]}
             className="mySwiper"
           >
             <SwiperSlide>

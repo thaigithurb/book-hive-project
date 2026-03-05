@@ -46,10 +46,28 @@ body {
   }
 
   50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes gentle-bounce-md {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
     transform: translateY(-12px);
   }
 }
 
 .animate-gentle-bounce {
-  animation: gentle-bounce 2.5s ease-in-out infinite;
+  animation: gentle-bounce 2s ease-in-out infinite;
+}
+
+@media (min-width: 768px) {
+  .animate-gentle-bounce {
+    animation: gentle-bounce-md 2.5s ease-in-out infinite;
+  }
 }
