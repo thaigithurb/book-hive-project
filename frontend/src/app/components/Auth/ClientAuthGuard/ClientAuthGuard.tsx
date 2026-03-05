@@ -18,10 +18,17 @@ export default function ClientAuthGuard({
       return {
         id: payload.id,
         email: payload.email,
+        exp: payload.exp,
       };
     } catch {
       return null;
     }
+  };
+
+  const isTokenExpired = (token: string) => {
+    const userData = extractUserFromToken(token);
+    if (!userData?.exp) return true;
+    return userData.exp * 1000 < Date.now();
   };
 
   const logout = () => {
@@ -36,6 +43,13 @@ export default function ClientAuthGuard({
       const clientUser = localStorage.getItem("client_user");
 
       if (!accessToken || !clientUser) {
+        logout();
+        setCheckedAuth(true);
+        return;
+      }
+
+      // Kiểm tra token hết hạn trước khi gọi API
+      if (isTokenExpired(accessToken)) {
         logout();
         setCheckedAuth(true);
         return;
