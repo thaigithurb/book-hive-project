@@ -30,8 +30,8 @@ export default function FloatingElements() {
     const newElements = Array.from({ length: count }).map((_, i) => ({
       id: i,
       left: Math.random() * 100,
-      delay: Math.random() * 2,
-      duration: isMobile ? 4 + Math.random() * 2 : 6 + Math.random() * 4,
+      delay: Math.random() * 3,
+      duration: isMobile ? 8 + Math.random() * 4 : 12 + Math.random() * 6,
     }));
     setElements(newElements);
   }, [isMobile]);
