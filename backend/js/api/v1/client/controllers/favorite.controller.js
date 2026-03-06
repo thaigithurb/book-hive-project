@@ -17,7 +17,7 @@ module.exports.index = (req, res) => __awaiter(this, void 0, void 0, function* (
         const favorites = yield Favorite.find({ userId })
             .skip(skip)
             .limit(limit)
-            .populate("bookId");
+            .populate("bookId").sort({ createdAt: -1 });
         const total = yield Favorite.countDocuments({ userId });
         return res.status(200).json({ favorites, total, limit });
     }

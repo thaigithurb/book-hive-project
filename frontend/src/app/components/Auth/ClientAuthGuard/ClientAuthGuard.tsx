@@ -48,7 +48,6 @@ export default function ClientAuthGuard({
         return;
       }
 
-      // Kiểm tra token hết hạn trước khi gọi API
       if (isTokenExpired(accessToken)) {
         logout();
         setCheckedAuth(true);
@@ -72,7 +71,7 @@ export default function ClientAuthGuard({
   }, [setUser]);
 
   useEffect(() => {
-    const handleStorageChange = (e: StorageEvent) => {
+    const handleStorageChange = (e: any) => {
       if (e.key === "accessToken_user" || e.key === "client_user") {
         const accessToken = localStorage.getItem("accessToken_user");
         const clientUser = localStorage.getItem("client_user");

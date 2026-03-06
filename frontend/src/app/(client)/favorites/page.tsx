@@ -2,9 +2,9 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Book } from "@/app/interfaces/book.interface";
-import { Loading } from "@/app/components/Loading/Loading";
 import Pagination from "@/app/components/Pagination/Pagination";
 import { FavoriteCard } from "@/app/components/Card/FavoriteCard";
+import { FavoriteCardSkeleton } from "@/app/components/Skeleton/FavoriteCardSkeleton";
 import { useSyncParams } from "@/app/utils/useSyncParams";
 import { usePageChange } from "@/app/utils/usePageChange";
 import { toast, ToastContainer } from "react-toastify";
@@ -80,7 +80,11 @@ export default function FavoritesPage() {
             Sản phẩm yêu thích của bạn
           </h2>
           {loading ? (
-            <Loading />
+            <div className="space-y-3 md:space-y-4">
+              {Array.from({ length: limit }).map((_, i) => (
+                <FavoriteCardSkeleton key={i} />
+              ))}
+            </div>
           ) : favorites.length === 0 ? (
             <div className="min-h-[300px] md:min-h-[400px] flex items-center justify-center text-gray-500 text-sm md:text-base">
               Bạn chưa thêm sản phẩm nào vào mục yêu thích.

@@ -2,18 +2,53 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import { useCart } from "@/contexts/CartContext";
 import { Loading } from "@/app/components/Loading/Loading";
+import ConfirmModal from "@/app/components/ConfirmModal/ConfirmModal";
 import Image from "next/image";
 
 export default function CartPage() {
   const router = useRouter();
-  const { items, removeFromCart, updateQuantity, isLoading } = useCart();
+  const { items, removeFromCart, updateQuantity, clearCart, isLoading } =
+    useCart();
+  const [confirmModal, setConfirmModal] = useState({
+    open: false,
+    message: "",
+    action: null as (() => void) | null,
+  });
 
   if (isLoading) {
     return <Loading fullScreen={true} size="lg" text="Đang tải giỏ hàng..." />;
   }
+
+  const handleConfirmModal = (message: string, action: () => void) => {
+    setConfirmModal({
+      open: true,
+      message,
+      action,
+    });
+  };
+
+  const handleRemoveItem = (bookId: string) => {
+    handleConfirmModal("Bạn chắc chắn muốn xóa sản phẩm này?", () => {
+      removeFromCart(bookId);
+      toast.info("Đã xóa khỏi giỏ hàng");
+      setConfirmModal({ open: false, message: "", action: null });
+    });
+  };
+
+  const handleClearCart = () => {
+    handleConfirmModal(
+      "Bạn chắc chắn muốn xóa tất cả sản phẩm trong giỏ hàng?",
+      () => {
+        clearCart();
+        toast.info("Đã xóa tất cả sản phẩm");
+        setConfirmModal({ open: false, message: "", action: null });
+      },
+    );
+  };
 
   if (items.length === 0) {
     return (
@@ -55,9 +90,17 @@ export default function CartPage() {
   return (
     <div className="min-h-screen py-6 md:py-12 bg-gray-50">
       <div className="container mx-auto px-4">
-        <h1 className="text-2xl md:text-4xl font-bold text-slate-800 mb-6 md:mb-8">
-          Giỏ hàng
-        </h1>
+        <div className="flex justify-between items-center mb-6 md:mb-8">
+          <h1 className="text-2xl md:text-4xl font-bold text-slate-800">
+            Giỏ hàng
+          </h1>
+          <button
+            onClick={handleClearCart}
+            className="cursor-pointer px-3 py-2 md:px-4 md:py-2.5 bg-red-50 text-red-600 font-bold rounded-lg hover:bg-red-100 transition-colors duration-200 active:scale-95 text-xs md:text-sm"
+          >
+            🗑️ Xóa tất cả
+          </button>
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8">
           <div className="lg:col-span-2 space-y-3 md:space-y-4">
@@ -69,8 +112,7 @@ export default function CartPage() {
                 <button
                   onClick={(e) => {
                     e.preventDefault();
-                    removeFromCart(item.bookId);
-                    toast.info("Đã xóa khỏi giỏ hàng");
+                    handleRemoveItem(item.bookId);
                   }}
                   className="absolute top-2 right-2 p-1.5 text-gray-400 hover:text-red-600 sm:hidden z-10"
                 >
@@ -126,8 +168,7 @@ export default function CartPage() {
                     <button
                       onClick={(e) => {
                         e.preventDefault();
-                        removeFromCart(item.bookId);
-                        toast.info("Đã xóa khỏi giỏ hàng");
+                        handleRemoveItem(item.bookId);
                       }}
                       className="hidden sm:block flex-shrink-0 cursor-pointer px-3 py-1.5 md:px-4 md:py-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg transition-colors duration-200 font-semibold text-xs md:text-sm"
                     >
@@ -162,10 +203,7 @@ export default function CartPage() {
                       <button
                         onClick={(e) => {
                           e.preventDefault();
-                          updateQuantity(
-                            item.bookId,
-                            item.quantity + 1,
-                          );
+                          updateQuantity(item.bookId, item.quantity + 1);
                         }}
                         className="w-6 h-6 md:w-8 md:h-8 flex items-center justify-center bg-gray-200 hover:bg-gray-300 rounded-md transition-colors duration-200 font-bold text-slate-700 text-sm md:text-base"
                       >
@@ -240,6 +278,17 @@ export default function CartPage() {
           </div>
         </div>
       </div>
+
+      <ConfirmModal
+        open={confirmModal.open}
+        message={confirmModal.message}
+        label="Xóa"
+        labelCancel="Hủy"
+        onConfirm={() => confirmModal.action?.()}
+        onCancel={() =>
+          setConfirmModal({ open: false, message: "", action: null })
+        }
+      />
 
       <ToastContainer
         autoClose={1500}
