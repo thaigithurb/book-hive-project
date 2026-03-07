@@ -27,9 +27,10 @@ export default function EditProfilePage() {
   const [loading, setLoading] = useState(false);
   const [isPageLoading, setIsPageLoading] = useState(true);
   const router = useRouter();
-  const accessToken = localStorage.getItem("accessToken_user");
 
   useEffect(() => {
+    const accessToken = localStorage.getItem("accessToken_user");
+
     axios
       .get(`${API_URL}/api/v1/users/me`, {
         headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
@@ -72,6 +73,7 @@ export default function EditProfilePage() {
     }
 
     setLoading(true);
+    const accessToken = localStorage.getItem("accessToken_user");
     toast
       .promise(
         axios.patch(
