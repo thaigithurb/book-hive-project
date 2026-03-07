@@ -12,25 +12,6 @@ export default function ClientAuthGuard({
   const [checkedAuth, setCheckedAuth] = useState(false);
   const { setUser } = useUser();
 
-  const extractUserFromToken = (token: string) => {
-    try {
-      const payload = JSON.parse(atob(token.split(".")[1]));
-      return {
-        id: payload.id,
-        email: payload.email,
-        exp: payload.exp,
-      };
-    } catch {
-      return null;
-    }
-  };
-
-  const isTokenExpired = (token: string) => {
-    const userData = extractUserFromToken(token);
-    if (!userData?.exp) return true;
-    return userData.exp * 1000 < Date.now();
-  };
-
   const logout = () => {
     localStorage.removeItem("accessToken_user");
     localStorage.removeItem("client_user");
@@ -48,18 +29,10 @@ export default function ClientAuthGuard({
         return;
       }
 
-      if (isTokenExpired(accessToken)) {
-        logout();
-        setCheckedAuth(true);
-        return;
-      }
-
       try {
         await axiosClient.post("/api/v1/auth/verify");
-        const userData = extractUserFromToken(accessToken);
-        if (userData) {
-          setUser(userData);
-        }
+        const userData = JSON.parse(clientUser);
+        setUser(userData);
       } catch {
         logout();
       } finally {
@@ -86,7 +59,5 @@ export default function ClientAuthGuard({
     return () => window.removeEventListener("storage", handleStorageChange);
   }, [setUser]);
 
-  if (!checkedAuth)
-    return <Loading fullScreen={true} size="lg" text="Đang xác thực..." />;
   return <>{children}</>;
 }

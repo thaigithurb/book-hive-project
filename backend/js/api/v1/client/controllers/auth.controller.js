@@ -89,7 +89,7 @@ exports.loginWithPassword = (req, res) => __awaiter(void 0, void 0, void 0, func
         }
         const refreshToken = generate.generateRefreshToken();
         user.refreshToken = refreshToken;
-        user.refreshTokenExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+        user.refreshTokenExpiresAt = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
         res.cookie("refreshToken_user", refreshToken, {
             httpOnly: true,
             secure: true,
@@ -230,7 +230,7 @@ module.exports.loginWithGoogle = (req, res) => __awaiter(void 0, void 0, void 0,
         }
         const refreshToken = generate.generateRefreshToken();
         user.refreshToken = refreshToken;
-        user.refreshTokenExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+        user.refreshTokenExpiresAt = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
         const accessToken = jwt.sign({ id: user._id, email: user.email }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });
         res.cookie("refreshToken_user", refreshToken, {
             httpOnly: true,

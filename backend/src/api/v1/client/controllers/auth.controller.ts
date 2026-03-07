@@ -99,7 +99,7 @@ exports.loginWithPassword = async (req, res) => {
 
     // Lưu refreshToken mới vào DB
     user.refreshToken = refreshToken;
-    user.refreshTokenExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+    user.refreshTokenExpiresAt = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
 
     res.cookie("refreshToken_user", refreshToken, {
       httpOnly: true,
@@ -282,7 +282,7 @@ module.exports.loginWithGoogle = async (req, res) => {
     // Tạo refreshToken
     const refreshToken = generate.generateRefreshToken();
     user.refreshToken = refreshToken;
-    user.refreshTokenExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+    user.refreshTokenExpiresAt = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
 
     // Tạo accessToken
     const accessToken = jwt.sign(

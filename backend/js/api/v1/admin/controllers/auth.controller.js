@@ -33,7 +33,7 @@ module.exports.login = (req, res) => __awaiter(void 0, void 0, void 0, function*
         }
         const refreshToken = generate.generateRefreshToken();
         user.refreshToken = refreshToken;
-        user.refreshTokenExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+        user.refreshTokenExpiresAt = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
         yield user.save();
         res.cookie("refreshToken_admin", refreshToken, {
             httpOnly: true,

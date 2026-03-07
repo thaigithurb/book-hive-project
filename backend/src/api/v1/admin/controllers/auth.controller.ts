@@ -31,7 +31,7 @@ module.exports.login = async (req, res) => {
 
     // Lưu refreshToken mới vào DB
     user.refreshToken = refreshToken;
-    user.refreshTokenExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+    user.refreshTokenExpiresAt = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
     await user.save();
 
     res.cookie("refreshToken_admin", refreshToken, {
