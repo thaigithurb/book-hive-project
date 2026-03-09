@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { StatCard } from "@/app/components/Card/StatCard";
-import axiosAdmin from "@/libs/axios-admin";
 
 type DashboardStats = {
   totalBooks: number;
