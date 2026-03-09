@@ -31,7 +31,8 @@ module.exports.login = async (req, res) => {
 
     // Lưu refreshToken mới vào DB
     user.refreshToken = refreshToken;
-    user.refreshTokenExpiresAt = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
+    user.refreshTokenExpiresAt = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000);
+
     await user.save();
 
     res.cookie("refreshToken_admin", refreshToken, {
@@ -56,6 +57,7 @@ module.exports.login = async (req, res) => {
     return res.status(200).json({
       message: "Đăng nhập thành công!",
       accessToken,
+      refreshToken,
       user: {
         id: user._id,
         email: user.email,
@@ -66,41 +68,6 @@ module.exports.login = async (req, res) => {
   } catch (error) {
     return res.status(400).json({
       message: "Đăng nhập thất bại",
-    });
-  }
-};
-
-// [POST] /api/v1/admin/auth/refresh
-module.exports.refresh = async (req, res) => {
-  try {
-    const refreshToken = req.cookies.refreshToken_admin;
-    if (!refreshToken) {
-      return res.status(401).json({ message: "Không có refreshToken" });
-    }
-
-    const user = await Account.findOne({ refreshToken });
-    if (
-      !user ||
-      !user.refreshTokenExpiresAt ||
-      user.refreshTokenExpiresAt < new Date()
-    ) {
-      return res.status(401).json({ message: "Phiên đăng nhập hết hạn!" });
-    }
-
-    // Tạo accessToken mới
-    const accessToken = jwt.sign(
-      { id: user._id, email: user.email, role_id: user.role_id },
-      process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN },
-    );
-
-    return res.status(200).json({
-      message: "Làm mới accessToken thành công!",
-      accessToken,
-    });
-  } catch (error) {
-    return res.status(400).json({
-      message: "Làm mới accessToken thất bại",
     });
   }
 };
@@ -144,7 +111,7 @@ module.exports.logout = async (req, res) => {
 
     res.clearCookie("refreshToken_admin", {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: true,
       sameSite: "strict",
     });
 

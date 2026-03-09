@@ -109,7 +109,7 @@ export default function CategoryTable({
                 />
               </td>
               <ConditionalRender permission="edit_category">
-                <td className="py-4 px-4">
+                <td className="py-4 px-4 text-nowrap">
                   {category._id && (
                     <ChangeStatusBadge
                       status={category.status}

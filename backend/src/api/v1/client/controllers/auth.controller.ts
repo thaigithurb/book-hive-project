@@ -94,12 +94,19 @@ exports.loginWithPassword = async (req, res) => {
       });
     }
 
+    // tạo mới accessToken
+    const accessToken = jwt.sign(
+      { id: user._id, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRES_IN },
+    );
+
     // Tạo mới refreshToken
     const refreshToken = generate.generateRefreshToken();
 
     // Lưu refreshToken mới vào DB
     user.refreshToken = refreshToken;
-    user.refreshTokenExpiresAt = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
+    user.refreshTokenExpiresAt = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000);
 
     res.cookie("refreshToken_user", refreshToken, {
       httpOnly: true,
@@ -107,13 +114,6 @@ exports.loginWithPassword = async (req, res) => {
       sameSite: "strict",
       expires: user.refreshTokenExpiresAt,
     });
-
-    // tạo mới accessToken
-    const accessToken = jwt.sign(
-      { id: user._id, email: user.email },
-      process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN },
-    );
 
     await user.save();
 
@@ -134,41 +134,6 @@ exports.loginWithPassword = async (req, res) => {
       success: false,
       message: "Lỗi server",
       error: error.message,
-    });
-  }
-};
-
-// [POST] /api/v1/auth/refresh
-module.exports.refresh = async (req, res) => {
-  try {
-    const refreshToken = req.cookies.refreshToken_user;
-    if (!refreshToken) {
-      return res.status(401).json({ message: "Không có refreshToken" });
-    }
-
-    const user = await User.findOne({ refreshToken });
-    if (
-      !user ||
-      !user.refreshTokenExpiresAt ||
-      user.refreshTokenExpiresAt < new Date()
-    ) {
-      return res.status(401).json({ message: "Phiên đăng nhập hết hạn!" });
-    }
-
-    // Tạo accessToken mới
-    const accessToken = jwt.sign(
-      { id: user._id, email: user.email },
-      process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN },
-    );
-
-    return res.status(200).json({
-      message: "Làm mới accessToken thành công!",
-      accessToken,
-    });
-  } catch (error) {
-    return res.status(400).json({
-      message: "Làm mới accessToken thất bại",
     });
   }
 };
@@ -279,17 +244,16 @@ module.exports.loginWithGoogle = async (req, res) => {
       }
     }
 
-    // Tạo refreshToken
-    const refreshToken = generate.generateRefreshToken();
-    user.refreshToken = refreshToken;
-    user.refreshTokenExpiresAt = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
-
     // Tạo accessToken
     const accessToken = jwt.sign(
       { id: user._id, email: user.email },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN },
     );
+
+    const refreshToken = generate.generateRefreshToken();
+    user.refreshToken = refreshToken;
+    user.refreshTokenExpiresAt = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000);
 
     res.cookie("refreshToken_user", refreshToken, {
       httpOnly: true,

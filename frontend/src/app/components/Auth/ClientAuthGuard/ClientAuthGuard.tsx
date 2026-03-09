@@ -1,8 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
-import axiosClient from "@/libs/axios-client";
 import { useUser } from "@/contexts/UserContext";
-import { Loading } from "@/app/components/Loading/Loading";
+import axios from "axios";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function ClientAuthGuard({
   children,
@@ -30,7 +31,16 @@ export default function ClientAuthGuard({
       }
 
       try {
-        await axiosClient.post("/api/v1/auth/verify");
+        const accessToken = localStorage.getItem("accessToken_user");
+        await axios.post(
+          `${API_URL}/api/v1/auth/verify`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          },
+        );
         const userData = JSON.parse(clientUser);
         setUser(userData);
       } catch {

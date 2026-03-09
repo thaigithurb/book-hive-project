@@ -2,9 +2,10 @@
 import { useEffect, useState } from "react";
 import { useAdmin } from "@/contexts/AdminContext";
 import { Loading } from "@/app/components/Loading/Loading";
-import axiosAdmin from "@/libs/axios-admin";
 import { useRouter } from "next/navigation";
+import axios from "axios";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;
 
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
@@ -30,7 +31,15 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
     }
 
     try {
-      await axiosAdmin.post(`/api/v1/${ADMIN_PREFIX}/auth/verify`);
+      await axios.post(
+        `${API_URL}/api/v1/${ADMIN_PREFIX}/auth/verify`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        },
+      );
       const adminData = JSON.parse(adminUserStr);
       setAdmin(adminData);
     } catch {

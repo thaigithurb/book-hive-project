@@ -8,8 +8,6 @@ router.post("/register", validateRegister, controller.register);
 
 router.post("/loginWithPassword", validateLogin, controller.loginWithPassword);
 
-router.post("/refresh", controller.refresh);
-
 router.post("/verify", controller.verify);
 
 router.post("/logout", controller.logout);

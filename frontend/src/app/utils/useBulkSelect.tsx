@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-const accessToken = localStorage.getItem("accessToken");
+const accessToken = localStorage.getItem("accessToken_admin");
 
 export function useBulkSelect(
   items: any[],

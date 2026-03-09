@@ -13,8 +13,7 @@ export const Header = () => {
   const [keyword, setKeyword] = useState("");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const cartCount = getTotalItems();
-  const userString = typeof window !== "undefined" ? localStorage.getItem("client_user") : null;
-  const user = userString ? JSON.parse(userString) : null;
+  const { user } = useUser();
 
   const handleSearch = (e: any) => {
     e.preventDefault();
