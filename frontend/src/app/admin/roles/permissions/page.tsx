@@ -13,7 +13,6 @@ import { useRouter } from "next/navigation";
 import { useAdmin } from "@/contexts/AdminContext";
 import PrivateRoute from "@/app/components/Auth/PrivateRoute/PrivateRoute";
 import ConditionalRender from "@/app/components/Auth/ConditionalRender/ConditionalRender";
-import axiosAdmin from "@/libs/axios-admin";
 
 const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -33,7 +32,7 @@ export default function Permission() {
 
   useEffect(() => {
     setLoading(true);
-    axiosAdmin
+    axios
       .get(`/api/v1/${ADMIN_PREFIX}/roles`)
       .then((res) => {
         setRoles(res.data.roles || []);
@@ -47,7 +46,7 @@ export default function Permission() {
   }, []);
 
   const fetchPermissions = () => {
-    axiosAdmin
+    axios
       .get(`/api/v1/${ADMIN_PREFIX}/roles/permissions`)
       .then((res) => setPermissionGroups(res.data.permissionGroups || []))
       .catch(() => setPermissionGroups([]));
@@ -89,7 +88,7 @@ export default function Permission() {
 
   const handleSave = async () => {
     try {
-      await axiosAdmin.patch(`/api/v1/${ADMIN_PREFIX}/roles/permissions/edit`, {
+      await axios.patch(`/api/v1/${ADMIN_PREFIX}/roles/permissions/edit`, {
         roles,
       });
 
@@ -130,7 +129,7 @@ export default function Permission() {
   const handleConfirmDelete = async () => {
     if (!selectedPerm) return;
     try {
-      await axiosAdmin.patch(
+      await axios.patch(
         `/api/v1/${ADMIN_PREFIX}/roles/permissions/delete/${selectedPerm._id}`,
       );
       toast.success("Xóa quyền thành công!");
