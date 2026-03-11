@@ -33,7 +33,11 @@ export default function Permission() {
   useEffect(() => {
     setLoading(true);
     axios
-      .get(`/api/v1/${ADMIN_PREFIX}/roles`)
+      .get(`${API_URL}/api/v1/${ADMIN_PREFIX}/roles`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken_admin")}`,
+        },
+      })
       .then((res) => {
         setRoles(res.data.roles || []);
         setOriginalRoles(res.data.roles || []);
@@ -47,7 +51,11 @@ export default function Permission() {
 
   const fetchPermissions = () => {
     axios
-      .get(`/api/v1/${ADMIN_PREFIX}/roles/permissions`)
+      .get(`${API_URL}/api/v1/${ADMIN_PREFIX}/roles/permissions`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken_admin")}`,
+        },
+      })
       .then((res) => setPermissionGroups(res.data.permissionGroups || []))
       .catch(() => setPermissionGroups([]));
   };
@@ -88,9 +96,15 @@ export default function Permission() {
 
   const handleSave = async () => {
     try {
-      await axios.patch(`/api/v1/${ADMIN_PREFIX}/roles/permissions/edit`, {
-        roles,
-      });
+      await axios.patch(
+        `${API_URL}/api/v1/${ADMIN_PREFIX}/roles/permissions/edit`,
+        { roles },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken_admin")}`,
+          },
+        },
+      );
 
       setOriginalRoles(
         roles.map((role) => ({
@@ -130,7 +144,12 @@ export default function Permission() {
     if (!selectedPerm) return;
     try {
       await axios.patch(
-        `/api/v1/${ADMIN_PREFIX}/roles/permissions/delete/${selectedPerm._id}`,
+        `${API_URL}/api/v1/${ADMIN_PREFIX}/roles/permissions/delete/${selectedPerm._id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken_admin")}`,
+          },
+        },
       );
       toast.success("Xóa quyền thành công!");
       fetchPermissions();
@@ -262,11 +281,6 @@ export default function Permission() {
                 </button>
               )}
             </div>
-            <ToastContainer
-              autoClose={1500}
-              hideProgressBar={true}
-              pauseOnHover={false}
-            />
           </div>
         )}
         <ConfirmModal

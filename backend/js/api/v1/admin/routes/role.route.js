@@ -7,7 +7,7 @@ const { validateRole, validatePermission } = require("../../../../middleware/val
 router.get("/", controller.index);
 router.post("/create", validateRole, controller.create);
 router.get("/permissions", controller.permissions);
-router.patch("/permissions/edit", validatePermission, controller.permissionsEdit);
+router.patch("/permissions/edit", controller.permissionsEdit);
 router.get("/:id", controller.getById);
 router.get("/detail/:slug", controller.detail);
 router.patch("/edit/:slug", validateRole, controller.edit);

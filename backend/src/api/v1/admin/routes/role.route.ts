@@ -10,7 +10,7 @@ router.post("/create", validateRole, controller.create);
 
 router.get("/permissions", controller.permissions);
 
-router.patch("/permissions/edit", validatePermission, controller.permissionsEdit);
+router.patch("/permissions/edit", controller.permissionsEdit);
 
 router.get("/:id", controller.getById);
 
