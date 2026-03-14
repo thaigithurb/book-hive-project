@@ -13,6 +13,7 @@ import "swiper/css";
 import "swiper/css/free-mode";
 import "swiper/css/pagination";
 import FloatingElements from "@/app/components/FloatingElements.tsx/FloatingElements";
+import { useUser } from "@/contexts/UserContext";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -29,13 +30,19 @@ export default function HomeClient({
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
+  const { user } = useUser();
+
   useEffect(() => {
     const token = localStorage.getItem("accessToken_user");
     setIsLoggedIn(!!token);
-    if (!token) {
+
+    if (!token || !user) {
+      setFavoriteIds([]);
       setIsLoading(false);
       return;
     }
+
+    setIsLoading(true);
     axios
       .get(`${API_URL}/api/v1/favorites`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -46,7 +53,7 @@ export default function HomeClient({
       })
       .catch(() => setFavoriteIds([]))
       .finally(() => setIsLoading(false));
-  }, []);
+  }, [user]);
 
   const handleToggleFavorite = async (bookId: string, next: boolean) => {
     const token = localStorage.getItem("accessToken_user");
