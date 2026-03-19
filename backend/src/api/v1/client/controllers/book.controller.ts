@@ -16,7 +16,25 @@ module.exports.index = async (req, res) => {
 
     if (keyword) {
       const regex = new RegExp(keyword, "i");
-      find.$or = [{ title: regex }, { author: regex }];
+
+      // Tìm categories match
+      const matchingCategories = await Category.find({
+        $or: [{ title: regex }, { slug: regex }],
+        deleted: false,
+        status: "active",
+      }).select("_id");
+
+      const categoryIds = matchingCategories.map((cat: any) => cat._id);
+
+      // Search books theo title, author, description, category_id
+      find.$or = [
+        { title: regex },
+        { author: regex },
+        { description: regex },
+        ...(categoryIds.length > 0
+          ? [{ category_id: { $in: categoryIds } }]
+          : []),
+      ];
     }
 
     // sort
@@ -166,7 +184,7 @@ module.exports.bestSeller = async (req, res) => {
 
     if (!records) {
       return res.status(400).json({
-        message: "Không tìm thấy sách nào!"
+        message: "Không tìm thấy sách nào!",
       });
     }
 

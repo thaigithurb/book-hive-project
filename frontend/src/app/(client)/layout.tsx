@@ -6,6 +6,7 @@ import { UserProvider } from "@/contexts/UserContext";
 import { Header } from "../components/Layout/Header/Header";
 import ClientAuthGuard from "../components/Auth/ClientAuthGuard/ClientAuthGuard";
 import { BookCardSkeleton } from "../components/Skeleton/BookCardSkeleton";
+import AIChat from "../components/AIChat/AIChat";
 
 export const metadata: Metadata = {
   title: "BookHive",
@@ -41,6 +42,7 @@ export default function RootLayout({
             <Footer />
           </ClientAuthGuard>
         </CartProvider>
+        <AIChat />
       </UserProvider>
     </Suspense>
   );

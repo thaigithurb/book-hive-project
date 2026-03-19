@@ -23,7 +23,20 @@ module.exports.index = (req, res) => __awaiter(void 0, void 0, void 0, function*
         };
         if (keyword) {
             const regex = new RegExp(keyword, "i");
-            find.$or = [{ title: regex }, { author: regex }];
+            const matchingCategories = yield Category.find({
+                $or: [{ title: regex }, { slug: regex }],
+                deleted: false,
+                status: "active",
+            }).select("_id");
+            const categoryIds = matchingCategories.map((cat) => cat._id);
+            find.$or = [
+                { title: regex },
+                { author: regex },
+                { description: regex },
+                ...(categoryIds.length > 0
+                    ? [{ category_id: { $in: categoryIds } }]
+                    : []),
+            ];
         }
         let sort = {};
         if (req.query.sortKey && req.query.sortValue) {
@@ -152,7 +165,7 @@ module.exports.bestSeller = (req, res) => __awaiter(void 0, void 0, void 0, func
         const records = yield Book.find().sort({ soldCount: -1 }).limit(10);
         if (!records) {
             return res.status(400).json({
-                message: "Không tìm thấy sách nào!"
+                message: "Không tìm thấy sách nào!",
             });
         }
         return res.status(200).json({
