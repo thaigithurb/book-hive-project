@@ -152,13 +152,12 @@ export default function AIChat() {
       setLoading(false);
     }
   };
-
-  return (
+ return (
     <>
       {/* Floating Action Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-6 right-6 bg-blue-500 hover:bg-blue-600 text-white rounded-full p-4 shadow-lg transition-all duration-200 z-40 flex items-center justify-center"
+        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 bg-blue-500 hover:bg-blue-600 text-white rounded-full p-4 shadow-lg transition-all duration-200 z-40 flex items-center justify-center"
         aria-label="Open AI Chat"
         title="Hỏi AI về sách"
       >
@@ -167,9 +166,12 @@ export default function AIChat() {
 
       {/* Chat Modal */}
       {isOpen && (
-        <div className="fixed bottom-24 right-6 w-96 max-w-[calc(100vw-32px)] bg-white rounded-lg shadow-2xl flex flex-col z-50 h-[600px] border border-gray-200 overflow-hidden">
+        <div className="fixed bg-white rounded-lg shadow-2xl flex flex-col z-50 border border-gray-200 overflow-hidden transition-all duration-300
+                        bottom-20 right-4 w-[300px] h-[450px]
+                        sm:bottom-24 sm:right-6 sm:w-80 sm:h-[500px]
+                        lg:w-96 lg:h-[600px]">
           {/* Header */}
-          <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-4">
+          <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-4 shrink-0">
             <h2 className="font-bold text-lg">AI Hỗ Trợ Book Hive</h2>
             <p className="text-xs text-blue-100">
               Hỏi về sách, danh mục, hoặc chính sách
@@ -254,7 +256,7 @@ export default function AIChat() {
                     {/* Action Buttons */}
                     {msg.actions && msg.actions.length > 0 && (
                       <div className="mt-3 w-[85%] flex flex-col gap-2 pl-2">
-                        {msg.actions.map((action, actionIdx) => 
+                        {msg.actions.map((action, actionIdx) =>
                           action.type === "link" ? (
                             <a
                               key={actionIdx}
@@ -313,21 +315,21 @@ export default function AIChat() {
           {/* Input Form */}
           <form
             onSubmit={handleSubmit}
-            className="border-t border-gray-200 p-3 bg-white"
+            className="border-t border-gray-200 p-3 bg-white shrink-0"
           >
             <div className="flex gap-2">
               <input
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Ví dụ: Tìm sách Clean Code..."
+                placeholder="Ví dụ: Tìm sách..."
                 disabled={loading}
-                className="flex-1 px-4 py-2 bg-gray-50 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-sm disabled:bg-gray-100"
+                className="flex-1 px-4 py-2 bg-gray-50 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-sm disabled:bg-gray-100 min-w-0"
               />
               <button
                 type="submit"
                 disabled={loading || !input.trim()}
-                className="bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 text-white h-10 w-10 flex items-center justify-center rounded-full transition-all shadow-sm"
+                className="bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 text-white h-10 w-10 flex items-center justify-center rounded-full transition-all shadow-sm shrink-0"
               >
                 <FiSend size={16} />
               </button>
