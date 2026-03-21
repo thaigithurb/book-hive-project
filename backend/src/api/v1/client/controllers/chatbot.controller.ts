@@ -43,7 +43,7 @@ module.exports.query = async (req, res) => {
           .limit(3);
         
         // Lấy giỏ hàng
-        userData.cart = await Cart.findOne({ user_id: decoded.id });
+        userData.cart = await Cart.findOne({ userId: decoded.id });
         
         // Lấy thông tin user
         userData.user = await User.findOne({ _id: decoded.id }).select("fullName email");
@@ -56,6 +56,7 @@ module.exports.query = async (req, res) => {
     const bookIds = relatedBooks.map(b => b._id);
     const relatedReviews = await Review.find({ book: { $in: bookIds } })
       .populate("user", "fullName")
+      .populate("book", "title")
       .limit(10);
 
     // 4. Build context đa tầng

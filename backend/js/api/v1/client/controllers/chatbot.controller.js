@@ -42,7 +42,7 @@ module.exports.query = (req, res) => __awaiter(void 0, void 0, void 0, function*
                 userData.orders = yield Order.find({ "userInfo.email": decoded.email })
                     .sort({ createdAt: -1 })
                     .limit(3);
-                userData.cart = yield Cart.findOne({ user_id: decoded.id });
+                userData.cart = yield Cart.findOne({ userId: decoded.id });
                 userData.user = yield User.findOne({ _id: decoded.id }).select("fullName email");
             }
             catch (err) {
@@ -52,6 +52,7 @@ module.exports.query = (req, res) => __awaiter(void 0, void 0, void 0, function*
         const bookIds = relatedBooks.map(b => b._id);
         const relatedReviews = yield Review.find({ book: { $in: bookIds } })
             .populate("user", "fullName")
+            .populate("book", "title")
             .limit(10);
         const context = aiService.buildContext(relatedBooks, {
             orders: userData.orders,

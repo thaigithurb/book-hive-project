@@ -50,12 +50,14 @@ function detectIntent(questionRaw) {
         return "auth_login";
     if (/(đăng\s*ký|register|sign\s*up)/i.test(q))
         return "auth_register";
-    if (/(giỏ\s*hàng|cart|thêm\s*vào\s*giỏ|xóa\s*khỏi\s*giỏ)/i.test(q))
+    if (/(giỏ\s*hàng|cart|thêm\s*vào\s*giỏ|xóa\s*khỏi\s*giỏ|trong\s*giỏ)/i.test(q))
         return "cart";
-    if (/(đơn\s*hàng|order|trạng\s*thái\s*đơn|hủy\s*đơn)/i.test(q))
+    if (/(đơn\s*hàng|order|trạng\s*thái\s*đơn|hủy\s*đơn|mua\s*gì|đã\s*mua)/i.test(q))
         return "order";
     if (/(thanh\s*toán|payment|vnpay|momo|cod|chuyển\s*khoản)/i.test(q))
         return "payment";
+    if (/(đánh\s*giá|review|nhận\s*xét|khen|chê|mọi\s*người\s*nói|sao)/i.test(q))
+        return "general_help";
     if (/(gợi\s*ý|recommend|đề\s*xuất)/i.test(q))
         return "books_recommend";
     if (/(tìm|search|kiếm|sách|book)/i.test(q))
@@ -168,6 +170,35 @@ function extractKeywords(raw) {
         "gợi",
         "ý",
         "recommend",
+        "của",
+        "được",
+        "mọi",
+        "người",
+        "đánh",
+        "giá",
+        "như",
+        "nào",
+        "thế",
+        "nào",
+        "gì",
+        "đâu",
+        "ai",
+        "tại",
+        "sao",
+        "nhỉ",
+        "vậy",
+        "biết",
+        "cho",
+        "biết",
+        "với",
+        "thử",
+        "xem",
+        "nói",
+        "về",
+        "văn",
+        "học",
+        "tác",
+        "giả"
     ]);
     const words = lower
         .split(/[^a-z0-9àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]+/i)
@@ -347,29 +378,29 @@ module.exports.queryAI = (question, context, relatedBooks) => __awaiter(void 0, 
         if (!apiKey) {
             throw new Error("GROQ_API_KEY không được cấu hình");
         }
-        const systemPrompt = `Bạn là BOOK STYLIST - Chuyên gia tư vấn sách cao cấp của BookHive.
-Triết lý: "Mỗi cuốn sách là một mảnh ghép tâm hồn, và tôi ở đây để giúp bạn tìm thấy mảnh ghép định mệnh".
+        const systemPrompt = `Bạn là BOOK STYLIST - Chuyên gia trợ lý Omni-Assistant cao cấp của BookHive.
+Bạn không chỉ tư vấn sách, mà còn là người quản gia tận tâm nắm rõ mọi trạng thái của cửa hàng và khách hàng.
 
-1. AM HIỂU WEBSITE (KNOWLEDGE BASE):
-- Giao hàng: Miễn phí nội thành TP.HCM (đơn >300k), 1-3 ngày toàn quốc.
-- Thanh toán: COD, Chuyển khoản, MoMo, VNPAY.
-- Đổi trả: Trong 7 ngày nếu sách lỗi sản xuất.
-- Tài khoản: Cần đăng nhập để tích điểm (BookCoins).
+1. KIẾN THỨC TOÀN DIỆN (OMNI-CONTEXT):
+- Kiểm tra mục ## TÀI KHOẢN CỦA BẠN: Để biết khách đã mua gì, đơn hàng đang ở tình trạng nào (pending, shipping, delivered) hoặc giỏ hàng có sách gì chưa thanh toán.
+- Kiểm tra mục ## ĐÁNH GIÁ CỘNG ĐỒNG: Sử dụng các nhận xét thực tế để tư vấn khách quan. Ví dụ: "Nhiều độc giả khác đánh giá cuốn này 5 sao vì cốt truyện rất lôi cuốn...".
+- Kiểm tra mục ## KHO SÁCH: Cung cấp thông tin sản phẩm chính xác.
 
-2. TƯ DUY CHIẾN LƯỢC (REASONING):
-- Khi khách hỏi, hãy phân tích "Tâm lý & Nhu cầu ngầm": Ví dụ khách thích "bí ẩn" thường có xu hướng tò mò, thích thử thách trí tuệ -> Gợi ý sách có plot twist mạnh.
-- Nếu không có sách trong context phù hợp, hãy dùng kiến thức của bạn để thảo luận về chủ đề đó một cách sâu sắc, VÀ sau đó khéo léo giới thiệu các đầu sách liên quan XA mà shop có (ví dụ khách hỏi Kim Dung nhưng shop không có, hãy thảo luận về tinh thần kiếm hiệp và gợi ý tiểu thuyết lịch sử Việt Nam).
-- Phải luôn giữ vai trò chuyên gia, không chỉ là bot trả lời.
+2. CHIẾN LƯỢC PHẢN HỒI (V7):
+- Tra cứu đơn hàng: Nếu khách hỏi về đơn hàng, hãy chủ động tra cứu mã đơn và trạng thái trong context. Nếu chưa có đơn nào, hãy hướng dẫn khách cách mua hàng.
+- Giỏ hàng: Nhắc nhở tinh tế nếu khách có món đồ bỏ quên trong giỏ hàng.
+- Đánh giá: Ưu tiên dùng các từ ngữ của khách hàng cũ (trong mục Reviews) để tăng sự thuyết phục.
+- Persona: Luôn thấu cảm (Empathy), lịch thiệp và mang phong thái một chuyên gia "biết tuốt" về BookHive.
 
 3. QUY TẮC CỐT LÕI:
-- Trò chuyện tinh tế, thấu cảm (Empathy). Sử dụng emoji sang trọng, không lạm dụng.
 - ĐỒNG BỘ: Chỉ nhắc tên sách có trong Context. Hệ thống tự hiển thị Card.
-- TUYỆT ĐỐI không tự viết danh sách liệt kê sách.
+- TUYỆT ĐỐI không tự viết danh sách liệt kê sách bằng dấu gạch đầu dòng nếu đã có cards.
+- Nếu không tìm thấy thông tin đơn hàng/sách cụ thể, hãy tư vấn dựa trên kiến thức chung của bạn nhưng khéo léo lái về website.
 
-4. FORMAT JSON:
+4. FORMAT JSON (BẮT BUỘC):
 {
-  "message": "Lời thoại của bạn. (Logic: Nhận xét -> Phân tích nhu cầu khách -> Gợi ý/Thảo luận tự nhiên)",
-  "intent": "string",
+  "message": "Lời thoại của bạn. (Cá nhân hóa + Thấu cảm + Trả lời trực diện câu hỏi)",
+  "intent": "books_search | books_recommend | cart | order | payment | general_chat",
   "actions": []
 }`;
         const userContent = context
@@ -528,6 +559,18 @@ module.exports.findRelatedBooks = (Book_1, query_1, ...args_1) => __awaiter(void
                     .limit(limit);
             }
         }
+        if (keywords.length >= 2) {
+            const cleanedPhrase = query.replace(/(sách|book|của|được|tìm|kiếm|đánh giá|nhận xét|review|mọi người|như thế nào|thế nào)/gi, "").trim();
+            if (cleanedPhrase.length >= 3) {
+                const phraseRegex = new RegExp(cleanedPhrase, "i");
+                const phraseBooks = yield Book.find(Object.assign(Object.assign({}, baseFind), { $or: [
+                        { title: phraseRegex },
+                        { author: phraseRegex }
+                    ] })).sort(sort).limit(limit);
+                if (phraseBooks.length > 0)
+                    return phraseBooks;
+            }
+        }
         if (keywords.length > 0) {
             const pattern = keywords
                 .map((k) => k.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
@@ -591,24 +634,54 @@ module.exports.findRelatedBooks = (Book_1, query_1, ...args_1) => __awaiter(void
         return [];
     }
 });
-module.exports.buildContext = (books) => {
-    if (!books || books.length === 0) {
-        return "Hiện tại kho sách chưa tìm thấy đầu sách khớp hoàn toàn với mô tả. Hãy dùng kiến thức chuyên gia của bạn để thảo luận và gợi ý các hướng đọc khác (ví dụ: cùng tác giả, cùng thể loại, hoặc sách có giá trị tương đương).";
+module.exports.buildContext = (books, options = {}) => {
+    const { orders = [], reviews = [], cart = null, user = null } = options;
+    let context = `## THUẬN TIỆN & CHÍNH SÁCH:
+- Giao hàng: Miễn phí nội thành TP.HCM (>300k), 1-3 ngày toàn quốc.
+- Thanh toán: COD, Chuyển khoản, MoMo, VNPAY. Đổi trả 7 ngày lỗi SX.
+`;
+    if (user) {
+        context += `\n## CHÀO BẠN:
+- Tên khách hàng: ${user.fullName}
+- Email: ${user.email}
+`;
     }
-    const websiteInfo = `
-   CHÍNH SÁCH WEBSITE:
-   - Tình trạng: Tất cả sách là Hàng mới 100%, Chính hãng.
-   - Ưu đãi: Giảm 10% cho thành viên mới.
-   - Hotline hỗ trợ: 1900-2026.
-  `;
-    const booksData = books
-        .map((book, idx) => `SÁCH #${idx + 1}:
+    if (cart && cart.items && cart.items.length > 0) {
+        context += `\n## GIỎ HÀNG CỦA BẠN (Chưa thanh toán):
+${cart.items.map((p) => `- ${p.title} (SL: ${p.quantity}, Giá: ${p.price}đ)`).join("\n")}
+`;
+    }
+    if (orders && orders.length > 0) {
+        context += `\n## TRẠNG THÁI ĐƠN HÀNG GẦN ĐÂY:
+${orders
+            .map((o) => `- Mã: ${o.orderCode}, Trạng thái: ${o.status}, Tổng: ${o.totalAmount}đ (Ngày mua: ${o.createdAt})`)
+            .join("\n")}
+`;
+    }
+    if (reviews && reviews.length > 0) {
+        context += `\n## ĐÁNH GIÁ CỦA CỘNG ĐỒNG:
+${reviews
+            .map((r) => { var _a, _b; return `- Sách: ${((_a = r.book) === null || _a === void 0 ? void 0 : _a.title) || "Sách"}, Rating: ${r.rating}/5, Nhận xét: "${r.comment}" (Bởi: ${((_b = r.user) === null || _b === void 0 ? void 0 : _b.fullName) || "Khách"})`; })
+            .join("\n")}
+`;
+    }
+    if (books && books.length > 0) {
+        const booksData = books
+            .map((book, idx) => {
+            var _a;
+            return `SÁCH #${idx + 1}:
          - Tiêu đề: "${book.title}"
          - Tác giả: ${book.author}
-         - Giá: ${book.priceBuy}đ (Giá gốc: ${book.priceDefault || book.priceBuy}đ)
+         - Giá: ${book.priceBuy}đ
          - Đánh giá: ${book.rating}/5 sao
-         - Đã bán: ${book.soldCount || 0} cuốn
-         - Mô tả: ${book.description || "Đang cập nhật nội dung..."}`)
-        .join("\n\n");
-    return `${websiteInfo}\n\nDANH SÁCH SÁCH TỪ HỆ THỐNG:\n${booksData}`;
+         - Đã bán: ${book.soldCount || 0}
+         - Mô tả: ${((_a = book.description) === null || _a === void 0 ? void 0 : _a.slice(0, 150)) || "Đang cập nhật..."}`;
+        })
+            .join("\n\n");
+        context += `\n## KHO SÁCH (Dữ liệu thật):\n${booksData}`;
+    }
+    else {
+        context += `\n## KHO SÁCH: Hiện không có kết quả trực tiếp. Hãy tư vấn linh hoạt.`;
+    }
+    return context;
 };
