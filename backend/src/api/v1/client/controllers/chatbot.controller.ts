@@ -1,5 +1,11 @@
 const Book = require("../../models/book.model");
+const Category = require("../../models/category.model");
+const Order = require("../../models/order.model");
+const Review = require("../../models/review.model");
+const Cart = require("../../models/cart.model");
+const User = require("../../models/user.model");
 const aiService = require("../services/ai.service");
+const jwt = require("jsonwebtoken");
 
 // [POST] /api/v1/chatbot/query
 module.exports.query = async (req, res) => {
@@ -13,15 +19,54 @@ module.exports.query = async (req, res) => {
       });
     }
 
-    // Tìm các cuốn sách liên quan
+    // 1. Phân tích intent và lấy sách liên quan
     const relatedBooks = await aiService.findRelatedBooks(Book, question, {
       limit: 5,
     });
 
-    // Build context từ các cuốn sách
-    const context = aiService.buildContext(relatedBooks);
+    // 2. Lấy thông tin người dùng (nếu có token)
+    let userData = {
+      orders: [],
+      cart: null,
+      user: null
+    };
 
-    // Query AI
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      try {
+        const token = authHeader.split(" ")[1];
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        
+        // Lấy 3 đơn hàng gần nhất
+        userData.orders = await Order.find({ "userInfo.email": decoded.email })
+          .sort({ createdAt: -1 })
+          .limit(3);
+        
+        // Lấy giỏ hàng
+        userData.cart = await Cart.findOne({ user_id: decoded.id });
+        
+        // Lấy thông tin user
+        userData.user = await User.findOne({ _id: decoded.id }).select("fullName email");
+      } catch (err) {
+        console.log("Chatbot Auth optional error:", err.message);
+      }
+    }
+
+    // 3. Lấy đánh giá (reviews) cho các cuốn sách liên quan
+    const bookIds = relatedBooks.map(b => b._id);
+    const relatedReviews = await Review.find({ book: { $in: bookIds } })
+      .populate("user", "fullName")
+      .limit(10);
+
+    // 4. Build context đa tầng
+    const context = aiService.buildContext(relatedBooks, {
+      orders: userData.orders,
+      cart: userData.cart,
+      reviews: relatedReviews,
+      user: userData.user
+    });
+
+    // 5. Query AI
     const result = await aiService.queryAI(question, context, relatedBooks);
 
     if (!result.success) {
@@ -42,23 +87,20 @@ module.exports.query = async (req, res) => {
       "general_help",
       "out_of_scope",
     ];
-    const shouldSendBooks =
-      !noBookIntents.includes(result.ui?.intent || "") &&
-      Array.isArray(relatedBooks) &&
-      relatedBooks.length > 0;
-
-    const relatedBooksPayload = shouldSendBooks
-      ? relatedBooks.map((book: any) => ({
-          id: book._id,
-          title: book.title,
-          author: book.author,
-          price: book.priceBuy,
-          rating: book.rating,
-          image: book.image,
-          slug: book.slug,
-          href: book.slug ? `/books/detail/${book.slug}` : undefined,
-        }))
-      : [];
+    // Version 4: Chỉ gửi các sách mà AI đã chọn lọc trong ui.cards
+    const relatedBooksPayload =
+      result.ui && Array.isArray(result.ui.cards) && result.ui.cards.length > 0
+        ? result.ui.cards.map((card: any) => ({
+            id: card.id,
+            title: card.title,
+            author: card.author,
+            price: card.price,
+            rating: card.rating,
+            image: card.image,
+            slug: card.slug,
+            href: card.href,
+          }))
+        : [];
 
     return res.status(200).json({
       success: true,

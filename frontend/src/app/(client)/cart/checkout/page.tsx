@@ -24,10 +24,7 @@ type CheckoutForm = z.infer<typeof checkoutSchema>;
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const {
-    items,
-    clearCart,
-  } = useCart();
+  const { items, clearCart } = useCart();
   const [isLoaded, setIsLoaded] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<"transfer" | "cod">(
     "transfer",
@@ -55,28 +52,14 @@ export default function CheckoutPage() {
     setIsLoaded(true);
   }, []);
 
+  useEffect(() => {
+    if (isLoaded && items.length === 0) {
+      router.push("/cart");
+    }
+  }, [isLoaded, items.length, router]);
+
   if (!isLoaded || isRedirecting) {
     return <Loading fullScreen={true} size="lg" text="Đang tải..." />;
-  }
-
-  if (items.length === 0) {
-    return (
-      <div className="min-h-screen py-8 md:py-12">
-        <div className="container mx-auto px-4">
-          <div className="bg-white rounded-2xl p-6 md:p-12 shadow text-center">
-            <h1 className="text-2xl md:text-3xl font-bold text-slate-800 mb-4">
-              Giỏ hàng trống
-            </h1>
-            <Link
-              href="/home"
-              className="inline-block px-6 py-3 bg-primary text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors text-sm md:text-base"
-            >
-              Quay lại mua sắm
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
   }
 
   const totalAmount = items.reduce(
