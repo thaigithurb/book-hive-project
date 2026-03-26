@@ -8,6 +8,9 @@ import { BookCard } from "@/app/components/Card/BookCard";
 import { Loading } from "@/app/components/Loading/Loading";
 import Pagination from "@/app/components/Pagination/Pagination";
 import { usePageChange } from "@/app/utils/usePageChange";
+import { useSortChange } from "@/app/utils/useSortChange";
+import { useMemo, useRef } from "react";
+import SortSelect from "@/app/components/SortSelect/SortSelect";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -23,6 +26,22 @@ export default function SearchPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
+  const [sortValue, setSortValue] = useState("");
+  const [sort, setSort] = useState<{ key: string; value: 1 | -1 } | null>(null);
+
+  const sortOptions = useMemo(() => [
+    { value: "", label: "Sắp xếp" },
+    { value: "title_asc", label: "Tên A-Z" },
+    { value: "title_desc", label: "Tên Z-A" },
+    { value: "priceBuy_asc", label: "Giá mua tăng" },
+    { value: "priceBuy_desc", label: "Giá mua giảm" },
+    { value: "createdAt_desc", label: "Mới nhất" },
+    { value: "createdAt_asc", label: "Cũ nhất" },
+  ], []);
+
+  const resultsRef = useRef<any>(null);
+
+  const favoriteIdsSet = useMemo(() => new Set(favoriteIds), [favoriteIds]);
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken_user");
@@ -41,6 +60,7 @@ export default function SearchPage() {
         const res = await axios.get(`${API_URL}/api/v1/books`, {
           params: {
             ...(keyword && { keyWord: keyword }),
+            ...(sort && { sortKey: sort.key, sortValue: sort.value }),
             page,
             limit,
           },
@@ -58,9 +78,16 @@ export default function SearchPage() {
     };
 
     fetchBooks();
-  }, [keyword, page, limit]);
+  }, [keyword, page, limit, sort]);
+
+  useEffect(() => {
+    if (!isLoading) {
+      resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [page, sortValue, isLoading]);
 
   const handlePageChange = usePageChange("search", setPage, "client");
+  const handleSortChange = useSortChange("search", "client");
 
   if (isLoading) {
     return <Loading fullScreen={true} size="lg" text="Đang tìm kiếm..." />;
@@ -84,34 +111,50 @@ export default function SearchPage() {
         });
         setFavoriteIds((prev) => prev.filter((id) => id !== bookId));
       }
-    } catch (err) {}
+    } catch (err) { }
   };
 
   return (
     <div className="py-6 px-4 md:py-8 md:px-6">
       <div className="container mx-auto">
         <div className="mb-6 md:mb-8">
-          <h1 className="text-2xl md:text-3xl font-bold text-primary mb-2">
-            Kết quả tìm kiếm
-          </h1>
-          <p className="text-sm md:text-base text-gray-600">
-            {keyword && `Từ khóa: "${keyword}"`}
-            {total > 0
-              ? ` - Tìm thấy ${total} sách`
-              : " - Không tìm thấy sách nào"}
-          </p>
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold text-primary mb-2">
+                Kết quả tìm kiếm
+              </h1>
+              <p className="text-sm md:text-base text-gray-600">
+                {keyword && `Từ khóa: "${keyword}"`}
+                {total > 0
+                  ? ` - Tìm thấy ${total} sách`
+                  : " - Không tìm thấy sách nào"}
+              </p>
+            </div>
+            {total > 0 && (
+              <div className="w-full md:w-auto">
+                <SortSelect
+                  options={sortOptions}
+                  sortValue={sortValue}
+                  onChange={(e) => {
+                    setSortValue(e.target.value);
+                    handleSortChange(e, setSort);
+                  }}
+                />
+              </div>
+            )}
+          </div>
         </div>
 
         {books.length > 0 ? (
           <>
-            <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-[24px] mb-8">
-              {books.map((book, index) => (
+            <div ref={resultsRef} className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-[24px] mb-8">
+              {books.map((book) => (
                 <BookCard
-                  key={index}
+                  key={book._id}
                   book={book}
                   featured={false}
                   newest={false}
-                  isFavorite={favoriteIds.includes(book._id)}
+                  isFavorite={favoriteIdsSet.has(book._id)}
                   onToggleFavorite={handleToggleFavorite}
                   isLoggedIn={isLoggedIn}
                 />

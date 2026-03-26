@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useMemo, useRef } from "react";
 import axios from "axios";
 import { Book } from "@/app/interfaces/book.interface";
 import { BookCard } from "@/app/components/Card/BookCard";
@@ -29,7 +29,7 @@ export default function Books() {
   const [sort, setSort] = useState<{ key: string; value: 1 | -1 } | null>(null);
   const limit = 12;
   const [sortValue, setSortValue] = useState("");
-  const sortOptions = [
+  const sortOptions = useMemo(() => [
     { value: "", label: "Sắp xếp" },
     { value: "title_asc", label: "Tên A-Z" },
     { value: "title_desc", label: "Tên Z-A" },
@@ -37,9 +37,18 @@ export default function Books() {
     { value: "priceBuy_desc", label: "Giá mua giảm" },
     { value: "createdAt_desc", label: "Mới nhất" },
     { value: "createdAt_asc", label: "Cũ nhất" },
-  ];
+  ], []);
 
+  const resultsRef = useRef<any>(null);
   const { favoriteIds, setFavoriteIds, isLoggedIn } = useFetchFavorites();
+
+  const favoriteIdsSet = useMemo(() => new Set(favoriteIds), [favoriteIds]);
+
+  useEffect(() => {
+    if (!loading) {
+      resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [page, sortValue, loading]);
 
   // Xử lý toggle favorite
   const handleToggleFavorite = async (bookId: string, next: boolean) => {
@@ -61,7 +70,7 @@ export default function Books() {
         );
         setFavoriteIds((prev) => prev.filter((id) => id !== bookId));
       }
-    } catch (err) {}
+    } catch (err) { }
   };
 
   // xử lí load data cùng với lọc và tìm kiếm
@@ -162,7 +171,7 @@ export default function Books() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-[24px] mb-8">
+          <div ref={resultsRef} className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-[24px] mb-8">
             {loading ? (
               Array.from({ length: 12 }).map((_, i) => (
                 <BookCardSkeleton key={i} />
@@ -174,7 +183,7 @@ export default function Books() {
                   book={book}
                   newest={book.newest ? true : false}
                   featured={book.featured ? true : false}
-                  isFavorite={favoriteIds.includes(book._id)}
+                  isFavorite={favoriteIdsSet.has(book._id)}
                   onToggleFavorite={handleToggleFavorite}
                   isLoggedIn={isLoggedIn}
                 />
