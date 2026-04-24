@@ -9,8 +9,10 @@ import { Loading } from "@/app/components/Loading/Loading";
 import Pagination from "@/app/components/Pagination/Pagination";
 import { usePageChange } from "@/app/utils/usePageChange";
 import { useSortChange } from "@/app/utils/useSortChange";
+import { useSyncParams } from "@/app/utils/useSyncParams";
 import { useMemo, useRef } from "react";
 import SortSelect from "@/app/components/SortSelect/SortSelect";
+import { BookCardSkeleton } from "@/app/components/Skeleton/BookCardSkeleton";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -24,8 +26,10 @@ export default function SearchPage() {
   const [books, setBooks] = useState<Book[]>([]);
   const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [isPaging, setIsPaging] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
+  const prevKeyword = useRef(keyword);
   const [sortValue, setSortValue] = useState("");
   const [sort, setSort] = useState<{ key: string; value: 1 | -1 } | null>(null);
 
@@ -55,7 +59,13 @@ export default function SearchPage() {
         return;
       }
 
-      setIsLoading(true);
+      if (prevKeyword.current !== keyword) {
+        setIsLoading(true);
+        prevKeyword.current = keyword;
+      } else {
+        setIsPaging(true);
+      }
+
       try {
         const res = await axios.get(`${API_URL}/api/v1/books`, {
           params: {
@@ -74,6 +84,7 @@ export default function SearchPage() {
         console.error(error);
       } finally {
         setIsLoading(false);
+        setIsPaging(false);
       }
     };
 
@@ -85,6 +96,8 @@ export default function SearchPage() {
       resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   }, [page, sortValue, isLoading]);
+
+  useSyncParams(setPage, setSortValue, setSort);
 
   const handlePageChange = usePageChange("search", setPage, "client");
   const handleSortChange = useSortChange("search", "client");
@@ -148,17 +161,23 @@ export default function SearchPage() {
         {books.length > 0 ? (
           <>
             <div ref={resultsRef} className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-[24px] mb-8">
-              {books.map((book) => (
-                <BookCard
-                  key={book._id}
-                  book={book}
-                  featured={false}
-                  newest={false}
-                  isFavorite={favoriteIdsSet.has(book._id)}
-                  onToggleFavorite={handleToggleFavorite}
-                  isLoggedIn={isLoggedIn}
-                />
-              ))}
+              {isPaging ? (
+                Array.from({ length: 12 }).map((_, i) => (
+                  <BookCardSkeleton key={i} />
+                ))
+              ) : (
+                books.map((book) => (
+                  <BookCard
+                    key={book._id}
+                    book={book}
+                    featured={false}
+                    newest={false}
+                    isFavorite={favoriteIdsSet.has(book._id)}
+                    onToggleFavorite={handleToggleFavorite}
+                    isLoggedIn={isLoggedIn}
+                  />
+                ))
+              )}
             </div>
 
             <div className="flex justify-center">
