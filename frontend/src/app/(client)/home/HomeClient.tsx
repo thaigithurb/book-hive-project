@@ -28,7 +28,7 @@ export default function HomeClient({
 }) {
   const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   const { user } = useUser();
 
@@ -98,11 +98,7 @@ export default function HomeClient({
           <div>
             <h2 className="text-2xl font-bold mb-4 text-primary">Sách mới</h2>
             <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-[24px] mb-10">
-              {isLoading
-                ? Array.from({ length: 8 }).map((_, i) => (
-                    <BookCardSkeleton key={i} />
-                  ))
-                : newestBooks
+              {newestBooks
                     .slice(0, 8)
                     .map((book, index) => (
                       <BookCard
@@ -143,13 +139,7 @@ export default function HomeClient({
               modules={[FreeMode, Pagination]}
               className="mySwiper !pt-[16px]"
             >
-              {isLoading
-                ? Array.from({ length: 4 }).map((_, i) => (
-                    <SwiperSlide key={i}>
-                      <BookCardSkeleton />
-                    </SwiperSlide>
-                  ))
-                : bestSellerBooks.map((book, index) => (
+              {bestSellerBooks.map((book, index) => (
                     <SwiperSlide key={index}>
                       <BookCard
                         book={book}
@@ -181,11 +171,7 @@ export default function HomeClient({
               Sách nổi bật
             </h2>
             <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-[24px] mb-10">
-              {isLoading
-                ? Array.from({ length: 8 }).map((_, i) => (
-                    <BookCardSkeleton key={i} />
-                  ))
-                : featuredBooks
+              {featuredBooks
                     .slice(0, 8)
                     .map((book, index) => (
                       <BookCard
