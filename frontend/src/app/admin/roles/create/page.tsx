@@ -39,16 +39,12 @@ export default function CreateRole() {
 
     toast
       .promise(
-        axios.post(
-          `${API_URL}/api/v1/${ADMIN_PREFIX}/roles/create`,
-          data,
-          {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
-            withCredentials: true,
-          }
-        ),
+        axios.post(`${API_URL}/api/v1/${ADMIN_PREFIX}/roles/create`, data, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+          withCredentials: true,
+        }),
         {
           pending: "Đang tạo vai trò...",
           success: {
@@ -64,7 +60,7 @@ export default function CreateRole() {
               return "Tạo vai trò thất bại";
             },
           },
-        }
+        },
       )
       .then(() => {
         setForm({

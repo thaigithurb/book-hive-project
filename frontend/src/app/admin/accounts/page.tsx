@@ -79,16 +79,13 @@ export default function Accounts() {
   }, [accounts]);
 
   const fetchAllAccounts = async () => {
-    const res = await axios.get(
-      `${API_URL}/api/v1/${ADMIN_PREFIX}/accounts`,
-      {
-        params: { page: 1, limit: 10000 },
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-        withCredentials: true,
-      }
-    );
+    const res = await axios.get(`${API_URL}/api/v1/${ADMIN_PREFIX}/accounts`, {
+      params: { page: 1, limit: 10000 },
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      withCredentials: true,
+    });
     return res.data.accounts || [];
   };
 
@@ -110,7 +107,7 @@ export default function Accounts() {
     "accounts",
     setEditedAccounts,
     editedAccounts,
-    "tài khoản"
+    "tài khoản",
   );
 
   // ĐỒNG BỘ page với URL mỗi khi searchParams thay đổi
@@ -129,7 +126,7 @@ export default function Accounts() {
             Authorization: `Bearer ${accessToken}`,
           },
           withCredentials: true,
-        }
+        },
       );
       setDeleteId(null);
       fetchData();
@@ -235,8 +232,8 @@ export default function Accounts() {
             pendingDeleteIds.length > 0
               ? `Bạn có chắc chắn muốn xóa ${pendingDeleteIds.length} mục đã chọn?`
               : deleteId
-              ? "Bạn có chắc chắn muốn xóa mục này?"
-              : ""
+                ? "Bạn có chắc chắn muốn xóa mục này?"
+                : ""
           }
           label="Xóa"
           labelCancel="Hủy"

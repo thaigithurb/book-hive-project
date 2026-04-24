@@ -3,7 +3,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 export function usePageChange(
   source: string,
   setPage: (page: number) => void,
-  side: string
+  side: string,
 ) {
   const router = useRouter();
   const searchParams = useSearchParams();

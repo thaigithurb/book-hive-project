@@ -13,7 +13,7 @@ export function useBulkSelect(
   resource: string,
   setEditedItems: (items: any[]) => void,
   editedItems: any[],
-  label: string
+  label: string,
 ) {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [bulkValue, setBulkValue] = useState<string>("");
@@ -29,7 +29,7 @@ export function useBulkSelect(
 
   const handleSelect = (id: string, checked: boolean) => {
     setSelectedIds((prev) =>
-      checked ? [...prev, id] : prev.filter((itemId) => itemId !== id)
+      checked ? [...prev, id] : prev.filter((itemId) => itemId !== id),
     );
   };
 
@@ -59,16 +59,12 @@ export function useBulkSelect(
     }
 
     const bulkPromise = axios
-      .patch(
-        `${API_URL}/api/v1/admin/${resource}/change-multi`,
-        payload,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-          withCredentials: true,
-        }
-      )
+      .patch(`${API_URL}/api/v1/admin/${resource}/change-multi`, payload, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+        withCredentials: true,
+      })
       .then(async () => {
         const allItems = await fetchAllItems();
         setEditedItems(allItems);
@@ -101,7 +97,7 @@ export function useBulkSelect(
             Authorization: `Bearer ${accessToken}`,
           },
           withCredentials: true,
-        }
+        },
       )
       .then(async () => {
         const allItems = await fetchAllItems();

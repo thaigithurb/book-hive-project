@@ -17,7 +17,7 @@ router.post(
   "/create",
   uploadImageHelper.single("image"),
   validateBook,
-  controller.create
+  controller.create,
 );
 
 router.get("/:slug", controller.getBySlug);
@@ -26,7 +26,7 @@ router.patch(
   "/edit/:slug",
   uploadImageHelper.single("image"),
   validateBook,
-  controller.edit
+  controller.edit,
 );
 
 router.get("/detail/:slug", controller.detail);

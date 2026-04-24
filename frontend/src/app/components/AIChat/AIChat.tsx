@@ -152,7 +152,7 @@ export default function AIChat() {
       setLoading(false);
     }
   };
- return (
+  return (
     <>
       {/* Floating Action Button */}
       <button
@@ -166,10 +166,12 @@ export default function AIChat() {
 
       {/* Chat Modal */}
       {isOpen && (
-        <div className="fixed bg-white rounded-lg shadow-2xl flex flex-col z-50 border border-gray-200 overflow-hidden transition-all duration-300
+        <div
+          className="fixed bg-white rounded-lg shadow-2xl flex flex-col z-50 border border-gray-200 overflow-hidden transition-all duration-300
                         bottom-20 right-4 w-[300px] h-[450px]
                         sm:bottom-24 sm:right-6 sm:w-80 sm:h-[500px]
-                        lg:w-96 lg:h-[600px]">
+                        lg:w-96 lg:h-[600px]"
+        >
           {/* Header */}
           <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-4 shrink-0">
             <h2 className="font-bold text-lg">AI Hỗ Trợ Book Hive</h2>
@@ -261,8 +263,16 @@ export default function AIChat() {
                             <a
                               key={actionIdx}
                               href={action.href || "#"}
-                              target={action.href?.startsWith("http") ? "_blank" : undefined}
-                              rel={action.href?.startsWith("http") ? "noopener noreferrer" : undefined}
+                              target={
+                                action.href?.startsWith("http")
+                                  ? "_blank"
+                                  : undefined
+                              }
+                              rel={
+                                action.href?.startsWith("http")
+                                  ? "noopener noreferrer"
+                                  : undefined
+                              }
                               className="px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white text-xs rounded-lg font-semibold transition-all shadow-sm text-center"
                             >
                               {action.label}
@@ -273,12 +283,17 @@ export default function AIChat() {
                               onClick={async () => {
                                 if (action.apiPath) {
                                   try {
-                                    const method = (action.method || "GET").toUpperCase();
+                                    const method = (
+                                      action.method || "GET"
+                                    ).toUpperCase();
                                     const response = await axios({
                                       method: method as any,
                                       url: `${process.env.NEXT_PUBLIC_API_URL}${action.apiPath}`,
                                     });
-                                    console.log("API Action Response:", response.data);
+                                    console.log(
+                                      "API Action Response:",
+                                      response.data,
+                                    );
                                   } catch (error) {
                                     console.error("API Action Error:", error);
                                   }
@@ -288,7 +303,7 @@ export default function AIChat() {
                             >
                               {action.label}
                             </button>
-                          )
+                          ),
                         )}
                       </div>
                     )}

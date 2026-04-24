@@ -2,7 +2,9 @@ const express = require("express");
 const router = express.Router();
 
 const controller = require("../controllers/category.controller");
-const { validateCategory } = require("../../../../middleware/validate.middleware");
+const {
+  validateCategory,
+} = require("../../../../middleware/validate.middleware");
 
 router.get("/", controller.index);
 

@@ -3,10 +3,7 @@ interface StatusFilterProps {
   onChange: (value: string) => void;
 }
 
-export default function StatusFilter({
-  value,
-  onChange,
-}: StatusFilterProps) {
+export default function StatusFilter({ value, onChange }: StatusFilterProps) {
   return (
     <>
       <div className="flex items-center gap-3">

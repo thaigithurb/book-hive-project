@@ -4,12 +4,10 @@ export function middleware(request: NextRequest) {
   const token = request.cookies.get("accessToken_user")?.value;
   const { pathname } = request.nextUrl;
 
-  const protectedRoutes = [
-    "/orders",
-  ];
+  const protectedRoutes = ["/orders"];
 
   const isProtectedRoute = protectedRoutes.some((route) =>
-    pathname.startsWith(route)
+    pathname.startsWith(route),
   );
 
   if (isProtectedRoute && !token) {
@@ -20,7 +18,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    "/((?!api|_next/static|_next/image|favicon.ico).*)",
-  ],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
 };

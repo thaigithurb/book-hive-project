@@ -32,7 +32,7 @@ module.exports.query = (req, res) => __awaiter(void 0, void 0, void 0, function*
         let userData = {
             orders: [],
             cart: null,
-            user: null
+            user: null,
         };
         const authHeader = req.headers.authorization;
         if (authHeader && authHeader.startsWith("Bearer ")) {
@@ -49,7 +49,7 @@ module.exports.query = (req, res) => __awaiter(void 0, void 0, void 0, function*
                 console.log("Chatbot Auth optional error:", err.message);
             }
         }
-        const bookIds = relatedBooks.map(b => b._id);
+        const bookIds = relatedBooks.map((b) => b._id);
         const relatedReviews = yield Review.find({ book: { $in: bookIds } })
             .populate("user", "fullName")
             .populate("book", "title")
@@ -58,7 +58,7 @@ module.exports.query = (req, res) => __awaiter(void 0, void 0, void 0, function*
             orders: userData.orders,
             cart: userData.cart,
             reviews: relatedReviews,
-            user: userData.user
+            user: userData.user,
         });
         const result = yield aiService.queryAI(question, context, relatedBooks);
         if (!result.success) {

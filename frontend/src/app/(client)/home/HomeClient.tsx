@@ -12,7 +12,13 @@ import { FreeMode, Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/free-mode";
 import "swiper/css/pagination";
-import FloatingElements from "@/app/components/FloatingElements.tsx/FloatingElements";
+import dynamic from "next/dynamic";
+
+const FloatingElements = dynamic(
+  () => import("@/app/components/FloatingElements.tsx/FloatingElements"),
+  { ssr: false },
+);
+
 import { useUser } from "@/contexts/UserContext";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -98,19 +104,17 @@ export default function HomeClient({
           <div>
             <h2 className="text-2xl font-bold mb-4 text-primary">Sách mới</h2>
             <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-[24px] mb-10">
-              {newestBooks
-                    .slice(0, 8)
-                    .map((book, index) => (
-                      <BookCard
-                        key={index}
-                        book={book}
-                        featured={false}
-                        newest={true}
-                        isFavorite={favoriteIds.includes(book._id)}
-                        onToggleFavorite={handleToggleFavorite}
-                        isLoggedIn={isLoggedIn}
-                      />
-                    ))}
+              {newestBooks.slice(0, 8).map((book, index) => (
+                <BookCard
+                  key={index}
+                  book={book}
+                  featured={false}
+                  newest={true}
+                  isFavorite={favoriteIds.includes(book._id)}
+                  onToggleFavorite={handleToggleFavorite}
+                  isLoggedIn={isLoggedIn}
+                />
+              ))}
             </div>
           </div>
           <div className="mb-10">
@@ -140,18 +144,18 @@ export default function HomeClient({
               className="mySwiper !pt-[16px]"
             >
               {bestSellerBooks.map((book, index) => (
-                    <SwiperSlide key={index}>
-                      <BookCard
-                        book={book}
-                        featured={false}
-                        newest={false}
-                        bestSeller={true}
-                        isFavorite={favoriteIds.includes(book._id)}
-                        onToggleFavorite={handleToggleFavorite}
-                        isLoggedIn={isLoggedIn}
-                      />
-                    </SwiperSlide>
-                  ))}
+                <SwiperSlide key={index}>
+                  <BookCard
+                    book={book}
+                    featured={false}
+                    newest={false}
+                    bestSeller={true}
+                    isFavorite={favoriteIds.includes(book._id)}
+                    onToggleFavorite={handleToggleFavorite}
+                    isLoggedIn={isLoggedIn}
+                  />
+                </SwiperSlide>
+              ))}
               <SwiperSlide>
                 <div className="flex items-center justify-center h-full min-h-[300px]">
                   <Link
@@ -171,19 +175,17 @@ export default function HomeClient({
               Sách nổi bật
             </h2>
             <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-[24px] mb-10">
-              {featuredBooks
-                    .slice(0, 8)
-                    .map((book, index) => (
-                      <BookCard
-                        key={index}
-                        book={book}
-                        featured={true}
-                        newest={false}
-                        isFavorite={favoriteIds.includes(book._id)}
-                        onToggleFavorite={handleToggleFavorite}
-                        isLoggedIn={isLoggedIn}
-                      />
-                    ))}
+              {featuredBooks.slice(0, 8).map((book, index) => (
+                <BookCard
+                  key={index}
+                  book={book}
+                  featured={true}
+                  newest={false}
+                  isFavorite={favoriteIds.includes(book._id)}
+                  onToggleFavorite={handleToggleFavorite}
+                  isLoggedIn={isLoggedIn}
+                />
+              ))}
             </div>
           </div>
         </div>

@@ -2,16 +2,13 @@
 import { useRouter } from "next/navigation";
 
 interface NewAddButtonProps {
-    label: string,
-    source: string
+  label: string;
+  source: string;
 }
 
 const ADMIN_PREFIX = process.env.NEXT_PUBLIC_ADMIN_PREFIX;
 
-export default function NewAddButton({
-  label,
-  source
-}: NewAddButtonProps) {
+export default function NewAddButton({ label, source }: NewAddButtonProps) {
   const router = useRouter();
   return (
     <>

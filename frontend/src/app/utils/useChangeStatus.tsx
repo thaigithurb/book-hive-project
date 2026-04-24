@@ -7,7 +7,7 @@ const accessToken = localStorage.getItem("accessToken_admin");
 
 export default function useChangeStatus(
   fetchData: () => void,
-  resource: String
+  resource: String,
 ) {
   return async (id: string, currentStatus: string) => {
     let newStatus;
@@ -27,7 +27,7 @@ export default function useChangeStatus(
             Authorization: `Bearer ${accessToken}`,
           },
           withCredentials: true,
-        }
+        },
       );
       fetchData();
       toast.success("Cập nhật trạng thái thành công!");

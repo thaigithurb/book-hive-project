@@ -21,7 +21,7 @@ export interface Book {
   createdAt?: Date;
   updatedAt?: Date;
   slug: string;
-  _id: string; 
+  _id: string;
   createdBy: UserRef;
   deletedBy: UserRef;
   updatedBy: UserRef;

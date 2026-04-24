@@ -69,7 +69,7 @@ export default function RoleForm({
               forecolor backcolor
             `,
             content_style: "body { font-family: Arial; font-size: 14px; }",
-            entity_encoding: "raw"
+            entity_encoding: "raw",
           }}
           onEditorChange={(content) => {
             editorHtmlRef.current = content;

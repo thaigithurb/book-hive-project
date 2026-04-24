@@ -74,7 +74,7 @@ module.exports.changeStatus = async (req, res) => {
       {
         status: status,
         updatedBy: req.user.id,
-      }
+      },
     );
 
     if (!account) {
@@ -102,7 +102,7 @@ module.exports.changeMulti = async (req, res) => {
       case "active":
         await Account.updateMany(
           { _id: { $in: ids } },
-          { status: "active", updatedBy: req.user.id }
+          { status: "active", updatedBy: req.user.id },
         );
         return res.status(200).json({
           message: `Cập nhật trạng thái thành công ${ids.length} tài khoản!`,
@@ -110,7 +110,7 @@ module.exports.changeMulti = async (req, res) => {
       case "inactive":
         await Account.updateMany(
           { _id: { $in: ids } },
-          { status: "inactive", updatedBy: req.user.id }
+          { status: "inactive", updatedBy: req.user.id },
         );
         return res.status(200).json({
           message: `Cập nhật trạng thái thành công ${ids.length} tài khoản!`,
@@ -118,7 +118,7 @@ module.exports.changeMulti = async (req, res) => {
       case "delete_all":
         await Account.updateMany(
           { _id: { $in: ids } },
-          { deleted: true, deletedAt: new Date(), deletedBy: req.user.id }
+          { deleted: true, deletedAt: new Date(), deletedBy: req.user.id },
         );
 
         // Sau khi xóa, cập nhật lại position cho các tài khoản còn lại
@@ -128,7 +128,7 @@ module.exports.changeMulti = async (req, res) => {
         for (let i = 0; i < accountsLeft.length; i++) {
           await Account.updateOne(
             { _id: accountsLeft[i]._id },
-            { position: i + 1 }
+            { position: i + 1 },
           );
         }
 
@@ -265,7 +265,7 @@ module.exports.delete = async (req, res) => {
         deleted: true,
         deletedBy: req.user.id,
         deletedAt: new Date(),
-      }
+      },
     );
 
     return res.status(200).json({
@@ -303,7 +303,7 @@ module.exports.resetPassword = async (req, res) => {
       {
         password: hashedPassword,
         updatedBy: req.user.id,
-      }
+      },
     );
 
     return res.status(200).json({

@@ -1,7 +1,11 @@
 import { useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 
-export function useSyncParams(setPage: (p: number) => void, setSortValue: (v: string) => void, setSort: (v: { key: string; value: 1 | -1 } | null) => void) {
+export function useSyncParams(
+  setPage: (p: number) => void,
+  setSortValue: (v: string) => void,
+  setSort: (v: { key: string; value: 1 | -1 } | null) => void,
+) {
   const searchParams = useSearchParams();
 
   useEffect(() => {
@@ -17,12 +21,12 @@ export function useSyncParams(setPage: (p: number) => void, setSortValue: (v: st
         urlSortKey === "title"
           ? `title_${urlSortValue === "asc" ? "asc" : "desc"}`
           : urlSortKey === "priceBuy"
-          ? `priceBuy_${urlSortValue === "asc" ? "asc" : "desc"}`
-          : urlSortKey === "createdAt"
-          ? `createdAt_${urlSortValue === "asc" ? "asc" : "desc"}`
-          : urlSortKey === "priceRentDay"
-          ? `priceRentDay_${urlSortValue === "asc" ? "asc" : "desc"}`
-          : "";
+            ? `priceBuy_${urlSortValue === "asc" ? "asc" : "desc"}`
+            : urlSortKey === "createdAt"
+              ? `createdAt_${urlSortValue === "asc" ? "asc" : "desc"}`
+              : urlSortKey === "priceRentDay"
+                ? `priceRentDay_${urlSortValue === "asc" ? "asc" : "desc"}`
+                : "";
       setSortValue(sortVal);
       setSort({
         key: urlSortKey,

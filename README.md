@@ -13,7 +13,7 @@ Các tài liệu kỹ thuật chi tiết có thể được tìm thấy trong th
 - [Sơ đồ thực thể quan hệ (ERD)](docs/ERD.md)
 - [Tài liệu API Specification](docs/API_spec.md)
 - [Kiến trúc hệ thống](docs/Architecture.md)
-- [Báo cáo tiến độ Sprint](docs/sprint-reports.md)
+- [Báo cáo tiến độ (6 Sprints)](docs/sprints/)
 
 ---
 

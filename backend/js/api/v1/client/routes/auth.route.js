@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express = require("express");
 const router = express.Router();
 const controller = require("../controllers/auth.controller");
-const { validateLogin, validateRegister } = require("../../../../middleware/validate.middleware");
+const { validateLogin, validateRegister, } = require("../../../../middleware/validate.middleware");
 router.post("/register", validateRegister, controller.register);
 router.post("/loginWithPassword", validateLogin, controller.loginWithPassword);
 router.post("/verify", controller.verify);

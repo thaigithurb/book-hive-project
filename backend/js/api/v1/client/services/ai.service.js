@@ -72,9 +72,7 @@ function buildDefaultActions(intent, hasBooks = false) {
         case "books_recommend":
         case "book_detail":
             if (!hasBooks) {
-                return [
-                    { type: "link", label: "Xem thêm", href: "/books" },
-                ];
+                return [{ type: "link", label: "Xem thêm", href: "/books" }];
             }
             return [{ type: "link", label: "Xem danh sách sách", href: "/books" }];
         case "cart":
@@ -198,7 +196,7 @@ function extractKeywords(raw) {
         "văn",
         "học",
         "tác",
-        "giả"
+        "giả",
     ]);
     const words = lower
         .split(/[^a-z0-9àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]+/i)
@@ -220,11 +218,54 @@ function extractKeywords(raw) {
         python: ["python", "django", "flask"],
         java: ["java", "spring"],
         sql: ["sql", "database", "cơ sở dữ liệu", "mysql", "postgres", "mongodb"],
-        cook: ["nấu ăn", "món ăn", "ẩm thực", "cooking", "recipe", "cookbook", "vào bếp", "công thức"],
-        children: ["thiếu nhi", "trẻ em", "ehon", "truyện tranh", "manga", "comic", "kids", "cổ tích"],
-        business: ["kinh doanh", "marketing", "khởi nghiệp", "quản trị", "lãnh đạo", "startup", "finance", "tài chính"],
-        history: ["lịch sử", "sử việt", "triều đại", "chiến tranh", "nhan vat lich su", "history"],
-        education: ["giáo khoa", "tham khảo", "ngoại ngữ", "tiếng anh", "ielts", "toeic", "học tập", "sgk"],
+        cook: [
+            "nấu ăn",
+            "món ăn",
+            "ẩm thực",
+            "cooking",
+            "recipe",
+            "cookbook",
+            "vào bếp",
+            "công thức",
+        ],
+        children: [
+            "thiếu nhi",
+            "trẻ em",
+            "ehon",
+            "truyện tranh",
+            "manga",
+            "comic",
+            "kids",
+            "cổ tích",
+        ],
+        business: [
+            "kinh doanh",
+            "marketing",
+            "khởi nghiệp",
+            "quản trị",
+            "lãnh đạo",
+            "startup",
+            "finance",
+            "tài chính",
+        ],
+        history: [
+            "lịch sử",
+            "sử việt",
+            "triều đại",
+            "chiến tranh",
+            "nhan vat lich su",
+            "history",
+        ],
+        education: [
+            "giáo khoa",
+            "tham khảo",
+            "ngoại ngữ",
+            "tiếng anh",
+            "ielts",
+            "toeic",
+            "học tập",
+            "sgk",
+        ],
         novel: ["tiểu thuyết", "truyện ngắn", "văn học", "tác phẩm", "novel"],
     };
     const expanded = new Set();
@@ -444,7 +485,8 @@ Bạn không chỉ tư vấn sách, mà còn là người quản gia tận tâm 
                 message = aiContent.replace(/```json|```/g, "").trim();
             }
             else {
-                message = "Rất tiếc, em gặp một chút trục trặc khi suy nghĩ. Anh có thể hỏi lại được không?";
+                message =
+                    "Rất tiếc, em gặp một chút trục trặc khi suy nghĩ. Anh có thể hỏi lại được không?";
             }
             intent = fallbackIntent;
             actions = buildDefaultActions(fallbackIntent, hasBooks);
@@ -560,13 +602,14 @@ module.exports.findRelatedBooks = (Book_1, query_1, ...args_1) => __awaiter(void
             }
         }
         if (keywords.length >= 2) {
-            const cleanedPhrase = query.replace(/(sách|book|của|được|tìm|kiếm|đánh giá|nhận xét|review|mọi người|như thế nào|thế nào)/gi, "").trim();
+            const cleanedPhrase = query
+                .replace(/(sách|book|của|được|tìm|kiếm|đánh giá|nhận xét|review|mọi người|như thế nào|thế nào)/gi, "")
+                .trim();
             if (cleanedPhrase.length >= 3) {
                 const phraseRegex = new RegExp(cleanedPhrase, "i");
-                const phraseBooks = yield Book.find(Object.assign(Object.assign({}, baseFind), { $or: [
-                        { title: phraseRegex },
-                        { author: phraseRegex }
-                    ] })).sort(sort).limit(limit);
+                const phraseBooks = yield Book.find(Object.assign(Object.assign({}, baseFind), { $or: [{ title: phraseRegex }, { author: phraseRegex }] }))
+                    .sort(sort)
+                    .limit(limit);
                 if (phraseBooks.length > 0)
                     return phraseBooks;
             }
@@ -608,11 +651,7 @@ module.exports.findRelatedBooks = (Book_1, query_1, ...args_1) => __awaiter(void
             books = yield Book.find({
                 deleted: false,
                 status: "active",
-                $or: [
-                    { title: regex },
-                    { author: regex },
-                    { description: regex },
-                ],
+                $or: [{ title: regex }, { author: regex }, { description: regex }],
             })
                 .sort({ soldCount: -1, featured: -1, createdAt: -1 })
                 .limit(limit);

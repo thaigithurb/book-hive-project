@@ -32,7 +32,9 @@ module.exports.add = async (req, res) => {
       cart = new Cart({ userId, items: [] });
     }
 
-    const existing = cart.items.find((item) => item.bookId.toString() === bookId);
+    const existing = cart.items.find(
+      (item) => item.bookId.toString() === bookId,
+    );
 
     if (existing) {
       existing.quantity += quantity;
@@ -54,7 +56,7 @@ module.exports.add = async (req, res) => {
   }
 };
 
-// [PATCH] /api/v1/cart/edit/:id 
+// [PATCH] /api/v1/cart/edit/:id
 module.exports.editItem = async (req, res) => {
   try {
     const userId = req.user.id;

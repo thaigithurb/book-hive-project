@@ -180,7 +180,7 @@ module.exports.delete = async (req, res) => {
     if (role) {
       await Role.updateOne(
         { _id: id },
-        { deleted: true, deletedBy: req.user.id, deletedAt: new Date() }
+        { deleted: true, deletedBy: req.user.id, deletedAt: new Date() },
       );
       res.status(200).json({ message: "Đã xóa vai trò!" });
     } else {
@@ -203,7 +203,7 @@ module.exports.changeMulti = async (req, res) => {
       case "delete_all":
         await Role.updateMany(
           { _id: { $in: ids } },
-          { deleted: true, deletedAt: new Date(), deletedBy: req.user.id }
+          { deleted: true, deletedAt: new Date(), deletedBy: req.user.id },
         );
 
         return res.status(200).json({
@@ -246,7 +246,7 @@ module.exports.createPerm = async (req, res) => {
       key,
       label,
       group,
-      slug, 
+      slug,
       createdBy: req.user.id,
     });
     await newPerm.save();
@@ -304,7 +304,7 @@ module.exports.editPerm = async (req, res) => {
       {
         slug: slug,
       },
-      updateData
+      updateData,
     );
     return res.status(200).json({ message: "Cập nhật quyền thành công!" });
   } catch (err) {
@@ -330,7 +330,7 @@ module.exports.deletePerm = async (req, res) => {
       },
       {
         deleted: true,
-      }
+      },
     );
 
     return res.status(200).json({ message: "Xóa quyền thành công!" });

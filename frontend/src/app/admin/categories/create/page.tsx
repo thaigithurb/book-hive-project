@@ -49,7 +49,7 @@ export default function Create() {
               Authorization: `Bearer ${accessToken}`,
             },
             withCredentials: true,
-          }
+          },
         ),
         {
           pending: "Đang tạo thể loại...",
@@ -66,7 +66,7 @@ export default function Create() {
               return "Tạo thể loại thất bại";
             },
           },
-        }
+        },
       )
       .then(() => {
         setForm({

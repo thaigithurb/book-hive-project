@@ -1,7 +1,7 @@
 interface SearchProps {
   value: string;
   onChange: (value: string) => void;
-  label: string
+  label: string;
 }
 
 export default function Search({ value, onChange, label }: SearchProps) {

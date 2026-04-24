@@ -3,6 +3,6 @@
     "outDir": "js",
     "target": "ES6",
     "module": "commonjs",
-    "removeComments": true,
-  },
+    "removeComments": true
+  }
 }

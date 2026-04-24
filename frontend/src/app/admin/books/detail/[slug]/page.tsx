@@ -67,7 +67,9 @@ export default function BookDetail() {
               />
             </div>
             <div>
-              <h1 className="text-2xl font-bold mb-3 text-primary">{book.title}</h1>
+              <h1 className="text-2xl font-bold mb-3 text-primary">
+                {book.title}
+              </h1>
               <p className="text-[17.6px] text-slate-400 mb-2">
                 Tác giả: {book.author}
               </p>

@@ -88,16 +88,12 @@ export default function Create() {
 
     toast
       .promise(
-        axios.post(
-          `${API_URL}/api/v1/${ADMIN_PREFIX}/books/create`,
-          formData,
-          {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
-            withCredentials: true,
-          }
-        ),
+        axios.post(`${API_URL}/api/v1/${ADMIN_PREFIX}/books/create`, formData, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+          withCredentials: true,
+        }),
         {
           pending: "Đang tạo sách...",
           success: {
@@ -113,7 +109,7 @@ export default function Create() {
               return "Tạo sách thất bại";
             },
           },
-        }
+        },
       )
       .then(() => {
         setForm({

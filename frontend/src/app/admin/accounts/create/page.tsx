@@ -84,7 +84,7 @@ export default function CreateAccount() {
               Authorization: `Bearer ${accessToken}`,
             },
             withCredentials: true,
-          }
+          },
         ),
         {
           pending: "Đang tạo tài khoản...",
@@ -101,7 +101,7 @@ export default function CreateAccount() {
               return "Tạo tài khoản thất bại";
             },
           },
-        }
+        },
       )
       .then(() => {
         setForm({

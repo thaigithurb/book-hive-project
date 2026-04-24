@@ -28,7 +28,7 @@ module.exports.query = async (req, res) => {
     let userData = {
       orders: [],
       cart: null,
-      user: null
+      user: null,
     };
 
     const authHeader = req.headers.authorization;
@@ -36,24 +36,26 @@ module.exports.query = async (req, res) => {
       try {
         const token = authHeader.split(" ")[1];
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        
+
         // Lấy 3 đơn hàng gần nhất
         userData.orders = await Order.find({ "userInfo.email": decoded.email })
           .sort({ createdAt: -1 })
           .limit(3);
-        
+
         // Lấy giỏ hàng
         userData.cart = await Cart.findOne({ userId: decoded.id });
-        
+
         // Lấy thông tin user
-        userData.user = await User.findOne({ _id: decoded.id }).select("fullName email");
+        userData.user = await User.findOne({ _id: decoded.id }).select(
+          "fullName email",
+        );
       } catch (err) {
         console.log("Chatbot Auth optional error:", err.message);
       }
     }
 
     // 3. Lấy đánh giá (reviews) cho các cuốn sách liên quan
-    const bookIds = relatedBooks.map(b => b._id);
+    const bookIds = relatedBooks.map((b) => b._id);
     const relatedReviews = await Review.find({ book: { $in: bookIds } })
       .populate("user", "fullName")
       .populate("book", "title")
@@ -64,7 +66,7 @@ module.exports.query = async (req, res) => {
       orders: userData.orders,
       cart: userData.cart,
       reviews: relatedReviews,
-      user: userData.user
+      user: userData.user,
     });
 
     // 5. Query AI

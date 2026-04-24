@@ -54,7 +54,7 @@ export default function EditPermission() {
             Authorization: `Bearer ${accessToken}`,
           },
           withCredentials: true,
-        }
+        },
       )
       .then((res) => {
         const perm = res.data.perm;
@@ -101,7 +101,7 @@ export default function EditPermission() {
               Authorization: `Bearer ${accessToken}`,
             },
             withCredentials: true,
-          }
+          },
         ),
         {
           pending: "Đang cập nhật quyền...",
@@ -118,7 +118,7 @@ export default function EditPermission() {
               return "Cập nhật quyền thất bại";
             },
           },
-        }
+        },
       )
       .finally(() => setLoading(false));
   };

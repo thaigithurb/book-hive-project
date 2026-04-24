@@ -2,7 +2,10 @@ const express = require("express");
 const router = express.Router();
 
 const controller = require("../controllers/role.controller");
-const { validateRole, validatePermission } = require("../../../../middleware/validate.middleware");
+const {
+  validateRole,
+  validatePermission,
+} = require("../../../../middleware/validate.middleware");
 
 router.get("/", controller.index);
 

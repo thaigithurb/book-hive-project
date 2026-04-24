@@ -5,7 +5,7 @@ const permissionRoutes = require("./permission.route");
 const accountRoutes = require("./account.route");
 const authRoutes = require("./auth.route");
 const { adminAuth } = require("../../../../middleware/auth.middleware");
-const { checkPermission } = require("../../../../middleware/permission.middleware");
+const { checkPermission, } = require("../../../../middleware/permission.middleware");
 module.exports = (app) => {
     const version = "/api/v1";
     const prefixAdmin = "/admin";

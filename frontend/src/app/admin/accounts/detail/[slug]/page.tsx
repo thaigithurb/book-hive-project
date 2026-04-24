@@ -31,7 +31,7 @@ export default function AccountDetail() {
               Authorization: `Bearer ${accessToken}`,
             },
             withCredentials: true,
-          }
+          },
         );
         setAccount(res.data.account);
       } catch (err) {

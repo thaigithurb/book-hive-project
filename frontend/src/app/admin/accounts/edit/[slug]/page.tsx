@@ -83,7 +83,7 @@ export default function EditBook() {
               Authorization: `Bearer ${accessToken}`,
             },
             withCredentials: true,
-          }
+          },
         );
         const account = res.data.account;
         setForm({
@@ -124,7 +124,7 @@ export default function EditBook() {
               Authorization: `Bearer ${accessToken}`,
             },
             withCredentials: true,
-          }
+          },
         ),
         {
           pending: "Đang cập nhật...",
@@ -141,7 +141,7 @@ export default function EditBook() {
               return "Cập nhật sách thất bại";
             },
           },
-        }
+        },
       )
       .finally(() => setLoading(false));
   };
@@ -157,7 +157,9 @@ export default function EditBook() {
           <div className="max-w-2xl mx-auto mt-8 bg-white p-8 rounded-xl shadow relative">
             <BackButton className="absolute -top-10 -left-60 flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 transition cursor-pointer" />
 
-            <h1 className="text-2xl font-bold mb-6 text-primary">Chỉnh sửa sách</h1>
+            <h1 className="text-2xl font-bold mb-6 text-primary">
+              Chỉnh sửa sách
+            </h1>
 
             <div>
               <AccountForm
@@ -180,7 +182,9 @@ export default function EditBook() {
                 <button
                   type="button"
                   className=" transition-colors duration-200 bg-[#979797] cursor-pointer hover:bg-[#676767] text-white px-2 py-2 rounded font-semibold mt-4"
-                  onClick={() => router.push(`/admin/accounts/reset-password/${slug}`)}
+                  onClick={() =>
+                    router.push(`/admin/accounts/reset-password/${slug}`)
+                  }
                 >
                   Reset mật khẩu
                 </button>

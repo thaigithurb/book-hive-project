@@ -34,7 +34,7 @@ module.exports.bookReviews = (req, res) => __awaiter(void 0, void 0, void 0, fun
         res.status(200).json({
             records: records,
             total,
-            limit
+            limit,
         });
     }
     catch (error) {

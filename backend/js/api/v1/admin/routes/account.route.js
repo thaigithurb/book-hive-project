@@ -4,7 +4,7 @@ const express = require("express");
 const router = express.Router();
 const controller = require("../controllers/account.controller");
 const uploadImageHelper = require("../../../../helpers/uploadImage");
-const { validateAccount, validateResetPassword } = require("../../../../middleware/validate.middleware");
+const { validateAccount, validateResetPassword, } = require("../../../../middleware/validate.middleware");
 router.get("/", controller.index);
 router.patch("/change-status/:status/:id", controller.changeStatus);
 router.patch("/change-multi", controller.changeMulti);

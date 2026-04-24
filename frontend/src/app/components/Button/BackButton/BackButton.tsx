@@ -4,16 +4,12 @@ interface BackButtonProps {
   className?: string;
 }
 
-export const BackButton = ( {className = "" }: BackButtonProps) => {
+export const BackButton = ({ className = "" }: BackButtonProps) => {
   const router = useRouter();
 
   return (
     <>
-      <button
-        type="button"
-        className={className}
-        onClick={() => router.back()}
-      >
+      <button type="button" className={className} onClick={() => router.back()}>
         <svg
           xmlns="http://www.w3.org/2000/svg"
           className="w-5 h-5 text-primary"
@@ -33,5 +29,3 @@ export const BackButton = ( {className = "" }: BackButtonProps) => {
     </>
   );
 };
-
-

@@ -10,25 +10,25 @@ const chatBotRoutes = require("./chatbot.route");
 const { clientAuth } = require("../../../../middleware/auth.middleware");
 
 module.exports = (app) => {
-    const version = "/api/v1";
+  const version = "/api/v1";
 
-    app.use(version + "/books" , bookRoutes);
+  app.use(version + "/books", bookRoutes);
 
-    app.use(version + "/orders", orderRoutes);
+  app.use(version + "/orders", orderRoutes);
 
-    app.use(version + "/payment", paymentRoutes);
+  app.use(version + "/payment", paymentRoutes);
 
-    app.use(version + "/cart", clientAuth, cartRoutes);
+  app.use(version + "/cart", clientAuth, cartRoutes);
 
-    app.use(version + "/auth", authRoutes);
+  app.use(version + "/auth", authRoutes);
 
-    app.use(version + "/users", userRoutes);
+  app.use(version + "/users", userRoutes);
 
-    app.use(version + "/favorites", clientAuth, favoriteRoutes);
+  app.use(version + "/favorites", clientAuth, favoriteRoutes);
 
-    app.use(version + "/reviews", reviewRoutes);
+  app.use(version + "/reviews", reviewRoutes);
 
-    app.use(version + "/chatbot", chatBotRoutes);
-}
+  app.use(version + "/chatbot", chatBotRoutes);
+};
 
 export {};

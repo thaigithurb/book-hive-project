@@ -48,7 +48,7 @@ export default function AccountResetPassword() {
               Authorization: `Bearer ${accessToken}`,
             },
             withCredentials: true,
-          }
+          },
         ),
         {
           pending: "Đang cập nhật...",
@@ -65,7 +65,7 @@ export default function AccountResetPassword() {
               return "Cập nhật mật khẩu thất bại";
             },
           },
-        }
+        },
       )
       .then(() => {
         setNewPassword("");

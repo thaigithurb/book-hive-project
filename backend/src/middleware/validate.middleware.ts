@@ -105,7 +105,11 @@ module.exports.validateAccount = (req, res, next) => {
 module.exports.validateResetPassword = (req, res, next) => {
   const { newPassword } = req.body;
 
-  if (!newPassword || typeof newPassword !== "string" || newPassword.length < 6) {
+  if (
+    !newPassword ||
+    typeof newPassword !== "string" ||
+    newPassword.length < 6
+  ) {
     return res
       .status(400)
       .json({ message: "Mật khẩu phải có ít nhất 6 ký tự!" });
@@ -135,7 +139,9 @@ module.exports.validateCheckout = (req, res, next) => {
   const { userInfo } = req.body;
 
   if (!userInfo || typeof userInfo !== "object") {
-    return res.status(400).json({ message: "Thông tin người dùng không hợp lệ!" });
+    return res
+      .status(400)
+      .json({ message: "Thông tin người dùng không hợp lệ!" });
   }
 
   const { fullName, email, phone, address } = userInfo;
@@ -150,11 +156,15 @@ module.exports.validateCheckout = (req, res, next) => {
   }
 
   if (!phone || !/^\d{10,11}$/.test(phone.replace(/\D/g, ""))) {
-    return res.status(400).json({ message: "Số điện thoại phải có 10-11 chữ số!" });
+    return res
+      .status(400)
+      .json({ message: "Số điện thoại phải có 10-11 chữ số!" });
   }
 
   if (!address || typeof address !== "string" || address.trim().length < 5) {
-    return res.status(400).json({ message: "Địa chỉ phải có ít nhất 5 ký tự!" });
+    return res
+      .status(400)
+      .json({ message: "Địa chỉ phải có ít nhất 5 ký tự!" });
   }
 
   next();

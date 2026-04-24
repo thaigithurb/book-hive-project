@@ -10,7 +10,8 @@ module.exports.index = async (req, res) => {
     const favorites = await Favorite.find({ userId })
       .skip(skip)
       .limit(limit)
-      .populate("bookId").sort({ createdAt: -1 });
+      .populate("bookId")
+      .sort({ createdAt: -1 });
     const total = await Favorite.countDocuments({ userId });
 
     return res.status(200).json({ favorites, total, limit });

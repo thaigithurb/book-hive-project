@@ -119,7 +119,7 @@ export default function Books() {
     "books",
     setEditedBooks,
     editedBooks,
-    "sách"
+    "sách",
   );
 
   // hàm xóa 1 item
@@ -134,7 +134,7 @@ export default function Books() {
             Authorization: `Bearer ${accessToken}`,
           },
           withCredentials: true,
-        }
+        },
       );
       setDeleteId(null);
       fetchData();
@@ -238,8 +238,8 @@ export default function Books() {
             pendingDeleteIds.length > 0
               ? `Bạn có chắc chắn muốn xóa ${pendingDeleteIds.length} mục đã chọn?`
               : deleteId
-              ? "Bạn có chắc chắn muốn xóa mục này?"
-              : ""
+                ? "Bạn có chắc chắn muốn xóa mục này?"
+                : ""
           }
           label="Xóa"
           labelCancel="Hủy"

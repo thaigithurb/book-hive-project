@@ -29,7 +29,7 @@ module.exports.bookReviews = async (req, res) => {
     res.status(200).json({
       records: records,
       total,
-      limit
+      limit,
     });
   } catch (error) {
     console.error(error);

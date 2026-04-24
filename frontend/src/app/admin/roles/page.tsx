@@ -104,7 +104,7 @@ export default function Roles() {
     "roles",
     setEditedRoles,
     editedRoles,
-    "vai trò"
+    "vai trò",
   );
 
   const handleDelete = async () => {
@@ -117,7 +117,7 @@ export default function Roles() {
             Authorization: `Bearer ${accessToken}`,
           },
           withCredentials: true,
-        }
+        },
       );
       setDeleteId(null);
       fetchData();
@@ -222,8 +222,8 @@ export default function Roles() {
             pendingDeleteIds.length > 0
               ? `Bạn có chắc chắn muốn xóa ${pendingDeleteIds.length} mục đã chọn?`
               : deleteId
-              ? "Bạn có chắc chắn muốn xóa mục này?"
-              : ""
+                ? "Bạn có chắc chắn muốn xóa mục này?"
+                : ""
           }
           label="Xóa"
           labelCancel="Hủy"

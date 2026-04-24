@@ -29,15 +29,18 @@ export default function Books() {
   const [sort, setSort] = useState<{ key: string; value: 1 | -1 } | null>(null);
   const limit = 12;
   const [sortValue, setSortValue] = useState("");
-  const sortOptions = useMemo(() => [
-    { value: "", label: "Sắp xếp" },
-    { value: "title_asc", label: "Tên A-Z" },
-    { value: "title_desc", label: "Tên Z-A" },
-    { value: "priceBuy_asc", label: "Giá mua tăng" },
-    { value: "priceBuy_desc", label: "Giá mua giảm" },
-    { value: "createdAt_desc", label: "Mới nhất" },
-    { value: "createdAt_asc", label: "Cũ nhất" },
-  ], []);
+  const sortOptions = useMemo(
+    () => [
+      { value: "", label: "Sắp xếp" },
+      { value: "title_asc", label: "Tên A-Z" },
+      { value: "title_desc", label: "Tên Z-A" },
+      { value: "priceBuy_asc", label: "Giá mua tăng" },
+      { value: "priceBuy_desc", label: "Giá mua giảm" },
+      { value: "createdAt_desc", label: "Mới nhất" },
+      { value: "createdAt_asc", label: "Cũ nhất" },
+    ],
+    [],
+  );
 
   const resultsRef = useRef<any>(null);
   const { favoriteIds, setFavoriteIds, isLoggedIn } = useFetchFavorites();
@@ -46,7 +49,10 @@ export default function Books() {
 
   useEffect(() => {
     if (!loading) {
-      resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      resultsRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
     }
   }, [page, sortValue, loading]);
 
@@ -70,7 +76,7 @@ export default function Books() {
         );
         setFavoriteIds((prev) => prev.filter((id) => id !== bookId));
       }
-    } catch (err) { }
+    } catch (err) {}
   };
 
   // xử lí load data cùng với lọc và tìm kiếm
@@ -171,7 +177,10 @@ export default function Books() {
             </div>
           </div>
 
-          <div ref={resultsRef} className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-[24px] mb-8">
+          <div
+            ref={resultsRef}
+            className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-[24px] mb-8"
+          >
             {loading ? (
               Array.from({ length: 12 }).map((_, i) => (
                 <BookCardSkeleton key={i} />

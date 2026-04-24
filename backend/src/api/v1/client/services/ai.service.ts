@@ -89,9 +89,13 @@ function detectIntent(questionRaw: string): AiStructuredResponse["intent"] {
   const q = (questionRaw || "").toLowerCase();
   if (/(đăng\s*nhập|login|log\s*in)/i.test(q)) return "auth_login";
   if (/(đăng\s*ký|register|sign\s*up)/i.test(q)) return "auth_register";
-  if (/(giỏ\s*hàng|cart|thêm\s*vào\s*giỏ|xóa\s*khỏi\s*giỏ|trong\s*giỏ)/i.test(q))
+  if (
+    /(giỏ\s*hàng|cart|thêm\s*vào\s*giỏ|xóa\s*khỏi\s*giỏ|trong\s*giỏ)/i.test(q)
+  )
     return "cart";
-  if (/(đơn\s*hàng|order|trạng\s*thái\s*đơn|hủy\s*đơn|mua\s*gì|đã\s*mua)/i.test(q))
+  if (
+    /(đơn\s*hàng|order|trạng\s*thái\s*đơn|hủy\s*đơn|mua\s*gì|đã\s*mua)/i.test(q)
+  )
     return "order";
   if (/(thanh\s*toán|payment|vnpay|momo|cod|chuyển\s*khoản)/i.test(q))
     return "payment";
@@ -114,9 +118,7 @@ function buildDefaultActions(
     case "book_detail":
       // If no books found, show "View More" button to /books
       if (!hasBooks) {
-        return [
-          { type: "link", label: "Xem thêm", href: "/books" },
-        ];
+        return [{ type: "link", label: "Xem thêm", href: "/books" }];
       }
       return [{ type: "link", label: "Xem danh sách sách", href: "/books" }];
     case "cart":
@@ -242,7 +244,7 @@ function extractKeywords(raw: string) {
     "văn",
     "học",
     "tác",
-    "giả"
+    "giả",
   ]);
 
   const words = lower
@@ -268,11 +270,54 @@ function extractKeywords(raw: string) {
     python: ["python", "django", "flask"],
     java: ["java", "spring"],
     sql: ["sql", "database", "cơ sở dữ liệu", "mysql", "postgres", "mongodb"],
-    cook: ["nấu ăn", "món ăn", "ẩm thực", "cooking", "recipe", "cookbook", "vào bếp", "công thức"],
-    children: ["thiếu nhi", "trẻ em", "ehon", "truyện tranh", "manga", "comic", "kids", "cổ tích"],
-    business: ["kinh doanh", "marketing", "khởi nghiệp", "quản trị", "lãnh đạo", "startup", "finance", "tài chính"],
-    history: ["lịch sử", "sử việt", "triều đại", "chiến tranh", "nhan vat lich su", "history"],
-    education: ["giáo khoa", "tham khảo", "ngoại ngữ", "tiếng anh", "ielts", "toeic", "học tập", "sgk"],
+    cook: [
+      "nấu ăn",
+      "món ăn",
+      "ẩm thực",
+      "cooking",
+      "recipe",
+      "cookbook",
+      "vào bếp",
+      "công thức",
+    ],
+    children: [
+      "thiếu nhi",
+      "trẻ em",
+      "ehon",
+      "truyện tranh",
+      "manga",
+      "comic",
+      "kids",
+      "cổ tích",
+    ],
+    business: [
+      "kinh doanh",
+      "marketing",
+      "khởi nghiệp",
+      "quản trị",
+      "lãnh đạo",
+      "startup",
+      "finance",
+      "tài chính",
+    ],
+    history: [
+      "lịch sử",
+      "sử việt",
+      "triều đại",
+      "chiến tranh",
+      "nhan vat lich su",
+      "history",
+    ],
+    education: [
+      "giáo khoa",
+      "tham khảo",
+      "ngoại ngữ",
+      "tiếng anh",
+      "ielts",
+      "toeic",
+      "học tập",
+      "sgk",
+    ],
     novel: ["tiểu thuyết", "truyện ngắn", "văn học", "tác phẩm", "novel"],
   };
 
@@ -387,17 +432,25 @@ function guessCategorySlugsFromQuery(query: string) {
   const slugs = new Set<string>();
 
   // Technology / programming
-  if (/(lap trinh|programming|coding|code|developer|dev|javascript|typescript|node|react|python|java|sql|it|phan mem)/i.test(q)) {
+  if (
+    /(lap trinh|programming|coding|code|developer|dev|javascript|typescript|node|react|python|java|sql|it|phan mem)/i.test(
+      q,
+    )
+  ) {
     slugs.add("cong-nghe");
   }
 
   // Cooking
-  if (/(nau an|mon an|am thuc|cook|cooking|recipe|bep|cong thuc|noi tro)/i.test(q)) {
+  if (
+    /(nau an|mon an|am thuc|cook|cooking|recipe|bep|cong thuc|noi tro)/i.test(q)
+  ) {
     slugs.add("nau-an");
   }
 
   // Mystery / Detective
-  if (/(trinh tham|bi an|detective|mystery|pha an|toi pham|trinh sat)/i.test(q)) {
+  if (
+    /(trinh tham|bi an|detective|mystery|pha an|toi pham|trinh sat)/i.test(q)
+  ) {
     slugs.add("trinh-tham");
   }
 
@@ -412,7 +465,11 @@ function guessCategorySlugsFromQuery(query: string) {
   }
 
   // Life skills
-  if (/(ky nang song|growth|phat trien|giao tiep|ung xu|thoi quen|atomic|habits|dac nhan tam)/i.test(q)) {
+  if (
+    /(ky nang song|growth|phat trien|giao tiep|ung xu|thoi quen|atomic|habits|dac nhan tam)/i.test(
+      q,
+    )
+  ) {
     slugs.add("ky-nang-song");
   }
 
@@ -424,7 +481,11 @@ function guessCategorySlugsFromQuery(query: string) {
   }
 
   // Business / Marketing
-  if (/(kinh doanh|marketing|khoi nghiep|quan tri|tai chinh|money|business|startup)/i.test(q)) {
+  if (
+    /(kinh doanh|marketing|khoi nghiep|quan tri|tai chinh|money|business|startup)/i.test(
+      q,
+    )
+  ) {
     slugs.add("kinh-doanh");
   }
 
@@ -558,7 +619,8 @@ Bạn không chỉ tư vấn sách, mà còn là người quản gia tận tâm 
       if (aiContent && aiContent.length > 10) {
         message = aiContent.replace(/```json|```/g, "").trim();
       } else {
-        message = "Rất tiếc, em gặp một chút trục trặc khi suy nghĩ. Anh có thể hỏi lại được không?";
+        message =
+          "Rất tiếc, em gặp một chút trục trặc khi suy nghĩ. Anh có thể hỏi lại được không?";
       }
       intent = fallbackIntent;
       actions = buildDefaultActions(fallbackIntent, hasBooks);
@@ -689,18 +751,22 @@ module.exports.findRelatedBooks = async (
 
     // Pass 1.5: Thử tìm kiếm chính xác theo cụm từ (Phrase match) cho cả Tên sách và Tác giả
     if (keywords.length >= 2) {
-       const cleanedPhrase = query.replace(/(sách|book|của|được|tìm|kiếm|đánh giá|nhận xét|review|mọi người|như thế nào|thế nào)/gi, "").trim();
-       if (cleanedPhrase.length >= 3) {
-         const phraseRegex = new RegExp(cleanedPhrase, "i");
-         const phraseBooks = await Book.find({ 
-           ...baseFind, 
-           $or: [
-             { title: phraseRegex },
-             { author: phraseRegex }
-           ]
-         }).sort(sort).limit(limit);
-         if (phraseBooks.length > 0) return phraseBooks;
-       }
+      const cleanedPhrase = query
+        .replace(
+          /(sách|book|của|được|tìm|kiếm|đánh giá|nhận xét|review|mọi người|như thế nào|thế nào)/gi,
+          "",
+        )
+        .trim();
+      if (cleanedPhrase.length >= 3) {
+        const phraseRegex = new RegExp(cleanedPhrase, "i");
+        const phraseBooks = await Book.find({
+          ...baseFind,
+          $or: [{ title: phraseRegex }, { author: phraseRegex }],
+        })
+          .sort(sort)
+          .limit(limit);
+        if (phraseBooks.length > 0) return phraseBooks;
+      }
     }
 
     if (keywords.length > 0) {
@@ -708,7 +774,7 @@ module.exports.findRelatedBooks = async (
         .map((k) => k.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
         .join("|");
       const regex = new RegExp(pattern, "i");
-      
+
       if (!books || books.length === 0) {
         // Search: title, author, description
         books = await Book.find({
@@ -749,11 +815,7 @@ module.exports.findRelatedBooks = async (
       books = await Book.find({
         deleted: false,
         status: "active",
-        $or: [
-          { title: regex },
-          { author: regex },
-          { description: regex },
-        ],
+        $or: [{ title: regex }, { author: regex }, { description: regex }],
       })
         .sort({ soldCount: -1, featured: -1, createdAt: -1 })
         .limit(limit);

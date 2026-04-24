@@ -1,4 +1,9 @@
-import { Editor } from "@tinymce/tinymce-react";
+import dynamic from "next/dynamic";
+
+const Editor = dynamic(
+  () => import("@tinymce/tinymce-react").then((mod) => mod.Editor),
+  { ssr: false },
+);
 import { input } from "framer-motion/client";
 import { useRef } from "react";
 

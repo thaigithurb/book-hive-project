@@ -76,13 +76,13 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   const addToCart = (newItem: CartItem) => {
     setItems((prevItems) => {
       const existingItem = prevItems.find(
-        (item) => item.bookId === newItem.bookId
+        (item) => item.bookId === newItem.bookId,
       );
       if (existingItem) {
         return prevItems.map((item) =>
           item.bookId === newItem.bookId
             ? { ...item, quantity: item.quantity + newItem.quantity }
-            : item
+            : item,
         );
       }
       return [...prevItems, newItem];
@@ -111,26 +111,19 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
         toast.error("Xóa sản phẩm thất bại");
       }
     } else {
-      setItems((prevItems) =>
-        prevItems.filter((item) => item.bookId !== id)
-      );
+      setItems((prevItems) => prevItems.filter((item) => item.bookId !== id));
     }
   };
 
-  const updateQuantity = (
-    id: string,
-    quantity: number
-  ) => {
+  const updateQuantity = (id: string, quantity: number) => {
     if (quantity <= 0) {
       removeFromCart(id);
       return;
     }
     setItems((prevItems) =>
       prevItems.map((item) =>
-        item.bookId === id
-          ? { ...item, quantity }
-          : item
-      )
+        item.bookId === id ? { ...item, quantity } : item,
+      ),
     );
     if (isAuthenticated) {
       const accessToken = localStorage.getItem("accessToken_user");
@@ -141,7 +134,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },
-        }
+        },
       );
     }
   };

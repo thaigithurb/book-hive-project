@@ -17,7 +17,9 @@ body {
 }
 
 .book-card {
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
 }
 
 @keyframes ping-favorite {
@@ -39,7 +41,6 @@ body {
 }
 
 @keyframes gentle-bounce {
-
   0%,
   100% {
     transform: translateY(0);
@@ -51,7 +52,6 @@ body {
 }
 
 @keyframes gentle-bounce-md {
-
   0%,
   100% {
     transform: translateY(0);

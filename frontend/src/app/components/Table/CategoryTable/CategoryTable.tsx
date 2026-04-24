@@ -139,8 +139,8 @@ export default function CategoryTable({
                       prev.map((b) =>
                         b._id === category._id
                           ? { ...b, position: newPosition }
-                          : b
-                      )
+                          : b,
+                      ),
                     );
                   }}
                 />

@@ -135,7 +135,6 @@ module.exports.webhook = async (req, res) => {
             verifiedAt: new Date(),
           }).save();
         }
-
       }
 
       try {

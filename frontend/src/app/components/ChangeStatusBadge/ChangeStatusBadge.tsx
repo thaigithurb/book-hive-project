@@ -3,7 +3,10 @@ interface ChangeStatusBadge {
   onClick?: () => void;
 }
 
-export default function ChangeStatusBadge({ status, onClick }: ChangeStatusBadge) {
+export default function ChangeStatusBadge({
+  status,
+  onClick,
+}: ChangeStatusBadge) {
   return (
     <span
       className={`py-1 px-3 rounded-[6px] text-[13.6px] font-semibold transition-colors duration-200  cursor-pointer ${

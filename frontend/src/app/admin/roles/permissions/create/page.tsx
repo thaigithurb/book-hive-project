@@ -67,7 +67,7 @@ export default function CreatePermission() {
               Authorization: `Bearer ${accessToken}`,
             },
             withCredentials: true,
-          }
+          },
         ),
         {
           pending: "Đang tạo quyền...",
@@ -84,7 +84,7 @@ export default function CreatePermission() {
               return "Tạo quyền thất bại";
             },
           },
-        }
+        },
       )
       .then(() => {
         setForm({
