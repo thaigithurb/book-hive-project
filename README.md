@@ -34,41 +34,35 @@ Các tài liệu kỹ thuật chi tiết có thể được tìm thấy trong th
 - MongoDB (Local hoặc Atlas)
 
 ### 2. Cấu hình biến môi trường
-Dựa vào các file `.env.example`, hãy tạo file `.env` tương ứng:
+Dựa vào các file `.env.example`, hãy tạo file `.env` tương ứng trong từng thư mục.
 
-**Backend:**
+### 2. Chạy ứng dụng
+
+Dự án sử dụng **NPM Workspaces**, bạn có thể quản lý cả Frontend và Backend từ thư mục gốc:
+
+**Cài đặt thư viện cho toàn bộ dự án:**
 ```bash
-cd backend
-cp .env.example .env
-# Chỉnh sửa .env với thông tin cơ sở dữ liệu và API key của bạn
+npm install
 ```
-
-**Frontend:**
-```bash
-cd frontend
-cp .env.example .env.local
-# Chỉnh sửa .env.local với thông tin API URL
-```
-
-### 3. Chạy ứng dụng
 
 **Chạy Backend:**
 ```bash
-cd backend
-npm install
-npm run dev
+npm run dev:backend
 ```
 
 **Chạy Frontend:**
 ```bash
-cd frontend
-npm install
-npm run dev
+npm run dev:frontend
+```
+
+**Định dạng lại code (Prettier):**
+```bash
+npm run format:all
 ```
 
 Ứng dụng sẽ khả dụng tại:
 - Frontend: `http://localhost:3000/home`
-- Backend: `http://localhost:3001/admin/dashboard/login`
+- Backend: `http://localhost:3001/admin/dashboard/login` (Admin)
 
 ---
 
