@@ -72,6 +72,8 @@ npm run dev
 
 ---
 
-## 👥 Nhóm Tác Giả
-- **Tên:** Lương Việt Thái
-- **Repo:** https://github.com/thaigithurb/book-hive-project
+## 👥 Thông Tin Sinh Viên
+- **Họ và tên:** Lương Việt Thái
+- **Mã số sinh viên:** 23631761
+- **Lớp:** DHKTPM19B
+- **Repo:** [https://github.com/thaigithurb/book-hive-project](https://github.com/thaigithurb/book-hive-project)
